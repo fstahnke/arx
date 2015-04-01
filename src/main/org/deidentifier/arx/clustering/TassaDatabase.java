@@ -1,4 +1,4 @@
-package org.deidentifier.arx.algorithm;
+package org.deidentifier.arx.clustering;
 
 import java.util.ArrayList;
 

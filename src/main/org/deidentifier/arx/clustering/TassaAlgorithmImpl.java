@@ -6,6 +6,7 @@ import java.util.List;
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.ARXInterface;
 import org.deidentifier.arx.Data;
+import org.deidentifier.arx.metric.InformationLoss;
 
 
 
@@ -16,13 +17,18 @@ public class TassaAlgorithmImpl {
 
 	public TassaAlgorithmImpl(Data data, ARXConfiguration config) throws IOException {
 		iface = new ARXInterface(data, config);
-	} 
+		
+		InformationLoss<?> loss1 = iface.getInformationLoss(null, 0, null);
+		InformationLoss<?> loss2 = iface.getInformationLoss(null, 0, null);
+		
+		loss1.compareTo(loss2); // -1 loss1<loss2 , 0 loss1=loss2 , +1 loss1>loss2
+	}
 	
 	
 	public List<TassaCluster> executeTassa() {
 		
 		// Input parameters of clustering
-		TassaCluster dataSet = new TassaCluster(iface.getData());
+		TassaCluster dataSet = new TassaCluster(iface.getDataQI());
 		int k = iface.getK();
 		// TODO: value "alpha" should be a variable 0 < a <= 1 provided by the ARXInterface
 		double a = 0.5;

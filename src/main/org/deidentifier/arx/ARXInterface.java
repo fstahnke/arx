@@ -7,9 +7,13 @@ import java.util.Set;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.LDiversity;
 import org.deidentifier.arx.criteria.TCloseness;
+import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.Dictionary;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
+import org.deidentifier.arx.framework.lattice.Node;
+import org.deidentifier.arx.metric.InformationLoss;
+import org.deidentifier.arx.metric.InformationLossWithBound;
 
 /**
  * This class provides a rudimentary interface to the internal ARX data structures
@@ -74,7 +78,7 @@ public class ARXInterface {
         checkAfterEncoding(config, manager);
 
         // Build buffer
-        int[][] array = getData();
+        int[][] array = getDataQI();
         buffer = new int[array.length][];
         for (int i = 0; i < array.length; i++) {
             buffer[i] = new int[array[0].length];
@@ -82,11 +86,46 @@ public class ARXInterface {
     }
 
     /**
-     * Returns the input data array
+     * Returns the input data array (quasi-identifiers)
      * @return
      */
-    public int[][] getData() {
+    public int[][] getDataQI() {
         return manager.getDataQI().getArray();
+    }
+    
+    /**
+     * Returns the information loss of a cluster
+     * @param data
+     * @param count
+     * @param transformation
+     * @return
+     */
+    public InformationLoss<?> getInformationLoss(int[] data, int count, int[] transformation) {
+    	HashGroupifyEntry entry = new HashGroupifyEntry(data, count);
+    	Node node = new Node(0);
+    	node.setTransformation(transformation, getLevel(transformation));
+    	return config.getMetric().getInformationLoss(node, entry).getInformationLoss();
+    }
+    
+    /**
+     * TODO: Get rid of this
+     * @param transformation
+     * @return
+     */
+    private int getLevel(int[] transformation) {
+		int level = 0;
+		for (int t : transformation) {
+			level += t;
+		}
+		return level;
+	}
+
+	/**
+     * Returns the input data array (sensitive attributes)
+     * @return
+     */
+    public int[][] getDataSE() {
+        return manager.getDataSE().getArray();
     }
 
     /**
