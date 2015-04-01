@@ -10,6 +10,8 @@ import java.util.List;
 class TassaCluster extends ArrayList<TassaRecord> {
 	
 	// TODO: add fields like transformation and buffer
+	public int[] transformation;
+	public int[] buffer;
 	
 	
 	public TassaCluster(int initialSize) {
