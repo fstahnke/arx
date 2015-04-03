@@ -33,7 +33,8 @@ public class ExampleTassa {
         // Access internals
         ARXInterface iface = new ARXInterface(data, config);
         
-        iface.getData();
+        iface.getDataQI();
+        iface.getDataSE();
         iface.getBuffer(); 
         iface.getHierarchy(0);
         iface.getAttribute(0);

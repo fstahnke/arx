@@ -28,7 +28,7 @@ public class TassaAlgorithmImpl {
 	public List<TassaCluster> executeTassa() {
 		
 		// Input parameters of clustering
-		TassaCluster dataSet = new TassaCluster(iface.getDataQI());
+		TassaCluster dataSet = new TassaCluster(iface.getDataQI(), iface);
 		int k = iface.getK();
 		// TODO: value "alpha" should be a variable 0 < a <= 1 provided by the ARXInterface
 		double a = 0.5;
@@ -134,10 +134,10 @@ public class TassaAlgorithmImpl {
 		TassaCluster sourceCluster = movedRecord.assignedCluster;
 		
 		deltaIL = (1/n) * (
-					sourceCluster.getRemovedIL(movedRecord) * (sourceCluster.size() - 1)
-					+ targetCluster.getAddedIL(movedRecord) * (targetCluster.size() + 1)
-					- sourceCluster.getIL() * sourceCluster.size()
-					+ targetCluster.getIL() * targetCluster.size()
+					sourceCluster.getRemovedGC(movedRecord) * (sourceCluster.size() - 1)
+					+ targetCluster.getAddedGC(movedRecord) * (targetCluster.size() + 1)
+					- sourceCluster.getGC_LM() * sourceCluster.size()
+					+ targetCluster.getGC_LM() * targetCluster.size()
 					);
 		
 		return deltaIL;

@@ -108,7 +108,7 @@ public class ARXInterface {
     }
     
     /**
-     * TODO: Get rid of this
+     * TODO: Get rid of this (easy and efficient with streams in Java 8)
      * @param transformation
      * @return
      */
@@ -117,7 +117,12 @@ public class ARXInterface {
 		for (int t : transformation) {
 			level += t;
 		}
+		
 		return level;
+		
+		/* Java 8:
+		return IntStream.of(transformation).sum();
+		*/
 	}
 
 	/**
