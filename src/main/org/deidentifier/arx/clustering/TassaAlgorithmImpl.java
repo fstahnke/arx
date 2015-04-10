@@ -19,22 +19,32 @@ public class TassaAlgorithmImpl {
 		
 	}
 	
+	/**
+	 * 
+	 * @param alpha modifier for the initial size of clusters. has to be 0 < alpha <= 1
+	 * @param omega modifier for the maximum size of clusters. has to be 1 < omega <= 2
+	 * @return a list of clusters with the local optimum for generalization cost
+	 */
 	
-	public List<TassaCluster> executeTassa() {
+	public List<TassaCluster> executeTassa(double alpha, double omega) {
+
+		// TODO: value "alpha" should be a variable 0 < a <= 1 provided by the ARXInterface
+		// TODO: value "omega" should be a variable 1 < w <= 2 provided by the ARXInterface
+		// check for correct arguments
+		if (alpha <= 0 || alpha > 1)
+			throw new IllegalArgumentException("executeTassa: Argument 'alpha' is out of bound: " + alpha);
+		if (omega <= 1 || omega > 2)
+			throw new IllegalArgumentException("executeTassa: Argument 'omega' is out of bound: " + omega);
 		
 		// Input parameters of clustering
 		TassaCluster dataSet = new TassaCluster(iface.getDataQI(), iface);
 		int k = iface.getK();
-		// TODO: value "alpha" should be a variable 0 < a <= 1 provided by the ARXInterface
-		double a = 0.5;
-		// TODO: value "omega" should be a variable 1 < w <= 2 provided by the ARXInterface
-		double w = 1.5;
 		// k_0 is the initial cluster size
 		int n = dataSet.size();
 		
 		// Output variable: Collection of clusters
 		// initialized with random partition of data records with the cluster size alpha*k
-		TassaDatabase output = (TassaDatabase) dataSet.createRandomPartitioning((int)Math.floor(a*k));
+		TassaDatabase output = (TassaDatabase) dataSet.createRandomPartitioning((int)Math.floor(alpha*k));
 		
 		// Helper variable to check, if records were changed
 		boolean recordsChanged = true;
@@ -80,7 +90,7 @@ public class TassaAlgorithmImpl {
 			
 			// Check for clusters greater w*k and split them
 			for (TassaCluster cluster : output) {
-				if (cluster.size() > w * k) {
+				if (cluster.size() > omega * k) {
 					cluster.createRandomPartitioning(Math.floorDiv(cluster.size(), 2));
 				}
 			}
