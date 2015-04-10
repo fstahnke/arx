@@ -6,7 +6,6 @@ import java.util.List;
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.ARXInterface;
 import org.deidentifier.arx.Data;
-import org.deidentifier.arx.metric.InformationLoss;
 
 
 
@@ -18,10 +17,6 @@ public class TassaAlgorithmImpl {
 	public TassaAlgorithmImpl(Data data, ARXConfiguration config) throws IOException {
 		iface = new ARXInterface(data, config);
 		
-		InformationLoss<?> loss1 = iface.getInformationLoss(null, 0, null);
-		InformationLoss<?> loss2 = iface.getInformationLoss(null, 0, null);
-		
-		loss1.compareTo(loss2); // -1 loss1<loss2 , 0 loss1=loss2 , +1 loss1>loss2
 	}
 	
 	

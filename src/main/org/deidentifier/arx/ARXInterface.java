@@ -1,9 +1,11 @@
 package org.deidentifier.arx;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.deidentifier.arx.clustering.GeneralizationTree;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.LDiversity;
 import org.deidentifier.arx.criteria.TCloseness;
@@ -13,7 +15,6 @@ import org.deidentifier.arx.framework.data.Dictionary;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 import org.deidentifier.arx.framework.lattice.Node;
 import org.deidentifier.arx.metric.InformationLoss;
-import org.deidentifier.arx.metric.InformationLossWithBound;
 
 /**
  * This class provides a rudimentary interface to the internal ARX data structures
@@ -28,6 +29,8 @@ public class ARXInterface {
     private final int[][]          buffer;
     /** The config */
     private final ARXConfiguration config;
+    /** The hierarchy trees. */
+    private ArrayList<GeneralizationTree> hierarchyTrees;
 
     /**
      * Creates a new interface to the internal ARX data structures
@@ -83,6 +86,32 @@ public class ARXInterface {
         for (int i = 0; i < array.length; i++) {
             buffer[i] = new int[array[0].length];
         }
+        
+        // Generate generalization hierarchy trees
+        for (GeneralizationHierarchy hierarchy : manager.getHierarchies())
+        {
+        	this.hierarchyTrees.add(new GeneralizationTree(hierarchy));
+        }
+    }
+    
+    /**
+     * Gets the hierarchy tree.
+     *
+     * @param index the index of the attribute
+     * @return the hierarchy tree
+     */
+    public GeneralizationTree getHierarchyTree(int index) {
+    	return this.hierarchyTrees.get(index);
+    }
+    
+    /**
+     * Gets the data manager for the current data set.
+     *
+     * @return the data manager
+     */
+    public DataManager getDataManager()
+    {
+    	return this.manager;
     }
 
     /**

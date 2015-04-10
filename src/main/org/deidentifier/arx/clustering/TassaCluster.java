@@ -7,17 +7,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.deidentifier.arx.ARXInterface;
-import org.deidentifier.arx.metric.InformationLoss;
+import org.deidentifier.arx.framework.data.DataManager;
 
-@SuppressWarnings("serial")
+
 class TassaCluster extends ArrayList<TassaRecord> {
+
+	private static final long serialVersionUID = 1L;
+	
 	
 	private ARXInterface iface;
+	private DataManager manager;
 	
-	// TODO: add fields like transformation and buffer
-	public int[] transformation;
-	public int[] generalizedContent;
-	private int[][] hierarchy;
+	// List of transformation nodes for every attribute
+	// they contain level of transformation, mapping key, all contained values
+	private ArrayList<GeneralizationNode> transformationNodes;
 	
 	// caching of calculated values
 	private double informationLoss;
@@ -25,23 +28,37 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	
 	public double getInformationLoss() {
 		if (clusterChanged) {
-			updateInformationLoss();
+			updateGeneralization();
 		}
 		return informationLoss;
 	}
 
-	// TODO: Add calculation for Information Loss
-	private void updateInformationLoss() {
-		for (TassaRecord record : this) {
-			
-		}
+
+	private void updateGeneralization() {
+		
+		this.updateTransformation();
+		informationLoss = this.getGC_LM();
 		clusterChanged = false;
 	}
 	
-	
+
+	/**
+	 * Update transformation of this Cluster.
+	 */
+	private void updateTransformation() {		
+		for (int i = 0; i < transformationNodes.size(); i++) {
+			int[] dataColumn = new int[this.size()];
+			for (int j = 0; j < this.size(); j++) {
+				dataColumn[j] = this.get(j).recordContent[i];
+			}
+			transformationNodes.set(i, iface.getHierarchyTree(i).getLowestGeneralization(dataColumn));
+		}
+	}
+
 	public TassaCluster(int initialSize, ARXInterface iface) {
 		super(initialSize);
 		this.iface = iface;
+		this.manager = iface.getDataManager();
 	}
 	
 	public TassaCluster(int[][] inputArray, ARXInterface iface) {
@@ -79,17 +96,15 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	}
 	
 	
-	
-	// TODO: Mockup. Provide calculation of generalization cost.
-	// TODO: Maybe merge methods by changing TassaRecord to TassaCluster.
 	public double getGC_LM() {
-		TassaCluster cluster = this;
 		
 		double gc = 0;
-		int recordCardinality = 5;
-		int attributeCardinality = 8;
 		
 		for (int i = 0; i < iface.getNumAttributes(); i++) {
+			
+			int recordCardinality = transformationNodes.get(i).size();
+			int attributeCardinality = manager.getHierarchies()[i].getDistinctValues()[0];
+			
 			gc += (recordCardinality - 1) / (attributeCardinality - 1);
 		}
 		

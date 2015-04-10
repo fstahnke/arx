@@ -11,12 +11,12 @@ public class TassaDatabase extends ArrayList<TassaCluster> {
 
 	public TassaCluster mergeClosestPair() {
 		// TODO: Mockup
-		return new TassaCluster(2);
+		return new TassaCluster(2, null);
 	}
 	
 	public TassaCluster mergeClosestPair(TassaDatabase targetDatabase) {
 		// TODO: Mockup. Maybe move to Cluster.
-		return new TassaCluster(2);
+		return new TassaCluster(2, null);
 	}
 
 }
