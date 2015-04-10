@@ -88,6 +88,7 @@ public class ARXInterface {
         }
         
         // Generate generalization hierarchy trees
+        hierarchyTrees = new ArrayList<GeneralizationTree>(manager.getHierarchies().length);
         for (GeneralizationHierarchy hierarchy : manager.getHierarchies())
         {
         	this.hierarchyTrees.add(new GeneralizationTree(hierarchy));

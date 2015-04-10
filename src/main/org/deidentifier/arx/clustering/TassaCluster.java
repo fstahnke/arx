@@ -23,21 +23,21 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	private ArrayList<GeneralizationNode> transformationNodes;
 	
 	// caching of calculated values
-	private double informationLoss;
+	private double generalizationCost;
 	private boolean clusterChanged = true;
 	
-	public double getInformationLoss() {
+	public double getGC() {
 		if (clusterChanged) {
 			updateGeneralization();
 		}
-		return informationLoss;
+		return generalizationCost;
 	}
 
 
 	private void updateGeneralization() {
 		
 		this.updateTransformation();
-		informationLoss = this.getGC_LM();
+		generalizationCost = this.getGC_LM();
 		clusterChanged = false;
 	}
 	
@@ -45,13 +45,14 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	/**
 	 * Update transformation of this Cluster.
 	 */
-	private void updateTransformation() {		
-		for (int i = 0; i < transformationNodes.size(); i++) {
+	private void updateTransformation() {
+		transformationNodes.clear();
+		for (int i = 0; i < iface.getNumAttributes(); i++) {
 			int[] dataColumn = new int[this.size()];
 			for (int j = 0; j < this.size(); j++) {
 				dataColumn[j] = this.get(j).recordContent[i];
 			}
-			transformationNodes.set(i, iface.getHierarchyTree(i).getLowestGeneralization(dataColumn));
+			transformationNodes.add(i, iface.getHierarchyTree(i).getLowestGeneralization(dataColumn));
 		}
 	}
 
@@ -59,6 +60,7 @@ class TassaCluster extends ArrayList<TassaRecord> {
 		super(initialSize);
 		this.iface = iface;
 		this.manager = iface.getDataManager();
+		this.transformationNodes = new ArrayList<GeneralizationNode>();
 	}
 	
 	public TassaCluster(int[][] inputArray, ARXInterface iface) {

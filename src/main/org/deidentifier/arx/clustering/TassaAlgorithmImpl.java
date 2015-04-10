@@ -44,7 +44,7 @@ public class TassaAlgorithmImpl {
 		
 		// Output variable: Collection of clusters
 		// initialized with random partition of data records with the cluster size alpha*k
-		TassaDatabase output = (TassaDatabase) dataSet.createRandomPartitioning((int)Math.floor(alpha*k));
+		TassaDatabase output = new TassaDatabase(dataSet.createRandomPartitioning((int)Math.floor(alpha*k)));
 		
 		// Helper variable to check, if records were changed
 		boolean recordsChanged = true;
@@ -59,7 +59,7 @@ public class TassaAlgorithmImpl {
 				
 				final TassaCluster sourceCluster = record.assignedCluster;
 				TassaCluster targetCluster = null;
-				double deltaIL = 0.0;
+				double deltaIL = Double.MAX_VALUE;
 				
 				// find cluster with minimal change of information loss
 				for (TassaCluster cluster : output) {
@@ -141,8 +141,8 @@ public class TassaAlgorithmImpl {
 		deltaIL = (1/n) * (
 					sourceCluster.getRemovedGC(movedRecord) * (sourceCluster.size() - 1)
 					+ targetCluster.getAddedGC(movedRecord) * (targetCluster.size() + 1)
-					- sourceCluster.getGC_LM() * sourceCluster.size()
-					+ targetCluster.getGC_LM() * targetCluster.size()
+					- sourceCluster.getGC() * sourceCluster.size()
+					+ targetCluster.getGC() * targetCluster.size()
 					);
 		
 		return deltaIL;

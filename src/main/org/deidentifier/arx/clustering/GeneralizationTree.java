@@ -1,6 +1,7 @@
 package org.deidentifier.arx.clustering;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.TreeMap;
 
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
@@ -56,9 +57,10 @@ public class GeneralizationTree extends TreeMap<Integer, GeneralizationNode> {
 				// Go through all nodes in the path and delete all nodes, that don't contain i
 				// TODO: It would probably be more efficient to do it bottom up
 				// and break when the first node containing i is found.
-				for (GeneralizationNode node : path) {
+				for (Iterator<GeneralizationNode> iterator = path.iterator(); iterator.hasNext();) {
+					GeneralizationNode node = iterator.next();
 					if (!node.contains(i)) {
-						path.remove(node);
+						iterator.remove();
 					}
 				}
 			}

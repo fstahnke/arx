@@ -19,6 +19,7 @@ public class GeneralizationNode extends ArrayList<Integer> {
 		this.level = level;
 		this.mappingKey = mappingKey;
 		this.parent = parent;
+		this.children = new ArrayList<GeneralizationNode>();
 	}
 	
 	public GeneralizationNode(int level, int mappingKey, GeneralizationNode parent, int[] values) {
@@ -47,11 +48,10 @@ public class GeneralizationNode extends ArrayList<Integer> {
 			// if level is highest level in hierarchy, this is the root node. add all values.
 			if (this.level == hierarchy.getHeight() - 1 && this.isEmpty())
 			{
-				this.addAll(hierarchy.getDistinctValues(this.level));
+				this.addAll(hierarchy.getDistinctValues(0));
 			}
 			
 			for (int value : this) {
-				
 				int mappingKeyLowerLevel = hierarchy.getArray()[value][this.level-1];
 				
 				GeneralizationNode child = this.getChild(mappingKeyLowerLevel);
