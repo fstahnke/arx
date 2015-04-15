@@ -26,8 +26,11 @@ public class TassaTest {
         
 		TassaAlgorithmImpl tassa = new TassaAlgorithmImpl(data, config);
 		
-		@SuppressWarnings("unused")
 		ArrayList<TassaCluster> clusterList = (ArrayList<TassaCluster>) tassa.executeTassa(0.5, 1.5);
+		
+		int test = clusterList.size();
+		
+		test = test + 0;
 
 	}
 

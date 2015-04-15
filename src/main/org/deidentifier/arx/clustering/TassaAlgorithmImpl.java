@@ -1,6 +1,8 @@
 package org.deidentifier.arx.clustering;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.deidentifier.arx.ARXConfiguration;
@@ -40,11 +42,15 @@ public class TassaAlgorithmImpl {
 		TassaCluster dataSet = new TassaCluster(iface.getDataQI(), iface);
 		int k = iface.getK();
 		// k_0 is the initial cluster size
+		int k_0 = (int)Math.floor(alpha*k) > 0 ? (int)Math.floor(alpha*k) : 1;
 		int n = dataSet.size();
 		
 		// Output variable: Collection of clusters
 		// initialized with random partition of data records with the cluster size alpha*k
-		TassaDatabase output = new TassaDatabase(dataSet.createRandomPartitioning((int)Math.floor(alpha*k)));
+		TassaClusterSet output = new TassaClusterSet(dataSet.createRandomPartitioning(k_0));
+		for(TassaCluster cluster : output) {
+			cluster.assignAllRecords();
+		}
 		
 		// Helper variable to check, if records were changed
 		boolean recordsChanged = true;
@@ -76,6 +82,7 @@ public class TassaAlgorithmImpl {
 				if (sourceCluster.size() == 1)
 				{
 					targetCluster.add(record);
+					targetCluster.assignAllRecords();
 					output.remove(sourceCluster);
 					recordsChanged = true;
 				}
@@ -83,31 +90,37 @@ public class TassaAlgorithmImpl {
 				// If change in information loss is negative, move record to new cluster
 				else if (deltaIL < 0) {
 					targetCluster.add(record);
+					targetCluster.assignAllRecords();
 					sourceCluster.remove(record);
 					recordsChanged = true;
 				}
 			}
 			
-			// Check for clusters greater w*k and split them
-			for (TassaCluster cluster : output) {
+			// Check for clusters greater w*k, split them and add them back to output
+			ArrayList<TassaCluster> newClusters = new ArrayList<TassaCluster>();
+			for (Iterator<TassaCluster> itr = output.iterator(); itr.hasNext();) {
+				TassaCluster cluster = itr.next();
 				if (cluster.size() > omega * k) {
-					cluster.createRandomPartitioning(Math.floorDiv(cluster.size(), 2));
+					itr.remove();
+					newClusters.addAll(cluster.createRandomPartitioning(Math.floorDiv(cluster.size(), 2)));
 				}
 			}
+			for (TassaCluster c : newClusters) {
+				c.assignAllRecords();
+			}
+			output.addAll(newClusters);
 		}
 		
-		// TODO loop: as long as there are clusters of size smaller k, merge clusters
-		TassaDatabase smallClusters = new TassaDatabase();
+		// put small clusters into smallClusters collection
+		TassaClusterSet smallClusters = new TassaClusterSet();
 		
 		for (TassaCluster cluster : output) {
 			if (cluster.size() < k) {
 				smallClusters.add(cluster);
-				output.remove(cluster);
 			}
 		}
-		
-		
-		smallClusters.sort(TassaCluster.SizeComparator);
+		// remove small clusters from output
+		output.removeAll(smallClusters);
 		
 		// As long as there are clusters with size < k
 		// merge closest two clusters and either
@@ -118,15 +131,19 @@ public class TassaAlgorithmImpl {
 			TassaCluster mergedCluster = smallClusters.mergeClosestPair();
 			
 			if (mergedCluster.size() >= k) {
+				mergedCluster.assignAllRecords();
 				output.add(mergedCluster);
-			}
-			else {
-				smallClusters.add(mergedCluster);
+				smallClusters.remove(mergedCluster);
 			}
 		}
 		
 		if (smallClusters.size() == 1) {
-			output.add(smallClusters.mergeClosestPair(output));
+			TassaCluster mergedCluster = output.mergeClosestPair(smallClusters.get(0));
+			mergedCluster.assignAllRecords();
+		}
+		
+		for (TassaCluster cluster : output) {
+			cluster.getGC();
 		}
 		
 		return output;
@@ -138,12 +155,11 @@ public class TassaAlgorithmImpl {
 		double deltaIL = 0.0;
 		TassaCluster sourceCluster = movedRecord.assignedCluster;
 		
-		deltaIL = (1/n) * (
-					sourceCluster.getRemovedGC(movedRecord) * (sourceCluster.size() - 1)
+		deltaIL = sourceCluster.getRemovedGC(movedRecord) * (sourceCluster.size() - 1)
 					+ targetCluster.getAddedGC(movedRecord) * (targetCluster.size() + 1)
 					- sourceCluster.getGC() * sourceCluster.size()
-					+ targetCluster.getGC() * targetCluster.size()
-					);
+					+ targetCluster.getGC() * targetCluster.size();
+		deltaIL /= n;
 		
 		return deltaIL;
 	}
