@@ -114,7 +114,7 @@ public class TassaAlgorithmImpl {
 				TassaCluster cluster = itr.next();
 				if (cluster.size() > omega * k) {
 					itr.remove();
-					newClusters.addAll(new TassaClusterSet(cluster, Math.floorDiv(cluster.size(), 2), iface));
+					newClusters.addAll(new TassaClusterSet(cluster, (int)Math.floor(cluster.size()/2), iface));
 				}
 			}
 			for (TassaCluster c : newClusters) {
