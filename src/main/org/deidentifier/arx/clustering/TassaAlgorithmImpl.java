@@ -64,11 +64,17 @@ public class TassaAlgorithmImpl {
 			recordsChanged = false;
 			
 			int recordCount = 0;
-			
+			final long initTime = System.nanoTime();
+			long startTime = System.nanoTime();
 			// Loop: check all records for improvement of information loss
 			for (TassaRecord record : dataSet) {
-				System.out.println("Record number: " + recordCount++);
-				// System.out.println("Record number: " + recordCount++);
+				if (recordCount % 100 == 0 && recordCount > 0) {
+					long stopTime = System.nanoTime();
+					
+					System.out.println("Record number: " + recordCount + ", Execution time: " + ((stopTime-startTime)/1000000.0) + ", Average time: " + (System.nanoTime()-initTime)/(recordCount*10000.0));
+					startTime = System.nanoTime();
+				}
+				recordCount++;
 				final TassaCluster sourceCluster = record.assignedCluster;
 				TassaCluster targetCluster = null;
 				double deltaIL = Double.MAX_VALUE;
