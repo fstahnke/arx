@@ -30,7 +30,7 @@ public class ARXInterface {
     /** The config */
     private final ARXConfiguration config;
     /** The hierarchy trees. */
-    private ArrayList<GeneralizationTree> hierarchyTrees;
+    private GeneralizationTree[] hierarchyTrees;
 
     /**
      * Creates a new interface to the internal ARX data structures
@@ -88,10 +88,11 @@ public class ARXInterface {
         }
         
         // Generate generalization hierarchy trees
-        hierarchyTrees = new ArrayList<GeneralizationTree>(manager.getHierarchies().length);
-        for (GeneralizationHierarchy hierarchy : manager.getHierarchies())
+        hierarchyTrees = new GeneralizationTree[getNumAttributes()];
+        GeneralizationHierarchy[] hierarchies = manager.getHierarchies();
+        for (int i = 0; i < hierarchies.length; i++)
         {
-        	this.hierarchyTrees.add(new GeneralizationTree(hierarchy));
+        	hierarchyTrees[i] = new GeneralizationTree(hierarchies[i]);
         }
     }
     
@@ -102,7 +103,7 @@ public class ARXInterface {
      * @return the hierarchy tree
      */
     public GeneralizationTree getHierarchyTree(int index) {
-    	return this.hierarchyTrees.get(index);
+    	return hierarchyTrees[index];
     }
     
     /**

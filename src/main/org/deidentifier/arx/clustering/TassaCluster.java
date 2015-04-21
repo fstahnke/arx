@@ -2,6 +2,7 @@ package org.deidentifier.arx.clustering;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.deidentifier.arx.ARXInterface;
@@ -18,7 +19,9 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	
 	// List of transformation nodes for every attribute
 	// they contain level of transformation, mapping key, all contained values
-	private ArrayList<GeneralizationNode> transformationNodes;
+	private GeneralizationNode[] transformationNodes;
+	private HashMap<TassaRecord, Double> removedNodeGC;
+	private GeneralizationTree[] hierarchyTrees;
 	
 	// caching of calculated values
 	private double generalizationCost;
@@ -31,7 +34,12 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	private TassaCluster(ARXInterface iface) {
 		this.iface = iface;
 		manager = iface.getDataManager();
-		transformationNodes = new ArrayList<GeneralizationNode>(iface.getNumAttributes());
+		transformationNodes = new GeneralizationNode[iface.getNumAttributes()];
+		hierarchyTrees = new GeneralizationTree[transformationNodes.length];
+		for (int i = 0; i < transformationNodes.length; i++) {
+			hierarchyTrees[i] = iface.getHierarchyTree(i);
+		}
+		removedNodeGC = new HashMap<TassaRecord, Double>();
 	}
 	
 	public TassaCluster(Collection<TassaRecord> recordCollection, ARXInterface iface) {
@@ -43,7 +51,9 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	public TassaCluster(TassaCluster cluster) {
 		this(cluster.iface);
 		addAll(cluster);
-		transformationNodes.addAll(cluster.transformationNodes);
+		for (int i = 0; i < transformationNodes.length; i++) {
+			transformationNodes[i] = cluster.transformationNodes[i];
+		}
 		lastModCount = modCount;
 	}
 
@@ -61,6 +71,7 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	}
 	
 	public TassaRecord remove(int index) {
+		removedNodeGC.clear();
 		return super.remove(index);
 	}
 	
@@ -91,13 +102,12 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	 * Update transformation of this Cluster.
 	 */
 	private void updateTransformation() {
-		transformationNodes.clear();
-		for (int i = 0; i < iface.getNumAttributes(); i++) {
+		for (int i = 0; i < transformationNodes.length; i++) {
 			int[] dataColumn = new int[this.size()];
 			for (int j = 0; j < this.size(); j++) {
 				dataColumn[j] = this.get(j).recordContent[i];
 			}
-			transformationNodes.add(i, iface.getHierarchyTree(i).getLowestCommonAncestor(dataColumn));
+			transformationNodes[i] = hierarchyTrees[i].getLowestCommonAncestor(dataColumn);
 		}
 	}
 	
@@ -107,8 +117,8 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	 */
 	private void updateTransformation(TassaRecord addedRecord) {
 		int[] recordContent = addedRecord.recordContent;
-		for (int i = 0; i < iface.getNumAttributes(); i++) {
-			transformationNodes.set(i, iface.getHierarchyTree(i).getLowestCommonAncestor(transformationNodes.get(i), recordContent[i]));
+		for (int i = 0; i < recordContent.length; i++) {
+			transformationNodes[i] = hierarchyTrees[i].getLowestCommonAncestor(transformationNodes[i], recordContent[i]);
 		}
 	}
 	
@@ -116,17 +126,17 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	public double getGC_LM() {
 		
 		double gc = 0;
-		
-		for (int i = 0; i < iface.getNumAttributes(); i++) {
+		int numAtt = transformationNodes.length;
+		for (int i = 0; i < numAtt; i++) {
 			
 			// TODO: Check, whether we have the correct cardinalities here!
-			int recordCardinality = transformationNodes.get(i).values.size();
-			int attributeCardinality = manager.getHierarchies()[i].getDistinctValues()[0];
+			int recordCardinality = transformationNodes[i].values.size();
+			int attributeCardinality = hierarchyTrees[i].root.values.size();
 			
 			gc += (recordCardinality - 1) / (attributeCardinality - 1);
 		}
 		
-		return gc / iface.getNumAttributes();
+		return gc / numAtt;
 	}
 	
 	public double getAddedGC(TassaRecord addedRecord) {
@@ -136,13 +146,16 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	}
 	
 	public double getRemovedGC(TassaRecord removedRecord) {
+		Double result = 0.0;
 		if (this.size() > 1) {
-			TassaCluster tempCluster = new TassaCluster(this);
-			tempCluster.remove(removedRecord);
-			return tempCluster.getGC();
+			result = removedNodeGC.get(removedRecord);
+			if (result == null) {
+				TassaCluster tempCluster = new TassaCluster(this);
+				tempCluster.remove(removedRecord);
+				result = tempCluster.getGC();
+				removedNodeGC.put(removedRecord, result);
+			}
 		}
-		else {
-			return 0;
-		}
+		return result;
 	}
 }
