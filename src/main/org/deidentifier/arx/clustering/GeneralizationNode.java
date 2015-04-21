@@ -1,36 +1,45 @@
 package org.deidentifier.arx.clustering;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 
-public class GeneralizationNode extends ArrayList<Integer> {
+public class GeneralizationNode {
 	
 	private static final long serialVersionUID = 1L;
 	
 	/** The mapping key. The distinct value in the generalization array
 	 * to which all children of this node are mapped to. */
+	HashSet<Integer> values;
 	int mappingKey;
 	int level;
+	GeneralizationTree tree;
 	GeneralizationNode parent;
 	ArrayList<GeneralizationNode> children;
 	
 	public GeneralizationNode(int level, int mappingKey, GeneralizationNode parent) {
+		values = new HashSet<Integer>();
 		this.level = level;
 		this.mappingKey = mappingKey;
 		this.parent = parent;
+		if (parent != null) {
+			this.tree = parent.tree;	
+		}
 		this.children = new ArrayList<GeneralizationNode>();
 	}
 	
-	public GeneralizationNode(int level, int mappingKey, GeneralizationNode parent, int[] values) {
-		this(level, mappingKey, parent);
+	public GeneralizationNode(int level, int mappingKey, int[] values, GeneralizationTree tree) {
+		this(level, mappingKey, null);
+		this.tree = tree;
 		this.addAll(values);
 	}
 	
 	public boolean addAll(int[] values) {
 		boolean result = true;
 		for (int i : values) {
-			result &= this.add(i);
+			result &= this.values.add(i);
 		}
 		return result;
 	}
@@ -45,30 +54,26 @@ public class GeneralizationNode extends ArrayList<Integer> {
 		
 		if (this.level > 0) {
 			
-			// if level is highest level in hierarchy, this is the root node. add all values.
-			if (this.level == hierarchy.getHeight() - 1 && this.isEmpty())
-			{
-				this.addAll(hierarchy.getDistinctValues(0));
-			}
-			
-			for (int value : this) {
+			for (int value : this.values) {
 				int mappingKeyLowerLevel = hierarchy.getArray()[value][this.level-1];
+				
+				//GeneralizationNode child2 = this.getChild(mappingKeyLowerLevel);
 				
 				GeneralizationNode child = this.getChild(mappingKeyLowerLevel);
 				
 				// add child node for every distinct key in next lower level
-				// TODO: TreeMaps better?
 				if (child == null) {
 					child = new GeneralizationNode(this.level-1, mappingKeyLowerLevel, this);
-					this.children.add(child);
+					tree.put(mappingKeyLowerLevel, child);
+					children.add(child);
 				}
 				
 				// add values, that are assigned to the mapping key of the child node
-				child.add(value);
+				child.values.add(value);
 			}
 			
 			// expand and build children
-			for (GeneralizationNode child : this.children) {
+			for (GeneralizationNode child : children) {
 				child.buildTree(hierarchy);
 			}
 		}

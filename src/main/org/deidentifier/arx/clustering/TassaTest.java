@@ -1,7 +1,6 @@
 package org.deidentifier.arx.clustering;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.Data;
@@ -10,6 +9,7 @@ import org.deidentifier.arx.criteria.KAnonymity;
 
 public class TassaTest {
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws IOException {
 		
 		// Load data
@@ -31,15 +31,15 @@ public class TassaTest {
 
         // Configuration
         ARXConfiguration config = ARXConfiguration.create();
-        config.addCriterion(new KAnonymity(5));
+        config.addCriterion(new KAnonymity(2));
         config.setMaxOutliers(0d);
 		
         
-		TassaAlgorithmImpl tassa = new TassaAlgorithmImpl(data, config);
+        TassaAlgorithmImpl tassa = new TassaAlgorithmImpl(data, config);
 		TassaAlgorithmImpl tassa2 = new TassaAlgorithmImpl(data2, config);
 		
-		ArrayList<TassaCluster> clusterList = (ArrayList<TassaCluster>) tassa.executeTassa(0.5, 1.5);
-		ArrayList<TassaCluster> clusterList2 = (ArrayList<TassaCluster>) tassa2.executeTassa(0.5, 1.5);
+		TassaClusterSet clusterList = tassa.executeTassa(0.5, 1.5);
+		TassaClusterSet clusterList2 = tassa2.executeTassa(0.5, 1.5);
 		
 		int test = clusterList.size() + clusterList2.size();
 		

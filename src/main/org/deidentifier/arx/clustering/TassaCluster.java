@@ -1,10 +1,6 @@
 package org.deidentifier.arx.clustering;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import org.deidentifier.arx.ARXInterface;
 import org.deidentifier.arx.framework.data.DataManager;
 
@@ -51,8 +47,8 @@ class TassaCluster extends ArrayList<TassaRecord> {
 		this.iface = iface;
 		this.manager = iface.getDataManager();
 		this.transformationNodes = new ArrayList<GeneralizationNode>(inputArray[0].length);
-		for (int i = 0; i < inputArray.length; i++) {
-			this.add(new TassaRecord(inputArray[i]));
+		for (int[] record :  inputArray) {
+			this.add(new TassaRecord(record));
 		}
 	}
 	
@@ -102,7 +98,7 @@ class TassaCluster extends ArrayList<TassaRecord> {
 			for (int j = 0; j < this.size(); j++) {
 				dataColumn[j] = this.get(j).recordContent[i];
 			}
-			transformationNodes.add(i, iface.getHierarchyTree(i).getLowestGeneralization(dataColumn));
+			transformationNodes.add(i, iface.getHierarchyTree(i).getLowestCommonAncestor(dataColumn));
 		}
 	}
 	
@@ -114,7 +110,7 @@ class TassaCluster extends ArrayList<TassaRecord> {
 		for (int i = 0; i < iface.getNumAttributes(); i++) {
 			
 			// TODO: Check, whether we have the correct cardinalities here!
-			int recordCardinality = transformationNodes.get(i).size();
+			int recordCardinality = transformationNodes.get(i).values.size();
 			int attributeCardinality = manager.getHierarchies()[i].getDistinctValues()[0];
 			
 			gc += (recordCardinality - 1) / (attributeCardinality - 1);
@@ -139,49 +135,4 @@ class TassaCluster extends ArrayList<TassaRecord> {
 			return 0;
 		}
 	}
-	
-	/**
-	 * Creates a random partitioning of the cluster.
-	 *
-	 * @param k
-	 *            The number of Records per cluster.
-	 * @return A list of random clusters with max. k Records
-	 */
-	public List<TassaCluster> createRandomPartitioning(int k) {
-		
-		// shuffle dataset to prepare random partitioning
-		Collections.shuffle(this);
-		
-		// calculate number of clusters
-		int numberOfClusters = (int) Math.floor(this.size() / k);
-		// calculate number of clusters, that will have k + 1 records
-		int additionalRecords = this.size() % k;
-
-		// create list of clusters as return container
-		List<TassaCluster> clusterList = new ArrayList<TassaCluster>(numberOfClusters);
-		Iterator<TassaRecord> iter = this.iterator();
-		
-		for (int i = 0; i < numberOfClusters; i++) {
-			
-			// until all additional records are distributed
-			// each cluster will have k + 1 records
-			int addRecord = (i < additionalRecords) ? 1 : 0;
-			
-			// create cluster object with space for k or k+1 records
-			TassaCluster c = new TassaCluster(this.iface);
-			c.ensureCapacity(k + addRecord);
-			
-			// iterate through each element
-			for (int j = 0; j < k + addRecord; j++) {
-				c.add(iter.next());
-			}
-			
-			// add cluster to clusterList
-			clusterList.add(c);
-		}
-		
-		return clusterList;
-		
-	}
-	
 }

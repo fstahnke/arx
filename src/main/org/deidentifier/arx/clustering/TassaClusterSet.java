@@ -1,7 +1,11 @@
 package org.deidentifier.arx.clustering;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+
+import org.deidentifier.arx.ARXInterface;
 
 public class TassaClusterSet extends ArrayList<TassaCluster> {
 	
@@ -9,12 +13,60 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
 	 * 
 	 */
 	
-	public TassaClusterSet(List<TassaCluster> listOfClusters) {
-		super(listOfClusters);
+	private ARXInterface iface;
+	
+	public TassaClusterSet(List<TassaRecord> inputDataSet, int k, ARXInterface iface) {
+		this.iface = iface;
+		this.createRandomPartitioning(inputDataSet, k);
 	}
 	
-	public TassaClusterSet() {
-		super();
+	public TassaClusterSet(List<TassaCluster> listOfClusters, ARXInterface iface) {
+		super(listOfClusters);
+		this.iface = iface;
+	}
+	
+	public TassaClusterSet(ARXInterface iface) {
+		this.iface = iface;
+	}
+	
+	/**
+	 * Creates a random partitioning of clusters with the given records.
+	 *
+	 * @param inputDataSet The records that will be distributed among the clusters
+	 * @param k            The number of Records per cluster.
+	 */
+	public void createRandomPartitioning(List<TassaRecord> inputDataSet, int k) {
+		
+		// shuffle dataset to prepare random partitioning
+		Collections.shuffle(inputDataSet);
+		
+		// calculate number of clusters
+		int numberOfClusters = (int) Math.floor(inputDataSet.size() / k);
+		// calculate number of clusters, that will have k + 1 records
+		int additionalRecords = inputDataSet.size() % k;
+
+		// create list of clusters as return container
+		this.ensureCapacity(numberOfClusters);
+		Iterator<TassaRecord> iter = inputDataSet.iterator();
+		
+		for (int i = 0; i < numberOfClusters; i++) {
+			
+			// until all additional records are distributed
+			// each cluster will have k + 1 records
+			int addRecord = (i < additionalRecords) ? 1 : 0;
+			
+			// create cluster object with space for k or k+1 records
+			TassaCluster c = new TassaCluster(iface);
+			c.ensureCapacity(k + addRecord);
+			
+			// iterate through each element
+			for (int j = 0; j < k + addRecord; j++) {
+				c.add(iter.next());
+			}
+			
+			// add cluster to clusterList
+			this.add(c);
+		}
 	}
 
 	private static final long serialVersionUID = 1899366651589072401L;

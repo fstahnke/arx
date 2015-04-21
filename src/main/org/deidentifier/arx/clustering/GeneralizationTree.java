@@ -1,12 +1,9 @@
 package org.deidentifier.arx.clustering;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.TreeMap;
-
+import java.util.HashMap;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 
-public class GeneralizationTree extends TreeMap<Integer, GeneralizationNode> {
+public class GeneralizationTree extends HashMap<Integer, GeneralizationNode> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -16,9 +13,39 @@ public class GeneralizationTree extends TreeMap<Integer, GeneralizationNode> {
 	public GeneralizationTree(GeneralizationHierarchy hierarchy) {
 		this.hierarchy = hierarchy;
 		int maxLevel = hierarchy.getHeight() - 1;
-		this.root = new GeneralizationNode(maxLevel, hierarchy.getArray()[0][maxLevel], null);
+		this.root = new GeneralizationNode(maxLevel, hierarchy.getArray()[0][maxLevel], hierarchy.getDistinctValues(0), this);
 		root.buildTree(hierarchy);
 		
+	}
+	
+	public GeneralizationNode getLowestCommonAncestor(GeneralizationNode node, int i) {
+		
+		for (GeneralizationNode commonNode = node; commonNode != root; commonNode = commonNode.parent) {
+			if (commonNode.values.contains(i)) {
+				return commonNode;
+			}
+		}
+		return root;
+	}
+
+
+	/**
+	 * Gets the lowest generalization for a given set of integers.
+	 *
+	 * @param dataColumn a set of integers
+	 * @return the lowest level of the hierarchy, where all given integers are part of the subtree
+	 */
+	public GeneralizationNode getLowestCommonAncestor(int[] dataColumn) {
+		
+		GeneralizationNode commonNode = this.get((Integer)dataColumn[0]);
+		
+		for (int i : dataColumn) {
+			while (!commonNode.values.contains(i)) {
+				commonNode = commonNode.parent;
+			}
+		}
+		
+		return commonNode;
 	}
 
 	/**
@@ -27,10 +54,10 @@ public class GeneralizationTree extends TreeMap<Integer, GeneralizationNode> {
 	 * @param dataColumn a set of integers
 	 * @return the lowest level of the hierarchy, where all given integers are part of the subtree
 	 */
-	public GeneralizationNode getLowestGeneralization(int[] dataColumn) {
+/*	public GeneralizationNode getLowestCommonAncestor(int[] dataColumn) {
 		
 		ArrayList<GeneralizationNode> path = new ArrayList<GeneralizationNode>(hierarchy.getHeight());
-		ArrayList<Integer> checkedValues = new ArrayList<Integer>();
+		HashSet<Integer> checkedValues = new HashSet<Integer>();
 		path.add(root);
 		
 		// Starting with highest level (root)
@@ -68,4 +95,5 @@ public class GeneralizationTree extends TreeMap<Integer, GeneralizationNode> {
 		
 		return path.get(path.size()-1);
 	}
+*/
 }

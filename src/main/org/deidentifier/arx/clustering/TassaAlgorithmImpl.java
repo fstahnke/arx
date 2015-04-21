@@ -3,8 +3,6 @@ package org.deidentifier.arx.clustering;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.ARXInterface;
 import org.deidentifier.arx.Data;
@@ -28,7 +26,7 @@ public class TassaAlgorithmImpl {
 	 * @return a list of clusters with the local optimum for generalization cost
 	 */
 	
-	public List<TassaCluster> executeTassa(double alpha, double omega) {
+	public TassaClusterSet executeTassa(double alpha, double omega) {
 
 		// TODO: value "alpha" should be a variable 0 < a <= 1 provided by the ARXInterface
 		// TODO: value "omega" should be a variable 1 < w <= 2 provided by the ARXInterface
@@ -39,7 +37,13 @@ public class TassaAlgorithmImpl {
 			throw new IllegalArgumentException("executeTassa: Argument 'omega' is out of bound: " + omega);
 		
 		// Input parameters of clustering
-		TassaCluster dataSet = new TassaCluster(iface.getDataQI(), iface);
+//		TassaCluster dataSet = new TassaCluster(iface.getDataQI(), iface);
+		
+		final ArrayList<TassaRecord> dataSet = new ArrayList<TassaRecord>(iface.getDataQI().length);
+		for (int[] record : iface.getDataQI()) {
+			dataSet.add(new TassaRecord(record));
+		}
+		
 		int k = iface.getK();
 		// k_0 is the initial cluster size
 		int k_0 = (int)Math.floor(alpha*k) > 0 ? (int)Math.floor(alpha*k) : 1;
@@ -47,7 +51,7 @@ public class TassaAlgorithmImpl {
 		
 		// Output variable: Collection of clusters
 		// initialized with random partition of data records with the cluster size alpha*k
-		TassaClusterSet output = new TassaClusterSet(dataSet.createRandomPartitioning(k_0));
+		TassaClusterSet output = new TassaClusterSet(dataSet, k_0, iface);
 		for(TassaCluster cluster : output) {
 			cluster.assignAllRecords();
 		}
@@ -55,21 +59,23 @@ public class TassaAlgorithmImpl {
 		// Helper variable to check, if records were changed
 		boolean recordsChanged = true;
 		
-		while (recordsChanged) {
-			
+		while (recordsChanged) {			
 			// reset recordsChanged flag
 			recordsChanged = false;
 			
+			int recordCount = 0;
+			
 			// Loop: check all records for improvement of information loss
 			for (TassaRecord record : dataSet) {
-				
+				System.out.println("Record number: " + recordCount++);
+				// System.out.println("Record number: " + recordCount++);
 				final TassaCluster sourceCluster = record.assignedCluster;
 				TassaCluster targetCluster = null;
 				double deltaIL = Double.MAX_VALUE;
 				
+				
 				// find cluster with minimal change of information loss
 				for (TassaCluster cluster : output) {
-					
 					if (cluster != sourceCluster) {
 						double tempDelta = getChangeOfInformationLoss(record, cluster, n);
 						if (tempDelta < deltaIL) {
@@ -97,22 +103,31 @@ public class TassaAlgorithmImpl {
 			}
 			
 			// Check for clusters greater w*k, split them and add them back to output
-			ArrayList<TassaCluster> newClusters = new ArrayList<TassaCluster>();
+			TassaClusterSet newClusters = new TassaClusterSet(iface);
 			for (Iterator<TassaCluster> itr = output.iterator(); itr.hasNext();) {
 				TassaCluster cluster = itr.next();
 				if (cluster.size() > omega * k) {
 					itr.remove();
-					newClusters.addAll(cluster.createRandomPartitioning(Math.floorDiv(cluster.size(), 2)));
+					newClusters.addAll(new TassaClusterSet(cluster, Math.floorDiv(cluster.size(), 2), iface));
 				}
 			}
 			for (TassaCluster c : newClusters) {
 				c.assignAllRecords();
 			}
 			output.addAll(newClusters);
+			
+			double IL = 0.0;
+			for (TassaCluster c : output) {
+				IL += c.getGC() * c.size();
+			}
+			
+			IL /= dataSet.size();
+			
+			System.out.println("Current total information loss: " + IL);
 		}
 		
 		// put small clusters into smallClusters collection
-		TassaClusterSet smallClusters = new TassaClusterSet();
+		TassaClusterSet smallClusters = new TassaClusterSet(iface);
 		
 		for (TassaCluster cluster : output) {
 			if (cluster.size() < k) {
@@ -138,7 +153,7 @@ public class TassaAlgorithmImpl {
 		}
 		
 		if (smallClusters.size() == 1) {
-			TassaCluster mergedCluster = output.mergeClosestPair(smallClusters.get(0));
+			TassaCluster mergedCluster = output.mergeClosestPair(smallClusters.iterator().next());
 			mergedCluster.assignAllRecords();
 		}
 		
