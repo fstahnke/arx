@@ -1,6 +1,9 @@
 package org.deidentifier.arx.clustering;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.deidentifier.arx.ARXInterface;
 import org.deidentifier.arx.framework.data.DataManager;
 
@@ -24,34 +27,26 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	 * 	We use this to detect, whether the cluster was changed and
 	 *  if we have to update generalizationCost and transformationNodes again.*/
 	private int lastModCount;
-	public TassaCluster(ARXInterface iface) {
-		super();
+	
+	private TassaCluster(ARXInterface iface) {
 		this.iface = iface;
-		this.manager = iface.getDataManager();
-		this.transformationNodes = new ArrayList<GeneralizationNode>();
+		manager = iface.getDataManager();
+		transformationNodes = new ArrayList<GeneralizationNode>(iface.getNumAttributes());
+	}
+	
+	public TassaCluster(Collection<TassaRecord> recordCollection, ARXInterface iface) {
+		this(iface);
+		addAll(recordCollection);
+		updateGeneralization();
 	}
 
 	public TassaCluster(TassaCluster cluster) {
-		super(cluster.size());
-		this.iface = cluster.iface;
-		this.manager = iface.getDataManager();
-		this.transformationNodes = new ArrayList<GeneralizationNode>(cluster.transformationNodes);
-		this.lastModCount = this.modCount;
-		for (TassaRecord record : cluster) {
-			this.add(record);
-		}
+		this(cluster.iface);
+		addAll(cluster);
+		transformationNodes.addAll(cluster.transformationNodes);
+		lastModCount = modCount;
 	}
-	
-	public TassaCluster(int[][] inputArray, ARXInterface iface) {
-		super(inputArray.length);
-		this.iface = iface;
-		this.manager = iface.getDataManager();
-		this.transformationNodes = new ArrayList<GeneralizationNode>(inputArray[0].length);
-		for (int[] record :  inputArray) {
-			this.add(new TassaRecord(record));
-		}
-	}
-	
+
 	// TODO: Better solution for assigning records?
 	public void assignAllRecords() {
 		for (TassaRecord record : this) {
@@ -60,11 +55,9 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	}
 	
 	public boolean add(TassaRecord record) {
-		return super.add(record);
-	}
-	
-	public boolean add(int[] arrayRecord) {
-		return this.add(new TassaRecord(arrayRecord));
+		boolean success = super.add(record);
+		updateGeneralization(record);
+		return success;
 	}
 	
 	public TassaRecord remove(int index) {
@@ -81,8 +74,14 @@ class TassaCluster extends ArrayList<TassaRecord> {
 
 
 	private void updateGeneralization() {
-		
 		this.updateTransformation();
+		generalizationCost = this.getGC_LM();
+		lastModCount = modCount;
+	}
+
+
+	private void updateGeneralization(TassaRecord addedRecord) {
+		this.updateTransformation(addedRecord);
 		generalizationCost = this.getGC_LM();
 		lastModCount = modCount;
 	}
@@ -99,6 +98,17 @@ class TassaCluster extends ArrayList<TassaRecord> {
 				dataColumn[j] = this.get(j).recordContent[i];
 			}
 			transformationNodes.add(i, iface.getHierarchyTree(i).getLowestCommonAncestor(dataColumn));
+		}
+	}
+	
+
+	/**
+	 * Update transformation of this Cluster.
+	 */
+	private void updateTransformation(TassaRecord addedRecord) {
+		int[] recordContent = addedRecord.recordContent;
+		for (int i = 0; i < iface.getNumAttributes(); i++) {
+			transformationNodes.set(i, iface.getHierarchyTree(i).getLowestCommonAncestor(transformationNodes.get(i), recordContent[i]));
 		}
 	}
 	

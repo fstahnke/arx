@@ -56,8 +56,7 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
 			int addRecord = (i < additionalRecords) ? 1 : 0;
 			
 			// create cluster object with space for k or k+1 records
-			TassaCluster c = new TassaCluster(iface);
-			c.ensureCapacity(k + addRecord);
+			ArrayList<TassaRecord> c = new ArrayList<TassaRecord>(k + addRecord);
 			
 			// iterate through each element
 			for (int j = 0; j < k + addRecord; j++) {
@@ -65,7 +64,7 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
 			}
 			
 			// add cluster to clusterList
-			this.add(c);
+			this.add(new TassaCluster(c, iface));
 		}
 	}
 
