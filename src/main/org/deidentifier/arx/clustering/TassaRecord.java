@@ -13,16 +13,18 @@ public class TassaRecord {
 
 	public final int[] recordContent;
 	public TassaCluster assignedCluster;
+	private final int hashCode;
 	
 	public TassaRecord(int[] content)
 	{
-		this.recordContent = content;
+		recordContent = content;
+		hashCode = Arrays.hashCode(recordContent);
 	}
 	
 	public int getSize() { return this.recordContent.length; }
 	
 	public int hashCode() {
-		return Arrays.hashCode(recordContent);
+		return hashCode;
 	}
 	
 	public boolean equals(Object o) {

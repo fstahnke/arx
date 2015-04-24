@@ -31,17 +31,17 @@ public class TassaTest {
 
         // Configuration
         ARXConfiguration config = ARXConfiguration.create();
-        config.addCriterion(new KAnonymity(2));
+        config.addCriterion(new KAnonymity(20));
         config.setMaxOutliers(0d);
 		
         
-        TassaAlgorithmImpl tassa = new TassaAlgorithmImpl(data, config);
+//        TassaAlgorithmImpl tassa = new TassaAlgorithmImpl(data, config);
 		TassaAlgorithmImpl tassa2 = new TassaAlgorithmImpl(data2, config);
 		
-		TassaClusterSet clusterList = tassa.executeTassa(0.5, 1.5);
+//		TassaClusterSet clusterList = tassa.executeTassa(0.5, 1.5);
 		TassaClusterSet clusterList2 = tassa2.executeTassa(0.5, 1.5);
 		
-		int test = clusterList.size() + clusterList2.size();
+		int test = clusterList2.size() + clusterList2.size();
 		
 		test = test + 0;
 

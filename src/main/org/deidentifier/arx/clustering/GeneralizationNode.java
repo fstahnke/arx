@@ -1,14 +1,11 @@
 package org.deidentifier.arx.clustering;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 
 public class GeneralizationNode {
-	
-	private static final long serialVersionUID = 1L;
 	
 	/** The mapping key. The distinct value in the generalization array
 	 * to which all children of this node are mapped to. */
@@ -20,14 +17,14 @@ public class GeneralizationNode {
 	ArrayList<GeneralizationNode> children;
 	
 	public GeneralizationNode(int level, int mappingKey, GeneralizationNode parent) {
-		values = new HashSet<Integer>();
+		values = new HashSet<>();
 		this.level = level;
 		this.mappingKey = mappingKey;
 		this.parent = parent;
 		if (parent != null) {
 			this.tree = parent.tree;	
 		}
-		this.children = new ArrayList<GeneralizationNode>();
+		this.children = new ArrayList<>();
 	}
 	
 	public GeneralizationNode(int level, int mappingKey, int[] values, GeneralizationTree tree) {
@@ -36,7 +33,7 @@ public class GeneralizationNode {
 		this.addAll(values);
 	}
 	
-	public boolean addAll(int[] values) {
+	private boolean addAll(int[] values) {
 		boolean result = true;
 		for (int i : values) {
 			result &= this.values.add(i);

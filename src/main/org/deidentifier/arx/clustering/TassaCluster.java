@@ -3,7 +3,6 @@ package org.deidentifier.arx.clustering;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 import org.deidentifier.arx.ARXInterface;
 import org.deidentifier.arx.framework.data.DataManager;
@@ -19,9 +18,10 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	
 	// List of transformation nodes for every attribute
 	// they contain level of transformation, mapping key, all contained values
+	private int[] transformation;
+	private int[] generalizationLevel;
 	private GeneralizationNode[] transformationNodes;
 	private HashMap<TassaRecord, Double> removedNodeGC;
-	private GeneralizationTree[] hierarchyTrees;
 	
 	// caching of calculated values
 	private double generalizationCost;
@@ -34,12 +34,12 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	private TassaCluster(ARXInterface iface) {
 		this.iface = iface;
 		manager = iface.getDataManager();
-		transformationNodes = new GeneralizationNode[iface.getNumAttributes()];
-		hierarchyTrees = new GeneralizationTree[transformationNodes.length];
-		for (int i = 0; i < transformationNodes.length; i++) {
-			hierarchyTrees[i] = iface.getHierarchyTree(i);
-		}
-		removedNodeGC = new HashMap<TassaRecord, Double>();
+		int numAtt = iface.getNumAttributes();
+		transformation = new int[numAtt];
+		generalizationLevel = new int[numAtt];
+		
+		transformationNodes = new GeneralizationNode[numAtt];
+		removedNodeGC = new HashMap<>();
 	}
 	
 	public TassaCluster(Collection<TassaRecord> recordCollection, ARXInterface iface) {
@@ -51,9 +51,7 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	public TassaCluster(TassaCluster cluster) {
 		this(cluster.iface);
 		addAll(cluster);
-		for (int i = 0; i < transformationNodes.length; i++) {
-			transformationNodes[i] = cluster.transformationNodes[i];
-		}
+		System.arraycopy(cluster.transformationNodes, 0, transformationNodes, 0, transformationNodes.length);
 		lastModCount = modCount;
 	}
 
@@ -65,14 +63,19 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	}
 	
 	public boolean add(TassaRecord record) {
-		boolean success = super.add(record);
 		updateGeneralization(record);
-		return success;
+		return super.add(record);
 	}
 	
-	public TassaRecord remove(int index) {
+//	public boolean addAll(TassaCluster cluster) {
+//		boolean success = super.addAll(cluster);
+//		updateGeneralization(cluster);
+//		return success;
+//	}
+
+	public boolean remove(TassaRecord record) {
 		removedNodeGC.clear();
-		return super.remove(index);
+		return super.remove(record);
 	}
 	
 	
@@ -97,17 +100,22 @@ class TassaCluster extends ArrayList<TassaRecord> {
 		lastModCount = modCount;
 	}
 	
+	private void updateGeneralization(TassaCluster cluster) {
+		this.updateTransformation(cluster);
+		generalizationCost = this.getGC_LM();
+		lastModCount = modCount;
+	}
 
 	/**
 	 * Update transformation of this Cluster.
 	 */
 	private void updateTransformation() {
-		for (int i = 0; i < transformationNodes.length; i++) {
+		for (int i = 0; i < transformation.length; i++) {
 			int[] dataColumn = new int[this.size()];
 			for (int j = 0; j < this.size(); j++) {
 				dataColumn[j] = this.get(j).recordContent[i];
 			}
-			transformationNodes[i] = hierarchyTrees[i].getLowestCommonAncestor(dataColumn);
+			transformation[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, 0);
 		}
 	}
 	
@@ -116,10 +124,26 @@ class TassaCluster extends ArrayList<TassaRecord> {
 	 * Update transformation of this Cluster.
 	 */
 	private void updateTransformation(TassaRecord addedRecord) {
-		int[] recordContent = addedRecord.recordContent;
-		for (int i = 0; i < recordContent.length; i++) {
-			transformationNodes[i] = hierarchyTrees[i].getLowestCommonAncestor(transformationNodes[i], recordContent[i]);
+		int[] newRecord = addedRecord.recordContent;
+		int[] existingRecord = this.get(0).recordContent;
+		for (int i = 0; i < newRecord.length; i++) {
+			int[] dataColumn = new int[]{existingRecord[i], newRecord[i]};
+			generalizationLevel[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, generalizationLevel[i]);
+			transformation[i] = iface.getHierarchyTree(i).getTransformation(newRecord[i], generalizationLevel[i]);
 		}
+	}
+	
+
+	/**
+	 * Update transformation of this cluster.
+	 *
+	 * @param cluster the cluster
+	 */
+	private void updateTransformation(TassaCluster cluster) {
+		for (int i = 0; i < transformationNodes.length; i++) {
+			transformationNodes[i] = iface.getHierarchyTree(i).getLowestCommonAncestor(transformationNodes[i], cluster.transformationNodes[i]);
+		}
+		
 	}
 	
 	
@@ -131,7 +155,7 @@ class TassaCluster extends ArrayList<TassaRecord> {
 			
 			// TODO: Check, whether we have the correct cardinalities here!
 			int recordCardinality = transformationNodes[i].values.size();
-			int attributeCardinality = hierarchyTrees[i].root.values.size();
+			int attributeCardinality = manager.getHierarchies()[i].getDistinctValues()[0];
 			
 			gc += (recordCardinality - 1) / (attributeCardinality - 1);
 		}
