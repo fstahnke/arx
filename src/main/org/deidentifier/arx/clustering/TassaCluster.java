@@ -68,11 +68,11 @@ class TassaCluster extends ArrayList<TassaRecord> {
         return super.add(record);
     }
     
-    // public boolean addAll(TassaCluster cluster) {
-    // boolean success = super.addAll(cluster);
-    // updateGeneralization(cluster);
-    // return success;
-    // }
+    public boolean addAll(TassaCluster cluster) {
+        final boolean success = super.addAll(cluster);
+        updateGeneralization(cluster);
+        return success;
+    }
     
     public boolean remove(TassaRecord record) {
         removedNodeGC.clear();
@@ -93,13 +93,13 @@ class TassaCluster extends ArrayList<TassaRecord> {
     }
     
     private void updateGeneralization(TassaRecord addedRecord) {
-        this.updateTransformation(addedRecord);
+        this.updateTransformation(addedRecord, generalizationLevel);
         generalizationCost = getGC_LM();
         lastModCount = modCount;
     }
     
     private void updateGeneralization(TassaCluster cluster) {
-        this.updateTransformation(cluster);
+        this.updateTransformation(cluster.get(0), cluster.generalizationLevel);
         generalizationCost = getGC_LM();
         lastModCount = modCount;
     }
@@ -109,47 +109,38 @@ class TassaCluster extends ArrayList<TassaRecord> {
      */
     private void updateTransformation() {
         for (int i = 0; i < transformation.length; i++) {
-            final int[] dataColumn = new int[size()];
-            for (int j = 0; j < size(); j++) {
-                dataColumn[j] = get(j).recordContent[i];
+            final int[] dataColumn = new int[this.size()];
+            int j = 0;
+            for (final TassaRecord record : this) {
+                dataColumn[j] = record.recordContent[i];
+                j++;
             }
-            transformation[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, 0);
+            generalizationLevel[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, 0);
+            transformation[i] = iface.getHierarchyTree(i).getTransformation(dataColumn[0], generalizationLevel[i]);
         }
     }
     
     /**
      * Update transformation of this Cluster.
      */
-    private void updateTransformation(TassaRecord addedRecord) {
+    private void updateTransformation(TassaRecord addedRecord, int[] currentGeneralizationLevel) {
         final int[] newRecord = addedRecord.recordContent;
         final int[] existingRecord = get(0).recordContent;
         for (int i = 0; i < newRecord.length; i++) {
             final int[] dataColumn = new int[] { existingRecord[i], newRecord[i] };
-            generalizationLevel[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, generalizationLevel[i]);
-            transformation[i] = iface.getHierarchyTree(i).getTransformation(newRecord[i], generalizationLevel[i]);
+            generalizationLevel[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, currentGeneralizationLevel[i]);
+            transformation[i] = iface.getHierarchyTree(i).getTransformation(dataColumn[0], generalizationLevel[i]);
         }
-    }
-    
-    /**
-     * Update transformation of this cluster.
-     *
-     * @param cluster the cluster
-     */
-    private void updateTransformation(TassaCluster cluster) {
-        for (int i = 0; i < transformationNodes.length; i++) {
-            transformationNodes[i] = iface.getHierarchyTree(i).getLowestCommonAncestor(transformationNodes[i], cluster.transformationNodes[i]);
-        }
-        
     }
     
     public double getGC_LM() {
         
         double gc = 0;
-        final int numAtt = transformationNodes.length;
+        final int numAtt = transformation.length;
         for (int i = 0; i < numAtt; i++) {
             
             // TODO: Check, whether we have the correct cardinalities here!
-            final int recordCardinality = transformationNodes[i].values.size();
+            final int recordCardinality = iface.getHierarchyTree(i).getCardinality(transformation[i], generalizationLevel[i]);
             final int attributeCardinality = manager.getHierarchies()[i].getDistinctValues()[0];
             
             gc += (recordCardinality - 1) / (attributeCardinality - 1);

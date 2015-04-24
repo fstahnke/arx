@@ -9,7 +9,6 @@ import org.deidentifier.arx.criteria.KAnonymity;
 
 public class TassaTest {
     
-    @SuppressWarnings("unused")
     public static void main(String[] args) throws IOException {
         
         // Load data
@@ -31,16 +30,21 @@ public class TassaTest {
         
         // Configuration
         final ARXConfiguration config = ARXConfiguration.create();
-        config.addCriterion(new KAnonymity(20));
+        config.addCriterion(new KAnonymity(2));
         config.setMaxOutliers(0d);
         
-        // TassaAlgorithmImpl tassa = new TassaAlgorithmImpl(data, config);
-        final TassaAlgorithmImpl tassa2 = new TassaAlgorithmImpl(data2, config);
+        // Configuration
+        final ARXConfiguration config2 = ARXConfiguration.create();
+        config2.addCriterion(new KAnonymity(20));
+        config2.setMaxOutliers(0d);
         
-        // TassaClusterSet clusterList = tassa.executeTassa(0.5, 1.5);
+        final TassaAlgorithmImpl tassa = new TassaAlgorithmImpl(data, config);
+        final TassaAlgorithmImpl tassa2 = new TassaAlgorithmImpl(data2, config2);
+        
+        final TassaClusterSet clusterList = tassa.executeTassa(0.5, 1.5);
         final TassaClusterSet clusterList2 = tassa2.executeTassa(0.5, 1.5);
         
-        int test = clusterList2.size() + clusterList2.size();
+        int test = clusterList.size() + clusterList2.size();
         
         test = test + 0;
         

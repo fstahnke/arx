@@ -1,8 +1,6 @@
 package org.deidentifier.arx.clustering;
 
 import java.util.HashMap;
-import java.util.HashSet;
-
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 
 // TODO: Try using IdentityHashMap, but be aware of the cache limit of Integer from -128 to +127
@@ -54,33 +52,16 @@ public class GeneralizationTree extends HashMap<Integer, GeneralizationNode> {
         return hierarchyArray[value][lvl];
     }
     
-    public int getCardinality(int lvl) {
+    public int getCardinality(int transformation, int lvl) {
         
-        final int[] distinctValues = new int[hierarchyArray.length];
         int distinctNumber = 0;
         
         for (final int[] record : hierarchyArray) {
-            // check, if value at position i already exists
-            for (int j = 0; j < distinctNumber; j++) {
-                if (record[lvl] == distinctValues[j]) {
-                    distinctValues[distinctNumber] = record[lvl];
-                    distinctNumber++;
-                    break;
-                }
+            if (record[lvl] == transformation) {
+                distinctNumber++;
             }
         }
         return distinctNumber;
-    }
-    
-    public int getCardinalityHashSet(int lvl) {
-        
-        final HashSet<Integer> distinctValues = new HashSet<>(hierarchyArray.length);
-        
-        for (final int[] record : hierarchyArray) {
-            distinctValues.add(record[lvl]);
-        }
-        
-        return distinctValues.size();
     }
     
     /**
