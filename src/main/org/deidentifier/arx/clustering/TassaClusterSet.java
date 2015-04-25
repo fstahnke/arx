@@ -3,6 +3,8 @@ package org.deidentifier.arx.clustering;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.deidentifier.arx.ARXInterface;
@@ -18,11 +20,6 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
     public TassaClusterSet(List<TassaRecord> inputDataSet, int k, ARXInterface iface) {
         this.iface = iface;
         createRandomPartitioning(inputDataSet, k);
-    }
-    
-    public TassaClusterSet(List<TassaCluster> listOfClusters, ARXInterface iface) {
-        super(listOfClusters);
-        this.iface = iface;
     }
     
     public TassaClusterSet(ARXInterface iface) {
