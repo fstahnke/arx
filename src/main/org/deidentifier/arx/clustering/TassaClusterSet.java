@@ -120,9 +120,7 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
     }
     
     public double getCommonGC(TassaCluster c1, TassaCluster c2) {
-        final TassaCluster tempCluster = new TassaCluster(c1);
-        tempCluster.addAll(c2);
-        return tempCluster.getGC();
+        return c1.getAddedGC(c2);
     }
     
 }

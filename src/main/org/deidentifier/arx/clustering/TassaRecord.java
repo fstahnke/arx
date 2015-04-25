@@ -30,12 +30,15 @@ public class TassaRecord {
         return hashCode;
     }
     
-    @Override
+/*    @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
         if (o instanceof TassaRecord) {
             return (Arrays.equals(recordContent, ((TassaRecord) o).recordContent));
         }
         return false;
-    }
+    }*/
     
 }

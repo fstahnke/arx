@@ -52,9 +52,10 @@ public class GeneralizationTree extends HashMap<Integer, GeneralizationNode> {
         return hierarchyArray[value][lvl];
     }
     
-    public int getCardinality(int transformation, int lvl) {
+    public int getCardinality(int value, int lvl) {
         
         int distinctNumber = 0;
+        final int transformation = hierarchyArray[value][lvl];
         
         for (final int[] record : hierarchyArray) {
             if (record[lvl] == transformation) {

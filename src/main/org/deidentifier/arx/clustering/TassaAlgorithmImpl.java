@@ -123,7 +123,7 @@ public class TassaAlgorithmImpl {
             
             double IL = 0.0;
             for (final TassaCluster c : output) {
-                IL += c.getGC() * c.size();
+                IL += c.getGeneralizationCost() * c.size();
             }
             
             IL /= dataSet.size();
@@ -163,7 +163,7 @@ public class TassaAlgorithmImpl {
         }
         
         for (final TassaCluster cluster : output) {
-            cluster.getGC();
+            cluster.getGeneralizationCost();
         }
         
         return output;
@@ -177,8 +177,8 @@ public class TassaAlgorithmImpl {
         
         deltaIL = sourceCluster.getRemovedGC(movedRecord) * (sourceCluster.size() - 1)
                   + targetCluster.getAddedGC(movedRecord) * (targetCluster.size() + 1)
-                  - sourceCluster.getGC() * sourceCluster.size()
-                  + targetCluster.getGC() * targetCluster.size();
+                  - sourceCluster.getGeneralizationCost() * sourceCluster.size()
+                  + targetCluster.getGeneralizationCost() * targetCluster.size();
         deltaIL /= n;
         
         return deltaIL;
