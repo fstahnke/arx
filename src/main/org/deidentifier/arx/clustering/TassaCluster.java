@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 import org.deidentifier.arx.ARXInterface;
 import org.deidentifier.arx.framework.data.DataManager;
@@ -89,7 +90,7 @@ class TassaCluster extends ArrayList<TassaRecord> {
         return generalizationCost;
     }
     
-    private int[] getGeneralizationLevels(Collection<TassaRecord> recordCollection, int[] currentGeneralizationLevels) {
+    private int[] getGeneralizationLevels(List<TassaRecord> recordCollection, int[] currentGeneralizationLevels) {
         final int[] result = new int[numAtt];
         
         for (int i = 0; i < numAtt; i++) {
@@ -99,6 +100,16 @@ class TassaCluster extends ArrayList<TassaRecord> {
                 dataColumn[j] = record.recordContent[i];
                 j++;
             }
+            result[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, currentGeneralizationLevels[i]);
+        }
+        return result;
+    }
+    
+    private int[] getGeneralizationLevels(TassaRecord record, int[] currentGeneralizationLevels) {
+        final int[] result = new int[numAtt];
+        
+        for (int i = 0; i < numAtt; i++) {
+            final int[] dataColumn = new int[] { record.recordContent[i], get(0).recordContent[i] };
             result[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, currentGeneralizationLevels[i]);
         }
         return result;
@@ -122,12 +133,12 @@ class TassaCluster extends ArrayList<TassaRecord> {
         for (int i = 0; i < numAtt; i++) {
             levels[i] = Math.max(this.generalizationLevels[i], addedCluster.generalizationLevels[i]);
         }
-        return getGC_LM(addedCluster.get(0).recordContent, this.getGeneralizationLevels(Arrays.asList(addedCluster.get(0), this.get(0)), levels));
+        return getGC_LM(addedCluster.get(0).recordContent, this.getGeneralizationLevels(addedCluster.get(0), levels));
     }
     
     public double getAddedGC(TassaRecord addedRecord) {
         lastModCount = modCount;
-        return getGC_LM(addedRecord.recordContent, this.getGeneralizationLevels(Arrays.asList(addedRecord, this.get(0)), generalizationLevels));
+        return getGC_LM(addedRecord.recordContent, this.getGeneralizationLevels(addedRecord, generalizationLevels));
     }
     
     public double getRemovedGC(TassaRecord removedRecord) {
