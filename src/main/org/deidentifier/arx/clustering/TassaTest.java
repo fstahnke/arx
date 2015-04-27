@@ -17,6 +17,7 @@ public class TassaTest {
         data.getDefinition().setAttributeType("gender", Hierarchy.create("data/test_hierarchy_gender.csv", ';'));
         data.getDefinition().setAttributeType("zipcode", Hierarchy.create("data/test_hierarchy_zipcode.csv", ';'));
         
+        //final Data data2 = Data.create("data/adult_subset.csv", ';');
         final Data data2 = Data.create("data/adult.csv", ';');
         data2.getDefinition().setAttributeType("age", Hierarchy.create("data/adult_hierarchy_age.csv", ';'));
         data2.getDefinition().setAttributeType("education", Hierarchy.create("data/adult_hierarchy_education.csv", ';'));
@@ -41,10 +42,11 @@ public class TassaTest {
         final TassaAlgorithmImpl tassa = new TassaAlgorithmImpl(data, config);
         final TassaAlgorithmImpl tassa2 = new TassaAlgorithmImpl(data2, config2);
         
-        final TassaClusterSet clusterList = tassa.executeTassa(0.5, 1.5);
+        @SuppressWarnings("unused")
+//        final TassaClusterSet clusterList = tassa.executeTassa(0.5, 1.5);
         final TassaClusterSet clusterList2 = tassa2.executeTassa(0.5, 1.5);
         
-        int test = clusterList.size() + clusterList2.size();
+        int test = clusterList2.size() + clusterList2.size();
         
         test = test + 0;
         

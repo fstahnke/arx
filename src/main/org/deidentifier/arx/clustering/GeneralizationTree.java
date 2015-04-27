@@ -1,18 +1,17 @@
 package org.deidentifier.arx.clustering;
 
 import java.util.HashMap;
-
+import java.util.IdentityHashMap;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 
-// TODO: Try using IdentityHashMap, but be aware of the cache limit of Integer from -128 to +127
-public class GeneralizationTree extends HashMap<Integer, GeneralizationNode> {
+public class GeneralizationTree extends IdentityHashMap<Integer, GeneralizationNode> {
     
     private static final long serialVersionUID = 1L;
     
     GeneralizationHierarchy   hierarchy;
     GeneralizationNode        root;
     int[][]                   hierarchyArray;
-    HashMap<Integer, Integer> cardinalityCache;
+    int[][]                   cardinalityCache;
     
     public GeneralizationTree(GeneralizationHierarchy hierarchy) {
         this.hierarchy = hierarchy;
@@ -21,11 +20,6 @@ public class GeneralizationTree extends HashMap<Integer, GeneralizationNode> {
         root.buildTree(hierarchy);
         hierarchyArray = hierarchy.getArray();
         cardinalityCache = getCardinalities();
-    }
-    
-    public GeneralizationNode getLowestCommonAncestor(GeneralizationNode node1, GeneralizationNode node2) {
-        
-        return null;
     }
     
     public GeneralizationNode getLowestCommonAncestor(GeneralizationNode node, int i) {
@@ -55,45 +49,34 @@ public class GeneralizationTree extends HashMap<Integer, GeneralizationNode> {
         return hierarchyArray[value][lvl];
     }
     
-    public HashMap<Integer, Integer> getCardinalities() {
+    public int getCardinality(int value, int lvl) {
+        return cardinalityCache[value][lvl];
+    }
+    
+    private int[][] getCardinalities() {
         
-        final HashMap<Integer, Integer> cardinalities = new HashMap<>(hierarchyArray.length + hierarchyArray[0].length);
+        final HashMap<Integer, Integer> cardHashMap = new HashMap<>(hierarchyArray.length + hierarchyArray[0].length);
         
-        for (int[] record : hierarchyArray) {
-            cardinalities.put(record[0], 1);
+        for (final int[] record : hierarchyArray) {
+            for (final int i : record) {
+                if (cardHashMap.containsKey(i)) {
+                    cardHashMap.put(i, cardHashMap.get(i) + 1);
+                } else {
+                    cardHashMap.put(i, 1);
+                }
+            }
         }
         
+        final int[][] cardinalities = new int[hierarchyArray.length][hierarchyArray[0].length];
+        
         for (int i = 0; i < hierarchyArray.length; i++) {
-            for (int j = 1; j < hierarchyArray[0].length; j++) {
-                Integer value = cardinalities.get(hierarchyArray[i][j]);
-                if (value != null) {
-                    cardinalities.put(hierarchyArray[i][j], ++value);
-                }
-                else {
-                    cardinalities.put(hierarchyArray[i][j], 1);
-                }
+            for (int j = 0; j < hierarchyArray[0].length; j++) {
+                cardinalities[i][j] = cardHashMap.get(hierarchyArray[i][j]);
             }
         }
         
         return cardinalities;
     }
-    
-    public int getCardinality (int value, int lvl) {
-        return cardinalityCache.get(hierarchyArray[value][lvl]);
-    }
-    
-    /*public int getCardinality(int value, int lvl) {
-        
-        int distinctNumber = 0;
-        final int transformation = hierarchyArray[value][lvl];
-        
-        for (final int[] record : hierarchyArray) {
-            if (record[lvl] == transformation) {
-                distinctNumber++;
-            }
-        }
-        return distinctNumber;
-    }*/
     
     /**
      * Gets the lowest generalization for a given set of integers.

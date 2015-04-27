@@ -1,15 +1,13 @@
 package org.deidentifier.arx.clustering;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.deidentifier.arx.ARXInterface;
 
-public class TassaClusterSet extends ArrayList<TassaCluster> {
+public class TassaClusterSet extends LinkedList<TassaCluster> {
     
     /**
      * 
@@ -32,7 +30,7 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
      * @param inputDataSet The records that will be distributed among the clusters
      * @param k The number of Records per cluster.
      */
-    public void createRandomPartitioning(List<TassaRecord> inputDataSet, int k) {
+    private void createRandomPartitioning(List<TassaRecord> inputDataSet, int k) {
         
         // shuffle dataset to prepare random partitioning
         Collections.shuffle(inputDataSet);
@@ -43,7 +41,6 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
         final int additionalRecords = inputDataSet.size() % k;
         
         // create list of clusters as return container
-        ensureCapacity(numberOfClusters);
         final Iterator<TassaRecord> iter = inputDataSet.iterator();
         
         for (int i = 0; i < numberOfClusters; i++) {
@@ -53,7 +50,7 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
             final int addRecord = (i < additionalRecords) ? 1 : 0;
             
             // create cluster object with space for k or k+1 records
-            final ArrayList<TassaRecord> c = new ArrayList<TassaRecord>(k + addRecord);
+            final LinkedList<TassaRecord> c = new LinkedList<>();
             
             // iterate through each element
             for (int j = 0; j < k + addRecord; j++) {
@@ -66,8 +63,8 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
     }
     
     private static final long serialVersionUID = 1899366651589072401L;
+
     
-    // TODO: kd-tree as general data structure for records, clusters and cluster sets???
     /**
      * Merges the closest pair of clusters in this set of clusters.
      * @return
@@ -76,13 +73,14 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
         
         double closestPairDistance = Double.MAX_VALUE;
         final TassaCluster[] closestPair = new TassaCluster[2];
-        
+
         for (int i = 0; i < size(); i++) {
+
             double closestDistance = Double.MAX_VALUE;
             final TassaCluster currentCluster = get(i);
             TassaCluster closestCluster = null;
             for (int j = i + 1; j < size(); j++) {
-                final double dist = getCommonGC(currentCluster, get(j));
+                final double dist = currentCluster.getAddedGC(get(j));
                 if (dist < closestDistance) {
                     closestDistance = dist;
                     closestCluster = get(j);
@@ -94,7 +92,7 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
                 closestPair[1] = closestCluster;
             }
         }
-        // TODO: We need a merge method, that calculates the transformation in a cheap way
+        
         closestPair[0].addAll(closestPair[1]);
         this.remove(closestPair[1]);
         return closestPair[0];
@@ -106,7 +104,7 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
         TassaCluster closestCluster = null;
         
         for (final TassaCluster currentCluster : this) {
-            final double dist = getCommonGC(inputCluster, currentCluster);
+            final double dist = inputCluster.getAddedGC(currentCluster);
             if (dist < closestDistance) {
                 closestDistance = dist;
                 closestCluster = currentCluster;
@@ -114,10 +112,6 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
         }
         closestCluster.addAll(inputCluster);
         return closestCluster;
-    }
-    
-    public double getCommonGC(TassaCluster c1, TassaCluster c2) {
-        return c1.getAddedGC(c2);
     }
     
 }

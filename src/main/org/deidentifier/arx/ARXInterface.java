@@ -15,27 +15,39 @@ import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 import org.deidentifier.arx.framework.lattice.Node;
 import org.deidentifier.arx.metric.InformationLoss;
 
+// TODO: Auto-generated Javadoc
 /**
- * This class provides a rudimentary interface to the internal ARX data structures
- * @author Fabian Prasser
+ * This class provides a rudimentary interface to the internal ARX data structures.
  *
+ * @author Fabian Prasser
  */
 public class ARXInterface {
 
-    /** The data manager */
+    /**  The data manager. */
     private final DataManager      manager;
-    /** The buffer */
+    
+    /**  The buffer. */
     private final int[][]          buffer;
-    /** The config */
+    
+    /**  The config. */
     private final ARXConfiguration config;
     /** The hierarchy trees. */
     private GeneralizationTree[] hierarchyTrees;
+    
+
+    /** Turn logging on or off. */
+    public final boolean logging = true;
+    /** The number of records that is processed between each logging tick. */
+    public final int logNumberOfRecords = 1000;
+    /** The number of clusters that is processed between each logging tick. */
+    public final int logNumberOfClusters = 100;
 
     /**
-     * Creates a new interface to the internal ARX data structures
-     * @param data
-     * @param config
-     * @throws IOException
+     * Creates a new interface to the internal ARX data structures.
+     *
+     * @param data the data
+     * @param config the config
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     public ARXInterface(final Data data, ARXConfiguration config) throws IOException {
 
@@ -116,19 +128,21 @@ public class ARXInterface {
     }
 
     /**
-     * Returns the input data array (quasi-identifiers)
-     * @return
+     * Returns the input data array (quasi-identifiers).
+     *
+     * @return the data qi
      */
     public int[][] getDataQI() {
         return manager.getDataQI().getArray();
     }
     
     /**
-     * Returns the information loss of a cluster
-     * @param data
-     * @param count
-     * @param transformation
-     * @return
+     * Returns the information loss of a cluster.
+     *
+     * @param data the data
+     * @param count the count
+     * @param transformation the transformation
+     * @return the information loss
      */
     public InformationLoss<?> getInformationLoss(int[] data, int count, int[] transformation) {
     	HashGroupifyEntry entry = new HashGroupifyEntry(data, count);
@@ -138,9 +152,10 @@ public class ARXInterface {
     }
     
     /**
-     * TODO: Get rid of this (easy and efficient with streams in Java 8)
-     * @param transformation
-     * @return
+     * TODO: Get rid of this (easy and efficient with streams in Java 8).
+     *
+     * @param transformation the transformation
+     * @return the level
      */
     private int getLevel(int[] transformation) {
 		int level = 0;
@@ -156,50 +171,56 @@ public class ARXInterface {
 	}
 
 	/**
-     * Returns the input data array (sensitive attributes)
-     * @return
-     */
+	 * Returns the input data array (sensitive attributes).
+	 *
+	 * @return the data se
+	 */
     public int[][] getDataSE() {
         return manager.getDataSE().getArray();
     }
 
     /**
-     * Returns the output buffer
-     * @return
+     * Returns the output buffer.
+     *
+     * @return the buffer
      */
     public int[][] getBuffer() {
         return buffer;
     }
 
     /**
-     * Returns the hierarchy for the attribute at the given index
-     * @param index
-     * @return
+     * Returns the hierarchy for the attribute at the given index.
+     *
+     * @param index the index
+     * @return the hierarchy
      */
     public int[][] getHierarchy(int index) {
         return manager.getHierarchies()[index].getArray();
     }
 
     /**
-     * Returns the name of the attribute at the given index
-     * @param index
-     * @return
+     * Returns the name of the attribute at the given index.
+     *
+     * @param index the index
+     * @return the attribute
      */
     public String getAttribute(int index) {
         return manager.getDataQI().getHeader()[index];
     }
 
     /**
-     * Returns the number of quasi-identifying attributes
-     * @return
+     * Returns the number of quasi-identifying attributes.
+     *
+     * @return the num attributes
      */
     public int getNumAttributes() {
         return buffer[0].length;
     }
 
     /**
-     * Returns the parameter 'k', as in k-anonymity
-     * @return
+     * Returns the parameter 'k', as in k-anonymity.
+     *
+     * @return the k
      */
     public int getK() {
         return config.getMinimalGroupSize();
@@ -208,7 +229,7 @@ public class ARXInterface {
     /**
      * Performs some sanity checks.
      *
-     * @param config
+     * @param config the config
      * @param manager the manager
      */
     private void checkAfterEncoding(final ARXConfiguration config, final DataManager manager) {

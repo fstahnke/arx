@@ -1,7 +1,7 @@
 package org.deidentifier.arx.clustering;
 
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 
@@ -16,7 +16,7 @@ public class GeneralizationNode {
     int                           level;
     GeneralizationTree            tree;
     GeneralizationNode            parent;
-    ArrayList<GeneralizationNode> children;
+    LinkedList<GeneralizationNode> children;
     
     public GeneralizationNode(int level, int mappingKey, GeneralizationNode parent) {
         values = new HashSet<>();
@@ -26,7 +26,7 @@ public class GeneralizationNode {
         if (parent != null) {
             tree = parent.tree;
         }
-        children = new ArrayList<>();
+        children = new LinkedList<>();
     }
     
     public GeneralizationNode(int level, int mappingKey, int[] values, GeneralizationTree tree) {
