@@ -7,19 +7,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.deidentifier.arx.ARXInterface;
-import org.deidentifier.arx.framework.data.DataManager;
 
 public class TassaCluster extends LinkedList<TassaRecord> {
     
     private static final long                  serialVersionUID = 1L;
     
     private final ARXInterface                 iface;
-    private final DataManager                  manager;
     
     /** The number of attributes. */
     private final int                          numAtt;
     
     private int[]                              generalizationLevels;
+	private final GeneralizationTree[]         generalizationTrees;
     private final HashMap<TassaRecord, Double> removedNodeGC;
     
     // caching of calculated values
@@ -35,18 +34,20 @@ public class TassaCluster extends LinkedList<TassaRecord> {
     
     private TassaCluster(ARXInterface iface) {
         this.iface = iface;
-        manager = iface.getDataManager();
         numAtt = iface.getNumAttributes();
+        generalizationTrees = new GeneralizationTree[numAtt];
+        for (int i = 0; i < numAtt; i++) {
+            generalizationTrees[i] = iface.getHierarchyTree(i);
+        }
         generalizationLevels = new int[numAtt];
-        
         removedNodeGC = new HashMap<>();
     }
     
     public TassaCluster(Collection<TassaRecord> recordCollection, ARXInterface iface) {
         this(iface);
         addAll(recordCollection);
-        assignAllRecords(this);
         getGeneralizationCost();
+        assignAllRecords();
     }
     
     public TassaCluster(TassaCluster cluster) {
@@ -55,8 +56,8 @@ public class TassaCluster extends LinkedList<TassaRecord> {
         System.arraycopy(cluster.generalizationLevels, 0, generalizationLevels, 0, generalizationLevels.length);
     }
     
-    private void assignAllRecords(TassaCluster cluster) {
-        for (final TassaRecord record : cluster) {
+    private void assignAllRecords() {
+        for (final TassaRecord record : this) {
             record.assignedCluster = this;
         }
     }
@@ -73,7 +74,7 @@ public class TassaCluster extends LinkedList<TassaRecord> {
     
     public boolean addAll(TassaCluster cluster) {
         final boolean success = super.addAll(cluster);
-        assignAllRecords(cluster);
+        assignAllRecords();
         final int[] levels = new int[numAtt];
         for (int i = 0; i < numAtt; i++) {
             levels[i] = Math.max(this.generalizationLevels[i], cluster.generalizationLevels[i]);
@@ -93,7 +94,7 @@ public class TassaCluster extends LinkedList<TassaRecord> {
     }
     
     public double getGeneralizationCost() {
-        if (lastModCount < modCount || generalizationCost == 0) {
+        if (lastModCount < modCount) {
             Arrays.fill(generalizationLevels, 0);
             generalizationLevels = getGeneralizationLevels(this, generalizationLevels);
             generalizationCost = getGC_LM(getFirst().recordContent, generalizationLevels);
@@ -112,16 +113,18 @@ public class TassaCluster extends LinkedList<TassaRecord> {
                 dataColumn[j] = record.recordContent[i];
                 j++;
             }
-            result[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, currentGeneralizationLevels[i]);
+            result[i] = generalizationTrees[i].getGeneralizationLevel(dataColumn, currentGeneralizationLevels[i]);
         }
         return result;
     }
     
     private int[] getGeneralizationLevels(TassaRecord record, int[] currentGeneralizationLevels) {
+		final int[] record1 = record.recordContent;
+		final int[] record2 = getFirst().recordContent;
         final int[] result = new int[numAtt];
         
         for (int i = 0; i < numAtt; i++) {
-            result[i] = iface.getHierarchyTree(i).getGeneralizationLevel(new int[] { record.recordContent[i], getFirst().recordContent[i] }, currentGeneralizationLevels[i]);
+            result[i] = generalizationTrees[i].getGeneralizationLevel(new int[] { record1[i], record2[i] }, currentGeneralizationLevels[i]);
         }
         return result;
     }
@@ -130,8 +133,9 @@ public class TassaCluster extends LinkedList<TassaRecord> {
         
         double gc = 0;
         for (int i = 0; i < numAtt; i++) {
-            final int recordCardinality = iface.getHierarchyTree(i).getCardinality(record[i], generalizationLevels[i]);
-            final int attributeCardinality = manager.getHierarchies()[i].getDistinctValues()[0];
+			final GeneralizationTree tree = generalizationTrees[i];
+            final int recordCardinality = tree.getCardinality(record[i], generalizationLevels[i]);
+            final int attributeCardinality = tree.getCardinality(record[i], tree.maxLevel);
             
             gc += (recordCardinality - 1) / (attributeCardinality - 1);
         }
@@ -168,7 +172,7 @@ public class TassaCluster extends LinkedList<TassaRecord> {
         final int[] record = getFirst().recordContent;
         int[] result = new int[numAtt];
         for (int i = 0; i < numAtt; i++) {
-            result[i] = iface.getHierarchyTree(i).getTransformation(record[i], generalizationLevels[i]);
+            result[i] = generalizationTrees[i].getTransformation(record[i], generalizationLevels[i]);
         }
         return result;
     }

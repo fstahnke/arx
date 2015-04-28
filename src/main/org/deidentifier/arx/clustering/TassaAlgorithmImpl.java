@@ -3,7 +3,6 @@ package org.deidentifier.arx.clustering;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 import org.deidentifier.arx.ARXConfiguration;
@@ -67,7 +66,7 @@ public class TassaAlgorithmImpl {
         while (recordsChanged) {
             // reset recordsChanged flag
             recordsChanged = false;
-            HashSet<TassaCluster> clustersToCheck = new HashSet<TassaCluster>(modifiedClusters);
+            HashSet<TassaCluster> clustersToCheck = new HashSet<>(modifiedClusters);
             modifiedClusters.clear();
             
             int recordCount = 0;
@@ -96,7 +95,7 @@ public class TassaAlgorithmImpl {
                     }
                 }
                 
-                if (sourceCluster.size() == 1)
+                if (sourceCluster.size() == 1 && targetCluster != null)
                 {
                     // move record to target cluster
                     clustersToCheck.remove(targetCluster);
@@ -117,7 +116,7 @@ public class TassaAlgorithmImpl {
                 }
                 
                 // If change in information loss is negative, move record to new cluster
-                else if (deltaIL < -0.0000000001) {
+                else if (deltaIL < -0.0000000001 && targetCluster != null) {
                     // remove record from source cluster
                     clustersToCheck.remove(sourceCluster);
                     sourceCluster.remove(record);
@@ -203,9 +202,7 @@ public class TassaAlgorithmImpl {
         }
         
         if (smallClusters.size() == 1) {
-            output.clear();
-            output.addAll(output);
-            output.mergeClosestPair(smallClusters.iterator().next());
+            output.mergeClosestPair(smallClusters.getFirst());
         }
         
         return output;

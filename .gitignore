@@ -12,3 +12,5 @@
 /nbproject/
 /manifest.mf
 /nb-build.xml
+/nbbuild/
+/dist/

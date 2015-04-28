@@ -12,10 +12,11 @@ public class GeneralizationTree extends IdentityHashMap<Integer, GeneralizationN
     GeneralizationNode        root;
     int[][]                   hierarchyArray;
     int[][]                   cardinalityCache;
+	final int maxLevel;
     
     public GeneralizationTree(GeneralizationHierarchy hierarchy) {
         this.hierarchy = hierarchy;
-        final int maxLevel = hierarchy.getHeight() - 1;
+        maxLevel = hierarchy.getHeight() - 1;
         root = new GeneralizationNode(maxLevel, hierarchy.getArray()[0][maxLevel], hierarchy.getDistinctValues(0), this);
         root.buildTree(hierarchy);
         hierarchyArray = hierarchy.getArray();
@@ -35,9 +36,8 @@ public class GeneralizationTree extends IdentityHashMap<Integer, GeneralizationN
     public int getGeneralizationLevel(int[] values, int lvl) {
         
         int val = hierarchyArray[values[0]][lvl];
-        final int maxLvl = hierarchyArray[0].length - 1;
         
-        for (int i = 1; i < values.length && lvl != maxLvl; i++) {
+        for (int i = 1; i < values.length && lvl != maxLevel; i++) {
             while (hierarchyArray[values[i]][lvl] != val) {
                 val = hierarchyArray[values[i - 1]][++lvl];
             }
