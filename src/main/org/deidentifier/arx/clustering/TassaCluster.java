@@ -1,6 +1,5 @@
 package org.deidentifier.arx.clustering;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,8 +10,6 @@ import org.deidentifier.arx.ARXInterface;
 public class TassaCluster extends LinkedList<TassaRecord> {
     
     private static final long                  serialVersionUID = 1L;
-    
-    private final ARXInterface                 iface;
     
     /** The number of attributes. */
     private final int                          numAtt;
@@ -32,8 +29,8 @@ public class TassaCluster extends LinkedList<TassaRecord> {
      */
     private int                                lastModCount;
     
-    private TassaCluster(ARXInterface iface) {
-        this.iface = iface;
+    public TassaCluster(Collection<TassaRecord> recordCollection, ARXInterface iface) {
+        super();
         numAtt = iface.getNumAttributes();
         generalizationTrees = new GeneralizationTree[numAtt];
         for (int i = 0; i < numAtt; i++) {
@@ -41,19 +38,8 @@ public class TassaCluster extends LinkedList<TassaRecord> {
         }
         generalizationLevels = new int[numAtt];
         removedNodeGC = new HashMap<>();
-    }
-    
-    public TassaCluster(Collection<TassaRecord> recordCollection, ARXInterface iface) {
-        this(iface);
-        addAll(recordCollection);
-        getGeneralizationCost();
-        assignAllRecords();
-    }
-    
-    public TassaCluster(TassaCluster cluster) {
-        this(cluster.iface);
-        addAll(cluster);
-        System.arraycopy(cluster.generalizationLevels, 0, generalizationLevels, 0, generalizationLevels.length);
+        super.addAll(recordCollection);
+        update(this);
     }
     
     private void assignAllRecords() {
@@ -65,40 +51,27 @@ public class TassaCluster extends LinkedList<TassaRecord> {
     @Override
     public boolean add(TassaRecord newRecord) {
         final boolean success = super.add(newRecord);
-        newRecord.assignedCluster = this;
-        generalizationLevels = getGeneralizationLevels(newRecord, generalizationLevels);
-        generalizationCost = getAddedGC(newRecord);
-        updateCluster();
+        update(newRecord);
         return success;
     }
     
-    public boolean addAll(TassaCluster cluster) {
-        final boolean success = super.addAll(cluster);
-        assignAllRecords();
-        final int[] levels = new int[numAtt];
-        for (int i = 0; i < numAtt; i++) {
-            levels[i] = Math.max(this.generalizationLevels[i], cluster.generalizationLevels[i]);
-        }
-        generalizationLevels = getGeneralizationLevels(cluster.getFirst(), levels);
-        generalizationCost = getGC_LM(cluster.getFirst().recordContent, generalizationLevels);
-        updateCluster();
+    @Override
+    public final boolean addAll(Collection<? extends TassaRecord> recordCollection) {
+        final boolean success = super.addAll(recordCollection);
+        update(recordCollection);
         return success;
     }
     
-    public boolean remove(TassaRecord record) {
+    @Override
+    public boolean remove(Object record) {
         final boolean success = super.remove(record);
-        removedNodeGC.clear();
-        hashCode();
-        getGeneralizationCost();
+        update(record);
         return success;
     }
     
     public double getGeneralizationCost() {
         if (lastModCount < modCount) {
-            Arrays.fill(generalizationLevels, 0);
-            generalizationLevels = getGeneralizationLevels(this, generalizationLevels);
-            generalizationCost = getGC_LM(getFirst().recordContent, generalizationLevels);
-            updateCluster();
+            update(this);
         }
         return generalizationCost;
     }
@@ -143,29 +116,79 @@ public class TassaCluster extends LinkedList<TassaRecord> {
         return gc / numAtt;
     }
     
-    public double getAddedGC(TassaCluster addedCluster) {
-        final int[] levels = new int[numAtt];
-        for (int i = 0; i < numAtt; i++) {
-            levels[i] = Math.max(this.generalizationLevels[i], addedCluster.generalizationLevels[i]);
+    public double getAddedGC(Object addedObject) {
+        double result = 0;
+        if (addedObject instanceof TassaCluster) {
+            TassaCluster cluster = (TassaCluster)addedObject;
+            final int[] levels = new int[numAtt];
+            for (int i = 0; i < numAtt; i++) {
+                levels[i] = Math.max(this.generalizationLevels[i], cluster.generalizationLevels[i]);
+            }
+            result = getGC_LM(cluster.getFirst().recordContent, this.getGeneralizationLevels(cluster.getFirst(), levels));
         }
-        return getGC_LM(addedCluster.getFirst().recordContent, this.getGeneralizationLevels(addedCluster.getFirst(), levels));
-    }
-    
-    public double getAddedGC(TassaRecord addedRecord) {
-        return getGC_LM(addedRecord.recordContent, this.getGeneralizationLevels(addedRecord, generalizationLevels));
+        if (addedObject instanceof TassaRecord) {
+            TassaRecord record = (TassaRecord)addedObject;
+            result = getGC_LM(record.recordContent, this.getGeneralizationLevels(record, generalizationLevels));
+        }
+        return result;
     }
     
     public double getRemovedGC(TassaRecord removedRecord) {
         Double result = 0.0;
         if (size() > 1) {
             result = removedNodeGC.get(removedRecord);
-            if (result == null && super.remove(removedRecord)) {
-                result = getGC_LM(getFirst().recordContent, getGeneralizationLevels(this, new int[numAtt]));
-                removedNodeGC.put(removedRecord, result);
-                this.add(removedRecord);
+            // We don't have a cached value for the GC without this record
+            if (result == null) {
+                // The record was not yet removed,
+                // so we have to add it back after the calculation
+                if (super.remove(removedRecord)) {
+                    result = getGC_LM(getFirst().recordContent, getGeneralizationLevels(this, new int[numAtt]));
+                    removedNodeGC.put(removedRecord, result);
+                    super.add(removedRecord);
+                    lastModCount = modCount;
+                }
+                // The record has already been removed,
+                // so we don't have to put it back
+                else {
+                    result = getGC_LM(getFirst().recordContent, getGeneralizationLevels(this, new int[numAtt]));
+                }
             }
         }
         return result;
+    }
+    
+    private void update(Object addedObject) {
+        final int[] levels = new int[numAtt];
+        if (addedObject instanceof TassaCluster) {
+            TassaCluster cluster = (TassaCluster)addedObject;
+            if (cluster == this) {
+                generalizationLevels = getGeneralizationLevels(this, levels);
+            }
+            else {
+                for (int i = 0; i < numAtt; i++) {
+                    levels[i] = Math.max(this.generalizationLevels[i], cluster.generalizationLevels[i]);
+                }
+                generalizationLevels = getGeneralizationLevels(cluster.getFirst(), levels);
+                
+            }
+            generalizationCost = getGC_LM(getFirst().recordContent, generalizationLevels);
+            assignAllRecords();
+        }
+        if (addedObject instanceof TassaRecord) {
+            TassaRecord record = (TassaRecord)addedObject;
+            if (record.assignedCluster != this) {
+                record.assignedCluster = this;
+                generalizationLevels = getGeneralizationLevels(record, generalizationLevels);
+                generalizationCost = getAddedGC(record);
+            }
+            else {
+                generalizationLevels = getGeneralizationLevels(this, levels);
+                generalizationCost = getRemovedGC(record);
+            }
+        }
+        removedNodeGC.clear();
+        hashCode();
+        lastModCount = modCount;
     }
     
     private int[] getTransformation() {
@@ -206,11 +229,6 @@ public class TassaCluster extends LinkedList<TassaRecord> {
             }
         }
         return hashCode;
-    }
-    
-    private void updateCluster() {
-        hashCode();
-        lastModCount = modCount;
     }
     
 }

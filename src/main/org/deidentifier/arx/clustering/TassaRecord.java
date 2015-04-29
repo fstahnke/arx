@@ -21,10 +21,6 @@ public class TassaRecord {
         hashCode = Arrays.hashCode(recordContent);
     }
     
-    public int getSize() {
-        return recordContent.length;
-    }
-    
     @Override
     public int hashCode() {
         return hashCode;
