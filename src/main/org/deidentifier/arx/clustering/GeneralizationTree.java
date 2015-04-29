@@ -1,15 +1,11 @@
 package org.deidentifier.arx.clustering;
 
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 
-public class GeneralizationTree extends IdentityHashMap<Integer, GeneralizationNode> {
-    
-    private static final long serialVersionUID = 1L;
+public class GeneralizationTree {
     
     GeneralizationHierarchy   hierarchy;
-    GeneralizationNode        root;
     int[][]                   hierarchyArray;
     int[][]                   cardinalityCache;
 	final int maxLevel;
@@ -17,20 +13,8 @@ public class GeneralizationTree extends IdentityHashMap<Integer, GeneralizationN
     public GeneralizationTree(GeneralizationHierarchy hierarchy) {
         this.hierarchy = hierarchy;
         maxLevel = hierarchy.getHeight() - 1;
-        root = new GeneralizationNode(maxLevel, hierarchy.getArray()[0][maxLevel], hierarchy.getDistinctValues(0), this);
-        root.buildTree(hierarchy);
         hierarchyArray = hierarchy.getArray();
         cardinalityCache = getCardinalities();
-    }
-    
-    public GeneralizationNode getLowestCommonAncestor(GeneralizationNode node, int i) {
-        
-        for (GeneralizationNode commonNode = node; commonNode != root; commonNode = commonNode.parent) {
-            if (commonNode.values.contains(i)) {
-                return commonNode;
-            }
-        }
-        return root;
     }
     
     public int getGeneralizationLevel(int[] values, int lvl) {
@@ -76,24 +60,5 @@ public class GeneralizationTree extends IdentityHashMap<Integer, GeneralizationN
         }
         
         return cardinalities;
-    }
-    
-    /**
-     * Gets the lowest generalization for a given set of integers.
-     *
-     * @param dataColumn a set of integers
-     * @return the lowest level of the hierarchy, where all given integers are part of the subtree
-     */
-    public GeneralizationNode getLowestCommonAncestor(int[] dataColumn) {
-        
-        GeneralizationNode commonNode = get(dataColumn[0]);
-        
-        for (final int i : dataColumn) {
-            while (!commonNode.values.contains(i)) {
-                commonNode = commonNode.parent;
-            }
-        }
-        
-        return commonNode;
     }
 }

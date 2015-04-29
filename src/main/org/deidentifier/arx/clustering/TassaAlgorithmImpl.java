@@ -80,7 +80,7 @@ public class TassaAlgorithmImpl {
                     startTime = stopTime;
                 }
                 recordCount++;
-                final TassaCluster sourceCluster = record.assignedCluster;
+                final TassaCluster sourceCluster = record.getAssignedCluster();
                 TassaCluster targetCluster = null;
                 double deltaIL = Double.MAX_VALUE;
                 
@@ -120,7 +120,7 @@ public class TassaAlgorithmImpl {
                     // remove record from source cluster
                     clustersToCheck.remove(sourceCluster);
                     sourceCluster.remove(record);
-                    clustersToCheck.add(sourceCluster);
+                    clustersToCheck.add((TassaCluster) sourceCluster);
                     
                     // move record to target cluster
                     clustersToCheck.remove(targetCluster);
@@ -140,12 +140,14 @@ public class TassaAlgorithmImpl {
             }
             
             // Check for clusters greater w*k, split them and add them back to output
+            final LinkedList<TassaCluster> bigClusters = new LinkedList<>();
             final TassaClusterSet newClusters = new TassaClusterSet(iface);
             for (final Iterator<TassaCluster> itr = output.iterator(); itr.hasNext();) {
                 final TassaCluster cluster = itr.next();
                 if (cluster.size() > omega * k) {
                     itr.remove();
                     modifiedClusters.remove(cluster);
+                    bigClusters.add(cluster);
                     newClusters.addAll(new TassaClusterSet(cluster, (int) Math.floor(cluster.size() / 2), iface));
                 }
             }
@@ -211,7 +213,7 @@ public class TassaAlgorithmImpl {
     
     private double getChangeOfInformationLoss(TassaRecord movedRecord, TassaCluster targetCluster, int n) {
         
-        final TassaCluster sourceCluster = movedRecord.assignedCluster;
+        final TassaCluster sourceCluster = movedRecord.getAssignedCluster();
         
         double deltaIL = (sourceCluster.getRemovedGC(movedRecord) * (sourceCluster.size() - 1)
                   + targetCluster.getAddedGC(movedRecord) * (targetCluster.size() + 1))
