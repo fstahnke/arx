@@ -9,16 +9,12 @@ import java.util.Arrays;
  * @author Fabian Stahnke
  *
  */
-public final class TassaRecord extends AbstractCluster {
+public final class TassaRecord implements IGeneralizable {
     
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -7132802338053695462L;
-    
-    
-    public final int[]  recordContent;
+    private final int[]  recordContent;
     private final int   hashCode;
+    
+    private TassaCluster assignedCluster;
     
     public TassaRecord(int[] content)
     {
@@ -41,15 +37,20 @@ public final class TassaRecord extends AbstractCluster {
         }
         return false;
     }
-
-    @Override
+    
     public double getGeneralizationCost() {
         return 0;
     }
-
-    @Override
-    public int[] getTransformedValues() {
+    
+    public int[] getCurrentGeneralization() {
         // return recordContent, because there is no generalization
         return recordContent;
+    }
+    
+    public TassaCluster getAssignedCluster() {
+        return assignedCluster;
+    }
+    public void setAssignedCluster(TassaCluster cluster) {
+        assignedCluster = cluster;
     }
 }

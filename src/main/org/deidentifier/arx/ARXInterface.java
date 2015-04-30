@@ -8,12 +8,9 @@ import org.deidentifier.arx.clustering.GeneralizationTree;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.LDiversity;
 import org.deidentifier.arx.criteria.TCloseness;
-import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.Dictionary;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
-import org.deidentifier.arx.framework.lattice.Node;
-import org.deidentifier.arx.metric.InformationLoss;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -135,40 +132,6 @@ public class ARXInterface {
     public int[][] getDataQI() {
         return manager.getDataQI().getArray();
     }
-    
-    /**
-     * Returns the information loss of a cluster.
-     *
-     * @param data the data
-     * @param count the count
-     * @param transformation the transformation
-     * @return the information loss
-     */
-    public InformationLoss<?> getInformationLoss(int[] data, int count, int[] transformation) {
-    	HashGroupifyEntry entry = new HashGroupifyEntry(data, count);
-    	Node node = new Node(0);
-    	node.setTransformation(transformation, getLevel(transformation));
-    	return config.getMetric().getInformationLoss(node, entry).getInformationLoss();
-    }
-    
-    /**
-     * TODO: Get rid of this (easy and efficient with streams in Java 8).
-     *
-     * @param transformation the transformation
-     * @return the level
-     */
-    private int getLevel(int[] transformation) {
-		int level = 0;
-		for (int t : transformation) {
-			level += t;
-		}
-		
-		return level;
-		
-		/* Java 8:
-		return IntStream.of(transformation).sum();
-		*/
-	}
 
 	/**
 	 * Returns the input data array (sensitive attributes).

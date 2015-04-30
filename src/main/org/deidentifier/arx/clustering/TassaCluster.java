@@ -2,9 +2,11 @@ package org.deidentifier.arx.clustering;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+
 import org.deidentifier.arx.ARXInterface;
 
-public class TassaCluster extends AbstractCluster {
+public class TassaCluster extends LinkedList<TassaRecord> implements IGeneralizable {
     
     private static final long                  serialVersionUID = 1L;
     
@@ -12,6 +14,7 @@ public class TassaCluster extends AbstractCluster {
     private final int                          numAtt;
     
     private int[]                              generalizationLevels;
+    private int[]                              transformation;
     private final HashMap<TassaRecord, Double> removedNodeGC;
     
     // caching of calculated values
@@ -27,7 +30,7 @@ public class TassaCluster extends AbstractCluster {
 
     private ARXInterface                       iface;
     
-    public TassaCluster(Collection<AbstractCluster> recordCollection, ARXInterface iface) {
+    public TassaCluster(Collection<? extends TassaRecord> recordCollection, ARXInterface iface) {
         super();
         this.iface = iface;
         numAtt = iface.getNumAttributes();
@@ -37,33 +40,35 @@ public class TassaCluster extends AbstractCluster {
         update(this);
     }
     
-    private void assignAllRecords() {
-        for (final AbstractCluster record : this) {
-            record.setAssignedCluster(this);
-        }
-    }
-    
     @Override
-    public boolean add(AbstractCluster newRecord) {
+    public boolean add(TassaRecord newRecord) {
         final boolean success = super.add(newRecord);
         update(newRecord);
         return success;
     }
     
     @Override
-    public final boolean addAll(Collection<? extends AbstractCluster> recordCollection) {
+    public final boolean addAll(Collection<? extends TassaRecord> recordCollection) {
         final boolean success = super.addAll(recordCollection);
         update(recordCollection);
         return success;
     }
     
-    public boolean remove(AbstractCluster record) {
+    public boolean remove(TassaRecord record) {
         final boolean success = super.remove(record);
         update(record);
         return success;
     }
-    
-    @Override
+
+    public int[] getCurrentGeneralization() {
+        final int[] record = getFirst().getCurrentGeneralization();
+        int[] result = new int[numAtt];
+        for (int i = 0; i < numAtt; i++) {
+            result[i] = iface.getHierarchyTree(i).getTransformation(record[i], generalizationLevels[i]);
+        }
+        return result;
+    }
+
     public double getGeneralizationCost() {
         if (lastModCount < modCount) {
             update(this);
@@ -71,25 +76,26 @@ public class TassaCluster extends AbstractCluster {
         return generalizationCost;
     }
     
-    private int[] getGeneralizationLevels(AbstractCluster cluster, int[] currentGeneralizationLevels) {
+    private int[] getGeneralizationLevels(IGeneralizable changedObject, int[] currentGeneralizationLevels) {
         int[] result = new int[numAtt];
         
-        if (cluster instanceof TassaRecord) {
-            final int[] record1 = cluster.getTransformedValues();
-            final int[] record2 = getFirst().getTransformedValues();
+        if (changedObject instanceof TassaRecord) {
+            final int[] record1 = changedObject.getCurrentGeneralization();
+            final int[] record2 = getFirst().getCurrentGeneralization();
             for (int i = 0; i < numAtt; i++) {
                 result[i] = iface.getHierarchyTree(i).getGeneralizationLevel(new int[] { record1[i], record2[i] }, currentGeneralizationLevels[i]);
             }
             
         }
         
-        if (cluster instanceof TassaCluster) {
-            if (cluster == this) {
+        if (changedObject instanceof TassaCluster) {
+            TassaCluster cluster = (TassaCluster)changedObject;
+            if (changedObject == this) {
                 for (int i = 0; i < numAtt; i++) {
                     final int[] dataColumn = new int[cluster.size()];
                     int j = 0;
-                    for (final AbstractCluster record : cluster) {
-                        dataColumn[j] = record.getTransformedValues()[i];
+                    for (final TassaRecord record : cluster) {
+                        dataColumn[j] = record.getCurrentGeneralization()[i];
                         j++;
                     }
                     result[i] = iface.getHierarchyTree(i).getGeneralizationLevel(dataColumn, currentGeneralizationLevels[i]);
@@ -118,19 +124,19 @@ public class TassaCluster extends AbstractCluster {
         return gc / numAtt;
     }
     
-    public double getAddedGC(AbstractCluster addedObject) {
+    public double getAddedGC(IGeneralizable movedRecord) {
         double result = 0;
-        if (addedObject instanceof TassaCluster) {
-            TassaCluster cluster = (TassaCluster)addedObject;
+        if (movedRecord instanceof TassaCluster) {
+            TassaCluster cluster = (TassaCluster)movedRecord;
             final int[] levels = new int[numAtt];
             for (int i = 0; i < numAtt; i++) {
                 levels[i] = Math.max(this.generalizationLevels[i], cluster.generalizationLevels[i]);
             }
-            result = getGC_LM(cluster.getFirst().getTransformedValues(), this.getGeneralizationLevels(cluster.getFirst(), levels));
+            result = getGC_LM(cluster.getFirst().getCurrentGeneralization(), this.getGeneralizationLevels(cluster.getFirst(), levels));
         }
-        if (addedObject instanceof TassaRecord) {
-            TassaRecord record = (TassaRecord)addedObject;
-            result = getGC_LM(record.recordContent, this.getGeneralizationLevels(record, generalizationLevels));
+        if (movedRecord instanceof TassaRecord) {
+            TassaRecord record = (TassaRecord)movedRecord;
+            result = getGC_LM(record.getCurrentGeneralization(), this.getGeneralizationLevels(record, generalizationLevels));
         }
         return result;
     }
@@ -144,7 +150,7 @@ public class TassaCluster extends AbstractCluster {
                 // The record was not yet removed,
                 // so we have to add it back after the calculation
                 if (super.remove(record)) {
-                    result = getGC_LM(getFirst().getTransformedValues(), getGeneralizationLevels(this, new int[numAtt]));
+                    result = getGC_LM(getFirst().getCurrentGeneralization(), getGeneralizationLevels(this, new int[numAtt]));
                     removedNodeGC.put(record, result);
                     super.add(record);
                     lastModCount = modCount;
@@ -152,7 +158,7 @@ public class TassaCluster extends AbstractCluster {
                 // The record has already been removed,
                 // so we don't have to put it back
                 else {
-                    result = getGC_LM(getFirst().getTransformedValues(), getGeneralizationLevels(this, new int[numAtt]));
+                    result = getGC_LM(getFirst().getCurrentGeneralization(), getGeneralizationLevels(this, new int[numAtt]));
                 }
             }
 //            else {
@@ -169,7 +175,7 @@ public class TassaCluster extends AbstractCluster {
         return result;
     }
     
-    private void update(Collection<? extends AbstractCluster> addedObject) {
+    private void update(Object addedObject) {
         final int[] levels = new int[numAtt];
         if (addedObject instanceof TassaCluster) {
             TassaCluster cluster = (TassaCluster)addedObject;
@@ -183,7 +189,7 @@ public class TassaCluster extends AbstractCluster {
                 generalizationLevels = getGeneralizationLevels(cluster.getFirst(), levels);
                 
             }
-            generalizationCost = getGC_LM(getFirst().getTransformedValues(), generalizationLevels);
+            generalizationCost = getGC_LM(getFirst().getCurrentGeneralization(), generalizationLevels);
             assignAllRecords();
         }
         if (addedObject instanceof TassaRecord) {
@@ -203,14 +209,10 @@ public class TassaCluster extends AbstractCluster {
         lastModCount = modCount;
     }
     
-    @Override
-    public int[] getTransformedValues() {
-        final int[] record = getFirst().getTransformedValues();
-        int[] result = new int[numAtt];
-        for (int i = 0; i < numAtt; i++) {
-            result[i] = iface.getHierarchyTree(i).getTransformation(record[i], generalizationLevels[i]);
+    private void assignAllRecords() {
+        for (final TassaRecord record : this) {
+            record.setAssignedCluster(this);
         }
-        return result;
     }
     
     @Override
@@ -222,8 +224,8 @@ public class TassaCluster extends AbstractCluster {
             TassaCluster cluster = (TassaCluster)obj;
             if (cluster.size() == this.size()) {
                 boolean equals = true;
-                final int[] transformation = getTransformedValues();
-                final int[] transformation2 = cluster.getTransformedValues();
+                final int[] transformation = getCurrentGeneralization();
+                final int[] transformation2 = cluster.getCurrentGeneralization();
                 for (int i = 0; equals && i < transformation.length; i++) {
                     equals &= (transformation[i] == transformation2[i]);
                 }
@@ -236,7 +238,7 @@ public class TassaCluster extends AbstractCluster {
     public int hashCode() {
         if (hashCode == 0 || lastModCount != modCount) {
             hashCode = size();
-            final int[] transformation = getTransformedValues();
+            final int[] transformation = getCurrentGeneralization();
             for (int i : transformation) {
                 hashCode = hashCode * 524287 + i;
             }

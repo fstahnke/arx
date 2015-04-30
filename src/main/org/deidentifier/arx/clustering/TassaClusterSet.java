@@ -1,5 +1,6 @@
 package org.deidentifier.arx.clustering;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -15,7 +16,7 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
     
     private final ARXInterface iface;
     
-    public TassaClusterSet(List<? extends AbstractCluster> inputDataSet, int k, ARXInterface iface) {
+    public TassaClusterSet(List<TassaRecord> inputDataSet, int k, ARXInterface iface) {
         this.iface = iface;
         createRandomPartitioning(inputDataSet, k);
     }
@@ -30,10 +31,10 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
      * @param inputDataSet The records that will be distributed among the clusters
      * @param k The number of Records per cluster.
      */
-    private void createRandomPartitioning(List<? extends AbstractCluster> inputDataSet, int k) {
+    private void createRandomPartitioning(Collection<TassaRecord> inputDataSet, int k) {
         
         // shuffle dataset to prepare random partitioning
-        Collections.shuffle(inputDataSet);
+        Collections.shuffle((List<?>) inputDataSet);
         
         // calculate number of clusters
         final int numberOfClusters = (int) Math.floor(inputDataSet.size() / k);
@@ -41,7 +42,7 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
         final int additionalRecords = inputDataSet.size() % k;
         
         // create list of clusters as return container
-        final Iterator<? extends AbstractCluster> iter = inputDataSet.iterator();
+        final Iterator<TassaRecord> iter = inputDataSet.iterator();
         
         for (int i = 0; i < numberOfClusters; i++) {
             
@@ -50,7 +51,7 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
             final int addRecord = (i < additionalRecords) ? 1 : 0;
             
             // create cluster object with space for k or k+1 records
-            final LinkedList<AbstractCluster> c = new LinkedList<>();
+            final LinkedList<TassaRecord> c = new LinkedList<>();
             
             // iterate through each element
             for (int j = 0; j < k + addRecord; j++) {
@@ -70,10 +71,6 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
      * @return
      */
     public TassaCluster mergeClosestPair() {
-        /*
-        if (getFirst() instanceof TassaRecord) {
-            throw new UnsupportedOperationException("Merging of singleton clusters (records) is not supported.");
-        }*/
         
         double closestPairDistance = Double.MAX_VALUE;
         final TassaCluster[] closestPair = new TassaCluster[2];

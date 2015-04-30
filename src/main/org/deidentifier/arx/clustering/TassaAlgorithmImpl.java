@@ -74,7 +74,7 @@ public class TassaAlgorithmImpl {
             long startTime = initTime;
             // Loop: check all records for improvement of information loss
             for (final TassaRecord record : dataSet) {
-                if (iface.logging && recordCount % iface.logNumberOfRecords == 0) {
+                if (iface.logging && recordCount % iface.logNumberOfRecords == 0 && recordCount > 0) {
                     final long stopTime = System.nanoTime();
                     System.out.println("#Clusters: " + clustersToCheck.size() +"/"+ output.size() + ", Record number: " + recordCount + ", Execution time: " + Math.round((stopTime - startTime) / 1000000.0) + " ms, Average time: " + Math.round((stopTime - initTime) * iface.logNumberOfRecords / (recordCount * 1000000.0)) + " ms");
                     startTime = stopTime;
@@ -161,7 +161,7 @@ public class TassaAlgorithmImpl {
             
             IL /= dataSet.size();
             
-            System.out.println("Current total information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount);
+            System.out.println("Current total information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + clustersToCheck.size() +"/"+ output.size());
             recordChangeCount = 0;
             lastIL = IL;
         }
