@@ -61,12 +61,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
     }
 
     public int[] getCurrentGeneralization() {
-        final int[] record = getFirst().getCurrentGeneralization();
-        int[] result = new int[numAtt];
-        for (int i = 0; i < numAtt; i++) {
-            result[i] = iface.getHierarchyTree(i).getTransformation(record[i], generalizationLevels[i]);
-        }
-        return result;
+    	return iface.getGeneralizationManager().getTransformation(getFirst(), generalizationLevels);
     }
 
     public double getGeneralizationCost() {
@@ -80,12 +75,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         int[] result = new int[numAtt];
         
         if (changedObject instanceof TassaRecord) {
-            final int[] record1 = changedObject.getCurrentGeneralization();
-            final int[] record2 = getFirst().getCurrentGeneralization();
-            for (int i = 0; i < numAtt; i++) {
-                result[i] = iface.getHierarchyTree(i).getGeneralizationLevel(new int[] { record1[i], record2[i] }, currentGeneralizationLevels[i]);
-            }
-            
+        	result = iface.getGeneralizationManager().getGeneralizationLevels(new ArrayList<TassaRecord>((TassaRecord) changedObject, getFirst()), currentGeneralizationLevels);
         }
         
         if (changedObject instanceof TassaCluster) {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.deidentifier.arx.clustering.GeneralizationManager;
 import org.deidentifier.arx.clustering.GeneralizationTree;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.LDiversity;
@@ -23,16 +24,29 @@ public class ARXInterface {
     /**  The data manager. */
     private final DataManager      manager;
     
+    /**
+     * Gets the data manager for the current data set.
+     *
+     * @return the data manager
+     */
+    public DataManager getDataManager()
+    {
+    	return this.manager;
+    }
+    
     /**  The buffer. */
     private final int[][]          buffer;
     
     /**  The config. */
     private final ARXConfiguration config;
-    /** The hierarchy trees. */
-    private GeneralizationTree[] hierarchyTrees;
+    /** The generalization manager. */
+    private final GeneralizationManager generalizationManager;
     
+    public GeneralizationManager getGeneralizationManager() {
+		return generalizationManager;
+	}
 
-    /** Turn logging on or off. */
+	/** Turn logging on or off. */
     public final boolean logging = true;
     /** The number of records that is processed between each logging tick. */
     public final int logNumberOfRecords = 1000;
@@ -95,33 +109,8 @@ public class ARXInterface {
             buffer[i] = new int[array[0].length];
         }
         
-        // Generate generalization hierarchy trees
-        hierarchyTrees = new GeneralizationTree[getNumAttributes()];
-        GeneralizationHierarchy[] hierarchies = manager.getHierarchies();
-        for (int i = 0; i < hierarchies.length; i++)
-        {
-        	hierarchyTrees[i] = new GeneralizationTree(hierarchies[i]);
-        }
-    }
-    
-    /**
-     * Gets the hierarchy tree.
-     *
-     * @param index the index of the attribute
-     * @return the hierarchy tree
-     */
-    public GeneralizationTree getHierarchyTree(int index) {
-    	return hierarchyTrees[index];
-    }
-    
-    /**
-     * Gets the data manager for the current data set.
-     *
-     * @return the data manager
-     */
-    public DataManager getDataManager()
-    {
-    	return this.manager;
+        // Create generalization manager
+        generalizationManager = new GeneralizationManager(manager);
     }
 
     /**
