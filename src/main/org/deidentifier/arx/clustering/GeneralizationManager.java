@@ -1,18 +1,17 @@
 package org.deidentifier.arx.clustering;
 
-import java.util.Collection;
-
 import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 
 public class GeneralizationManager {
     
-    private DataManager manager;
-    private GeneralizationTree[] generalizationTrees;
+    private final GeneralizationTree[] generalizationTrees;
     private final int numAtt;
-    
+    public int getNumAttributes() {
+        return numAtt;
+    }
+
     public GeneralizationManager(DataManager manager) {
-        this.manager = manager;
         GeneralizationHierarchy[] hierarchies = manager.getHierarchies();
         numAtt = hierarchies.length;
         generalizationTrees = new GeneralizationTree[numAtt];
@@ -22,39 +21,49 @@ public class GeneralizationManager {
         }
     }
     
-    private double getGC_LM(int[] record, int[] generalizationLevels) {
-        
-        double gc = 0;
-        for (int i = 0; i < numAtt; i++) {
-            final int recordCardinality = generalizationTrees[i].getCardinality(record[i], generalizationLevels[i]);
-            final int attributeCardinality = generalizationTrees[i].getCardinality(record[i], generalizationTrees[i].maxLevel);
-            
-            gc += (recordCardinality - 1) / (attributeCardinality - 1);
-        }
-        
-        return gc / numAtt;
+    public double calculateGeneralizationCost(IGeneralizable generalizeObject, int[] generalizationLevels) {
+        return calculateGeneralizationCost_LossMetric(generalizeObject.getValues(), generalizationLevels);
     }
     
-    public int[] getGeneralizationLevels(Collection<TassaRecord> recordCollection, int[] generalizationLevels) {
-
-        final int[] record1 = changedObject.getCurrentGeneralization();
-        final int[] record2 = getFirst().getCurrentGeneralization();
-        final int[][] valuesByAttribute = new int[numAtt][recordCollection.size()];
-        Iterator<TassaRecord> itr = recordCollection.iterator()
-        for (int i = 0; itr.hasNext(); i++)
-        {
-        	for (int )
-        }
+    // Calculate generalization levels for set of values from scratch
+    public int[] calculateGeneralizationLevels(IGeneralizable generalizeObject) {
+        
+        final int[] result = new int[numAtt];
+        final int[][] valuesByAttribute = generalizeObject.getValuesByAttribute();
+        
         for (int i = 0; i < numAtt; i++) {
-        	for (TassaRecord record : recordCollection) {
-        		
-        	}
-            result[i] = iface.getHierarchyTree(i).getGeneralizationLevel(new int[] { record1[i], record2[i] }, currentGeneralizationLevels[i]);
+            result[i] = generalizationTrees[i].getGeneralizationLevel(valuesByAttribute[i], 0);
         }
+        
+        return result;
+    }
+    
+    // Calculate generalization levels for two objects with initial generalization levels
+    public int[] calculateGeneralizationLevels(final int[] firstValues, final int[] secondValues, int[] currentGeneralizationLevels) {
+        final int[] result = new int[numAtt];
+        
+        for (int i = 0; i < numAtt; i++) {
+            result[i] = generalizationTrees[i].getGeneralizationLevel(firstValues[i], secondValues[i], currentGeneralizationLevels[i]);
+        }
+        
+        return result;
+    }
+    
+    // Calculate generalization levels for two objects with initial generalization levels
+    public int[] calculateGeneralizationLevels(IGeneralizable firstObject, IGeneralizable secondObject, int[] currentGeneralizationLevels) {
+        final int[] result = new int[numAtt];
+        final int[] firstValues = firstObject.getValues();
+        final int[] secondValues = secondObject.getValues();
+        
+        for (int i = 0; i < numAtt; i++) {
+            result[i] = generalizationTrees[i].getGeneralizationLevel(firstValues[i], secondValues[i], currentGeneralizationLevels[i]);
+        }
+        
+        return result;
     }
 
-	public int[] getTransformation(TassaRecord record, int[] generalizationLevels) {
-        final int[] values = record.getCurrentGeneralization();
+	public int[] calculateTransformation(IGeneralizable generalizeObject, int[] generalizationLevels) {
+        final int[] values = generalizeObject.getValues();
         int[] result = new int[numAtt];
         for (int i = 0; i < numAtt; i++) {
             result[i] = generalizationTrees[i].getTransformation(values[i], generalizationLevels[i]);
@@ -62,6 +71,16 @@ public class GeneralizationManager {
         return result;
 	}
     
-    
-    
+    private double calculateGeneralizationCost_LossMetric(final int[] record, final int[] generalizationLevels) {
+        
+        double gc = 0;
+        for (int i = 0; i < numAtt; i++) {
+            final int recordCardinality = generalizationTrees[i].getCardinality(record[i], generalizationLevels[i]);
+            final int attributeCardinality = generalizationTrees[i].attributeCardinality;
+            
+            gc += (recordCardinality - 1) / (attributeCardinality - 1);
+        }
+        
+        return gc / numAtt;
+    }
 }

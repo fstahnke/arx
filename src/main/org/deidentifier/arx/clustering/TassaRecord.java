@@ -19,7 +19,15 @@ public final class TassaRecord implements IGeneralizable {
     public TassaRecord(int[] content)
     {
         recordContent = content;
-        hashCode = Arrays.hashCode(recordContent);
+        hashCode = calculateHashCode();
+    }
+    
+    private int calculateHashCode() {
+        int result = 0;
+        for (int i : recordContent) {
+            result = result * 524287 + i;
+        }
+        return result;
     }
     
     @Override
@@ -42,7 +50,11 @@ public final class TassaRecord implements IGeneralizable {
         return 0;
     }
     
-    public int[] getCurrentGeneralization() {
+    public int[] getValues() {
+        return recordContent;
+    }
+    
+    public int[] getTransformation() {
         // return recordContent, because there is no generalization
         return recordContent;
     }
@@ -52,5 +64,11 @@ public final class TassaRecord implements IGeneralizable {
     }
     public void setAssignedCluster(TassaCluster cluster) {
         assignedCluster = cluster;
+    }
+
+    @Override
+    public int[][] getValuesByAttribute() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

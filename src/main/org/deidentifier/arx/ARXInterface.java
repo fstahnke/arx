@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.deidentifier.arx.clustering.GeneralizationManager;
-import org.deidentifier.arx.clustering.GeneralizationTree;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.LDiversity;
 import org.deidentifier.arx.criteria.TCloseness;

@@ -51,7 +51,21 @@ public class TassaAlgorithmImpl {
         
         // Output variable: Collection of clusters
         // initialized with random partition of data records with the cluster size alpha*k
-        final TassaClusterSet output = new TassaClusterSet(dataSet, k_0, iface);
+        final TassaClusterSet output = new TassaClusterSet(dataSet, k_0, iface.getGeneralizationManager());
+        System.out.println("Initial average information loss: " + output.getAverageGeneralizationCost());
+        
+        /**
+         * for testing purposes
+         */
+        final int testRounds = 100;
+        double testGC = 0.0;
+        for (int i = 0; i < testRounds; i++) {
+            TassaClusterSet testSet = new TassaClusterSet(dataSet, k_0, iface.getGeneralizationManager());
+            testGC += testSet.getAverageGeneralizationCost();
+        }
+        testGC /= testRounds;
+        System.out.println("Test generalization cost: " + testGC);
+        
         
         //final LinkedList<TassaCluster> output = new LinkedList<>(output2);
         
@@ -141,33 +155,28 @@ public class TassaAlgorithmImpl {
             
             // Check for clusters greater w*k, split them and add them back to output
             final LinkedList<TassaCluster> bigClusters = new LinkedList<>();
-            final TassaClusterSet newClusters = new TassaClusterSet(iface);
+            final TassaClusterSet newClusters = new TassaClusterSet(iface.getGeneralizationManager());
             for (final Iterator<TassaCluster> itr = output.iterator(); itr.hasNext();) {
                 final TassaCluster cluster = itr.next();
                 if (cluster.size() > omega * k) {
                     itr.remove();
                     modifiedClusters.remove(cluster);
                     bigClusters.add(cluster);
-                    newClusters.addAll(new TassaClusterSet(cluster, (int) Math.floor(cluster.size() / 2), iface));
+                    newClusters.addAll(new TassaClusterSet(cluster, (int) Math.floor(cluster.size() / 2), iface.getGeneralizationManager()));
                 }
             }
             modifiedClusters.addAll(newClusters);
             output.addAll(newClusters);
             
-            double IL = 0.0;
-            for (final TassaCluster c : output) {
-                IL += c.getGeneralizationCost() * c.size();
-            }
+            final double IL = output.getAverageGeneralizationCost();
             
-            IL /= dataSet.size();
-            
-            System.out.println("Current total information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + clustersToCheck.size() +"/"+ output.size());
+            System.out.println("Current average information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + clustersToCheck.size() +"/"+ output.size());
             recordChangeCount = 0;
             lastIL = IL;
         }
         
         // put small clusters into smallClusters collection
-        final TassaClusterSet smallClusters = new TassaClusterSet(iface);
+        final TassaClusterSet smallClusters = new TassaClusterSet(iface.getGeneralizationManager());
         
         for (final TassaCluster cluster : output) {
             if (cluster.size() < k) {
@@ -206,6 +215,9 @@ public class TassaAlgorithmImpl {
         if (smallClusters.size() == 1) {
             output.mergeClosestPair(smallClusters.getFirst());
         }
+        
+        
+        System.out.println("Final average information loss: " + output.getAverageGeneralizationCost());
         
         return output;
         

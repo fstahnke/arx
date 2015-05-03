@@ -6,23 +6,21 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.deidentifier.arx.ARXInterface;
-
 public class TassaClusterSet extends LinkedList<TassaCluster> {
     
     /**
      * 
      */
+
+    private final GeneralizationManager manager;
     
-    private final ARXInterface iface;
-    
-    public TassaClusterSet(List<TassaRecord> inputDataSet, int k, ARXInterface iface) {
-        this.iface = iface;
+    public TassaClusterSet(List<TassaRecord> inputDataSet, int k, GeneralizationManager manager) {
+        this.manager = manager;
         createRandomPartitioning(inputDataSet, k);
     }
     
-    public TassaClusterSet(ARXInterface iface) {
-        this.iface = iface;
+    public TassaClusterSet(GeneralizationManager manager) {
+        this.manager = manager;
     }
     
     /**
@@ -59,7 +57,7 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
             }
             
             // add cluster to clusterList
-            this.add(new TassaCluster(c, iface));
+            this.add(new TassaCluster(c, manager));
         }
     }
     
@@ -113,6 +111,17 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
         }
         closestCluster.addAll(inputCluster);
         return closestCluster;
+    }
+    
+    public double getAverageGeneralizationCost() {
+        double result = 0.0;
+        int numRecords = 0;
+        for (final TassaCluster c : this) {
+            numRecords += c.size();
+            result += c.getGeneralizationCost() * c.size();
+        }
+        return result / numRecords;
+        
     }
     
 }
