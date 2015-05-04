@@ -72,25 +72,17 @@ public class TassaAlgorithmImpl {
         boolean recordsChanged = true;
         int recordChangeCount = 0;
         int paff = 0;
+        int failedRemovals = 0;
         
-        LinkedList<TassaCluster> modifiedClusters = new LinkedList<>();
-        for (TassaCluster c : output) {
-            c.addToCollection(modifiedClusters);
-        }
-        
+        LinkedList<TassaCluster> modifiedClusters = new LinkedList<>(output);
         double lastIL = 0;
         
         while (recordsChanged) {
             // reset recordsChanged flag
             recordsChanged = false;
-            HashSet<TassaCluster> clustersToCheck = new HashSet<>();
-            for (TassaCluster c : modifiedClusters) {
-                c.addToCollection(clustersToCheck);
-            }
-            for (TassaCluster c : clustersToCheck) {
-                c.removeFromCollection(modifiedClusters);
-            }
-            //modifiedClusters.clear();
+            HashSet<TassaCluster> clustersToCheck = new HashSet<>(modifiedClusters);
+            modifiedClusters.clear();
+            failedRemovals = 0;
             
             int recordCount = 1;
             final long initTime = System.nanoTime();
@@ -121,24 +113,22 @@ public class TassaAlgorithmImpl {
                 if (sourceCluster.size() == 1 && targetCluster != null)
                 {
                     // move record to target cluster
-                    //clustersToCheck.remove(targetCluster);
-                    targetCluster.removeFromCollection(clustersToCheck);
+                    clustersToCheck.remove(targetCluster);
                     targetCluster.add(record);
-                    targetCluster.addToCollection(clustersToCheck);
-                    //clustersToCheck.add(targetCluster);
+                    clustersToCheck.add(targetCluster);
                     
                     // remove empty source cluster from all containing collections
-                    sourceCluster.removeFromCollection(output);
-                    sourceCluster.removeFromCollection(modifiedClusters);
-                    sourceCluster.removeFromCollection(clustersToCheck);
-                    //output.remove(sourceCluster);
-                    //modifiedClusters.remove(sourceCluster);
-                    //clustersToCheck.remove(sourceCluster);
+                    output.remove(sourceCluster);
+                    modifiedClusters.remove(sourceCluster);
+                    clustersToCheck.remove(sourceCluster);
                     
                     // log the change for the next loop
                     if (!modifiedClusters.contains(targetCluster)) {
-                        targetCluster.addToCollection(modifiedClusters);
-                        //modifiedClusters.add(targetCluster);
+                        boolean test = true;
+                        test = modifiedClusters.add(targetCluster);
+                        if (!test) {
+                            test = true;
+                        }
                     }
                     recordsChanged = true;
                     recordChangeCount++;
@@ -146,33 +136,31 @@ public class TassaAlgorithmImpl {
                 
                 // If change in information loss is negative, move record to new cluster
                 else if (deltaIL < -0.0000000001 && targetCluster != null) {
-
-                    int checkNumber = clustersToCheck.size();
+                    
                     // remove record from source cluster
-                    //clustersToCheck.remove(sourceCluster);
-                    sourceCluster.removeFromCollection(clustersToCheck);
-                    if (checkNumber <= clustersToCheck.size()) {
-                        paff++;
-                    }
+                    clustersToCheck.remove(sourceCluster);
                     sourceCluster.remove(record);
-                    sourceCluster.addToCollection(clustersToCheck);
-                    //clustersToCheck.add(sourceCluster);
+                    clustersToCheck.add(sourceCluster);
                     
                     // move record to target cluster
-                    //clustersToCheck.remove(targetCluster);
-                    targetCluster.removeFromCollection(clustersToCheck);
+                    clustersToCheck.remove(targetCluster);
                     targetCluster.add(record);
-                    targetCluster.addToCollection(clustersToCheck);
-                    //clustersToCheck.add(targetCluster);
+                    clustersToCheck.add(targetCluster);
                     
                     // log the change for the next loop
                     if (!modifiedClusters.contains(targetCluster)) {
-                        targetCluster.addToCollection(modifiedClusters);
-                        //modifiedClusters.add(targetCluster);
+                        boolean test = true;
+                        test = modifiedClusters.add(targetCluster);
+                        if (!test) {
+                            test = true;
+                        }
                     }
                     if (!modifiedClusters.contains(sourceCluster)) {
-                        sourceCluster.addToCollection(modifiedClusters);
-                        //modifiedClusters.add(sourceCluster);
+                        boolean test = true;
+                        test = modifiedClusters.add(sourceCluster);
+                        if (!test) {
+                            test = true;
+                        }
                     }
                     recordsChanged = true;
                     recordChangeCount++;
@@ -180,59 +168,30 @@ public class TassaAlgorithmImpl {
             }
             
             // Check for clusters greater w*k, split them and add them back to output
-            //final LinkedList<TassaCluster> newClusters = new LinkedList<>();
             int bigClusterCount = 0;
-            final LinkedList<TassaCluster> bigClusters = new LinkedList<>();
+            final LinkedList<TassaCluster> newClusters = new LinkedList<>();
             for (final Iterator<TassaCluster> itr = output.iterator(); itr.hasNext();) {
                 final TassaCluster cluster = itr.next();
                 if (cluster.size() > omega * k) {
-                    bigClusters.add(cluster);
-                    //itr.remove();
-                    //modifiedClusters.remove(cluster);
-                    //newClusters.addAll(new TassaClusterSet(cluster, (int) Math.floor(cluster.size() / 2), iface.getGeneralizationManager()));
+                    itr.remove();
+                    if (!modifiedClusters.remove(cluster)) {
+                        failedRemovals++;
+                    }
+                    clustersToCheck.remove(cluster);
+                    newClusters.addAll(cluster.splitCluster());
                     bigClusterCount++;
                 }
             }
-            final LinkedList<TassaCluster> l = new LinkedList<TassaCluster>();
             
-            for(TassaCluster c : bigClusters) {
-                boolean test = true;
-                test = c.removeFromCollection(output);
-                if (!test) {
-                    test = true;
-                }
-                test = c.removeFromCollection(modifiedClusters);
-                if (!test) {
-                    test = true;
-                }
-                test = c.removeFromCollection(clustersToCheck);
-                if (!test) {
-                    test = true;
-                }
-                test = l.addAll(c.splitCluster());
-                if (!test) {
-                    test = true;
-                }
-            }
-            
-            for(TassaCluster c : l) {
-                c.addToCollection(modifiedClusters);
-                c.addToCollection(output);
-                c.addToCollection(clustersToCheck);
-            }
-            //modifiedClusters.addAll(newClusters);
-            //output.addAll(newClusters);
+            modifiedClusters.addAll(newClusters);
+            output.addAll(newClusters);
+            clustersToCheck.addAll(newClusters);
             
             final double IL = output.getAverageGeneralizationCost();
             
-            System.out.println("Current average information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + modifiedClusters.size() +"/"+ output.size() + "(" + clustersToCheck.size() + "), Clusters split: " + bigClusterCount);
+            System.out.println("Current average information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + modifiedClusters.size() +"/"+ output.size() + "(" + clustersToCheck.size() + "), Clusters split: " + bigClusterCount + ", Failed removals: " + failedRemovals);
 
-            int s1 = output.size();
-            int s2 = clustersToCheck.size();
-            for(TassaCluster c : output) {
-                c.removeFromCollection(clustersToCheck);
-            }
-            
+            clustersToCheck.removeAll(output);
             if (clustersToCheck.size() > 0) {
                 System.out.println("doof! " + clustersToCheck.size());
                 ArrayList<TassaCluster> testArray = new ArrayList<TassaCluster>(clustersToCheck);

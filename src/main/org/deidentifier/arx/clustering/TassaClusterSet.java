@@ -56,10 +56,8 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
                 c.add(iter.next());
             }
             
-            TassaCluster cluster = new TassaCluster(c, manager);
-            cluster.addToCollection(this);
             // add cluster to clusterList
-            // this.add(new TassaCluster(c, manager));
+            this.add(new TassaCluster(c, manager));
         }
     }
     

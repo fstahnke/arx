@@ -3,7 +3,6 @@ package org.deidentifier.arx.clustering;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -18,7 +17,6 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
     private int[]                              transformation;
 
     private final HashMap<TassaRecord, Double> removedNodeGC;
-    public LinkedList<Collection<TassaCluster>> collectionsWithCluster;
     
     // caching of calculated values
     private double                             generalizationCost;
@@ -40,7 +38,6 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         generalizationLevels = new int[numAtt];
         removedNodeGC = new HashMap<>();
         super.addAll(recordCollection);
-        collectionsWithCluster = new LinkedList<Collection<TassaCluster>>();
         update(this);
     }
     
@@ -66,35 +63,6 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         final boolean success = super.remove(record);
         update(record);
         return success;
-    }
-    
-    public boolean addToCollection(Collection<TassaCluster> collection) {
-        if (!collectionsWithCluster.contains(collection)) {
-            collectionsWithCluster.add(collection);
-        }
-        return collection.add(this);
-    }
-    
-    public boolean removeFromCollection(Collection<TassaCluster> collection) {
-        final boolean success = collection.remove(this);
-        if (!success && collection instanceof HashSet && collectionsWithCluster.contains(collection)) {
-            System.out.println("Vielleicht doof!");
-            final boolean testbla = collection.contains(this);
-            boolean testbla2 = false;
-            Iterator<TassaCluster> itr = collection.iterator();
-            while (!testbla2 && itr.hasNext()) {
-                testbla2 = itr.next() == this;
-            }
-            if (testbla2 || testbla) {
-                System.out.println("doppeldoof!");
-            }
-        }
-        collectionsWithCluster.remove(collection);
-        return success;
-    }
-    
-    public boolean existsInCollection(Collection<TassaCluster> collection) {
-        return collectionsWithCluster.contains(collection);
     }
     
     public LinkedList<TassaCluster> splitCluster() {
