@@ -73,10 +73,11 @@ public class GeneralizationManager {
     
     private double calculateGeneralizationCost_LossMetric(final int[] record, final int[] generalizationLevels) {
         
-        double gc = 0;
+        double gc = 0d;
         for (int i = 0; i < numAtt; i++) {
-            final int recordCardinality = generalizationTrees[i].getCardinality(record[i], generalizationLevels[i]);
-            final int attributeCardinality = generalizationTrees[i].attributeCardinality;
+            // Important: Don't use integers here. Otherwise the division will result in 0.0 because it's performed as integer division.
+            final double recordCardinality = generalizationTrees[i].getCardinality(record[i], generalizationLevels[i]);
+            final double attributeCardinality = generalizationTrees[i].attributeCardinality;
             
             gc += (recordCardinality - 1) / (attributeCardinality - 1);
         }

@@ -54,11 +54,6 @@ public final class TassaRecord implements IGeneralizable {
         return recordContent;
     }
     
-    public int[] getTransformation() {
-        // return recordContent, because there is no generalization
-        return recordContent;
-    }
-    
     public TassaCluster getAssignedCluster() {
         return assignedCluster;
     }

@@ -32,7 +32,7 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
     private void createRandomPartitioning(Collection<TassaRecord> inputDataSet, int k) {
         
         // shuffle dataset to prepare random partitioning
-        Collections.shuffle((List<?>) inputDataSet);
+        Collections.shuffle((List<TassaRecord>) inputDataSet);
         
         // calculate number of clusters
         final int numberOfClusters = (int) Math.floor(inputDataSet.size() / k);
@@ -56,13 +56,14 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
                 c.add(iter.next());
             }
             
+            TassaCluster cluster = new TassaCluster(c, manager);
+            cluster.addToCollection(this);
             // add cluster to clusterList
-            this.add(new TassaCluster(c, manager));
+            // this.add(new TassaCluster(c, manager));
         }
     }
     
     private static final long serialVersionUID = 1899366651589072401L;
-
     
     /**
      * Merges the closest pair of clusters in this set of clusters.
