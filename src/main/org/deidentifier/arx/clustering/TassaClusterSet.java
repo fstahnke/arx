@@ -2,6 +2,8 @@ package org.deidentifier.arx.clustering;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,14 +15,16 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
      */
 
     private final GeneralizationManager manager;
+    private final HashMap<TassaCluster,TreeMap<Double,TassaCluster>> clusterDistances;
     
     public TassaClusterSet(List<TassaRecord> inputDataSet, int k, GeneralizationManager manager) {
-        this.manager = manager;
+        this(manager);
         createRandomPartitioning(inputDataSet, k);
     }
     
     public TassaClusterSet(GeneralizationManager manager) {
         this.manager = manager;
+        clusterDistances = new HashMap<TassaCluster, TreeMap<Double, TassaCluster>>();
     }
     
     /**
@@ -31,7 +35,7 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
      */
     private void createRandomPartitioning(Collection<TassaRecord> inputDataSet, int k) {
         
-        // shuffle dataset to prepare random partitioning
+        // shuffle data set to prepare random partitioning
         Collections.shuffle((List<TassaRecord>) inputDataSet);
         
         // calculate number of clusters
@@ -62,6 +66,18 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
     }
     
     private static final long serialVersionUID = 1899366651589072401L;
+    
+    private void calculateClusterDistances() {
+        clusterDistances.clear();
+        
+        for (TassaCluster c1 : this) {
+            for (TassaCluster c2 : this) {
+                if (c1 != c2) {
+                    
+                }
+            }
+        }
+    }
     
     /**
      * Merges the closest pair of clusters in this set of clusters.
@@ -95,6 +111,8 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
         this.remove(closestPair[1]);
         return closestPair[0];
     }
+    
+    
     
     public TassaCluster mergeClosestPair(TassaCluster inputCluster) {
         
