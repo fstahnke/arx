@@ -39,14 +39,13 @@ public class TassaTest {
         config2.addCriterion(new KAnonymity(20));
         config2.setMaxOutliers(0d);
 
-        @SuppressWarnings("unused")
         final TassaAlgorithmImpl tassa = new TassaAlgorithmImpl(data, config);
         final TassaAlgorithmImpl tassa2 = new TassaAlgorithmImpl(data2, config2);
         
         final TassaClusterSet clusterList = tassa.executeTassa(0.5, 1.5);
         final TassaClusterSet clusterList2 = tassa2.executeTassa(0.5, 1.5);
         
-        int test = clusterList2.size() + clusterList2.size();
+        int test = clusterList.size() + clusterList2.size();
         
         test = test + 0;
         

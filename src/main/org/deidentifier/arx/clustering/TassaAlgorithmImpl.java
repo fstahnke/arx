@@ -1,7 +1,6 @@
 package org.deidentifier.arx.clustering;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -53,26 +52,9 @@ public class TassaAlgorithmImpl {
         final TassaClusterSet output = new TassaClusterSet(dataSet, k_0, iface.getGeneralizationManager());
         System.out.println("Initial average information loss: " + output.getAverageGeneralizationCost() + ", Initial cluster count: " + output.size());
         
-        
-        /**
-         * for testing purposes
-         */
-        /*
-        final int testRounds = 100;
-        double testGC = 0.0;
-        for (int i = 0; i < testRounds; i++) {
-            TassaClusterSet testSet = new TassaClusterSet(dataSet, k_0, iface.getGeneralizationManager());
-            //testGC += testSet.getAverageGeneralizationCost();
-        }
-        testGC /= testRounds;
-        System.out.println("Test generalization cost: " + testGC);
-        */
-        
         // Helper variable to check, if records were changed
         boolean recordsChanged = true;
         int recordChangeCount = 0;
-        int paff = 0;
-        int failedRemovals = 0;
         
         LinkedList<TassaCluster> modifiedClusters = new LinkedList<>(output);
         double lastIL = 0;
@@ -80,9 +62,8 @@ public class TassaAlgorithmImpl {
         while (recordsChanged) {
             // reset recordsChanged flag
             recordsChanged = false;
-            HashSet<TassaCluster> clustersToCheck = new HashSet<>(modifiedClusters);
+            HashSet<TassaCluster> clustersToCheck = new HashSet<>(output);
             modifiedClusters.clear();
-            failedRemovals = 0;
             
             int recordCount = 1;
             final long initTime = System.nanoTime();
@@ -168,18 +149,31 @@ public class TassaAlgorithmImpl {
             }
             
             // Check for clusters greater w*k, split them and add them back to output
-            int bigClusterCount = 0;
-            final LinkedList<TassaCluster> newClusters = new LinkedList<>();
+            final LinkedList<TassaCluster> bigClusters = new LinkedList<>();
             for (final Iterator<TassaCluster> itr = output.iterator(); itr.hasNext();) {
                 final TassaCluster cluster = itr.next();
                 if (cluster.size() > omega * k) {
                     itr.remove();
-                    if (!modifiedClusters.remove(cluster)) {
-                        failedRemovals++;
+                    bigClusters.add(cluster);
+                }
+            }
+            
+            clustersToCheck.removeAll(bigClusters);
+            
+            final LinkedList<TassaCluster> newClusters = new LinkedList<>();
+            while (bigClusters.size() > 0) {
+                Iterator<TassaCluster> itr = bigClusters.iterator();
+                while (itr.hasNext()) {
+                    newClusters.addAll(itr.next().splitCluster());
+                    itr.remove();
+                }
+                itr = newClusters.iterator();
+                while (itr.hasNext()) {
+                    TassaCluster c = itr.next();
+                    if (c.size() > omega * k) {
+                        itr.remove();
+                        bigClusters.add(c);
                     }
-                    clustersToCheck.remove(cluster);
-                    newClusters.addAll(cluster.splitCluster());
-                    bigClusterCount++;
                 }
             }
             
@@ -189,13 +183,11 @@ public class TassaAlgorithmImpl {
             
             final double IL = output.getAverageGeneralizationCost();
             
-            System.out.println("Current average information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + modifiedClusters.size() +"/"+ output.size() + "(" + clustersToCheck.size() + "), Clusters split: " + bigClusterCount + ", Failed removals: " + failedRemovals);
-
+            System.out.println("Current average information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + modifiedClusters.size() +"/"+ output.size());
+            
             clustersToCheck.removeAll(output);
             if (clustersToCheck.size() > 0) {
                 System.out.println("doof! " + clustersToCheck.size());
-                ArrayList<TassaCluster> testArray = new ArrayList<TassaCluster>(clustersToCheck);
-                int s = testArray.size();
             }
             
             recordChangeCount = 0;
