@@ -56,13 +56,13 @@ public class TassaAlgorithmImpl {
         boolean recordsChanged = true;
         int recordChangeCount = 0;
         
-        LinkedList<TassaCluster> modifiedClusters = new LinkedList<>(output);
+        HashSet<TassaCluster> modifiedClusters = new HashSet<>(output);
         double lastIL = 0;
         
         while (recordsChanged) {
             // reset recordsChanged flag
             recordsChanged = false;
-            HashSet<TassaCluster> clustersToCheck = new HashSet<>(output);
+            HashSet<TassaCluster> clustersToCheck = new HashSet<>(modifiedClusters);
             modifiedClusters.clear();
             
             int recordCount = 1;
@@ -81,12 +81,25 @@ public class TassaAlgorithmImpl {
                 double deltaIL = Double.MAX_VALUE;
                 
                 // find cluster with minimal change of information loss
-                for (final TassaCluster cluster : clustersToCheck) {
-                    if (cluster != sourceCluster) {
-                        final double tempDelta = getChangeOfInformationLoss(record, cluster, n);
-                        if (tempDelta < deltaIL) {
-                            deltaIL = tempDelta;
-                            targetCluster = cluster;
+                if (clustersToCheck.contains(sourceCluster)) {
+                    for (final TassaCluster cluster : output) {
+                        if (cluster != sourceCluster) {
+                            final double tempDelta = getChangeOfInformationLoss(record, cluster, n);
+                            if (tempDelta < deltaIL) {
+                                deltaIL = tempDelta;
+                                targetCluster = cluster;
+                            }
+                        }
+                    }
+                }
+                else {
+                    for (final TassaCluster cluster : clustersToCheck) {
+                        if (cluster != sourceCluster) {
+                            final double tempDelta = getChangeOfInformationLoss(record, cluster, n);
+                            if (tempDelta < deltaIL) {
+                                deltaIL = tempDelta;
+                                targetCluster = cluster;
+                            }
                         }
                     }
                 }
@@ -94,8 +107,10 @@ public class TassaAlgorithmImpl {
                 if (sourceCluster.size() == 1 && targetCluster != null)
                 {
                     // move record to target cluster
+                    modifiedClusters.remove(targetCluster);
                     clustersToCheck.remove(targetCluster);
                     targetCluster.add(record);
+                    modifiedClusters.add(targetCluster);
                     clustersToCheck.add(targetCluster);
                     
                     // remove empty source cluster from all containing collections
@@ -104,13 +119,9 @@ public class TassaAlgorithmImpl {
                     clustersToCheck.remove(sourceCluster);
                     
                     // log the change for the next loop
-                    if (!modifiedClusters.contains(targetCluster)) {
-                        boolean test = true;
-                        test = modifiedClusters.add(targetCluster);
-                        if (!test) {
-                            test = true;
-                        }
-                    }
+                    /*if (!modifiedClusters.contains(targetCluster)) {
+                        modifiedClusters.add(targetCluster);
+                    }*/
                     recordsChanged = true;
                     recordChangeCount++;
                 }
@@ -119,30 +130,26 @@ public class TassaAlgorithmImpl {
                 else if (deltaIL < -0.0000000001 && targetCluster != null) {
                     
                     // remove record from source cluster
+                    modifiedClusters.remove(sourceCluster);
                     clustersToCheck.remove(sourceCluster);
                     sourceCluster.remove(record);
+                    modifiedClusters.add(sourceCluster);
                     clustersToCheck.add(sourceCluster);
                     
                     // move record to target cluster
+                    modifiedClusters.remove(targetCluster);
                     clustersToCheck.remove(targetCluster);
                     targetCluster.add(record);
+                    modifiedClusters.add(targetCluster);
                     clustersToCheck.add(targetCluster);
                     
                     // log the change for the next loop
-                    if (!modifiedClusters.contains(targetCluster)) {
-                        boolean test = true;
-                        test = modifiedClusters.add(targetCluster);
-                        if (!test) {
-                            test = true;
-                        }
+                    /*if (!modifiedClusters.contains(targetCluster)) {
+                        modifiedClusters.add(targetCluster);
                     }
                     if (!modifiedClusters.contains(sourceCluster)) {
-                        boolean test = true;
-                        test = modifiedClusters.add(sourceCluster);
-                        if (!test) {
-                            test = true;
-                        }
-                    }
+                        modifiedClusters.add(sourceCluster);
+                    }*/
                     recordsChanged = true;
                     recordChangeCount++;
                 }
@@ -159,6 +166,7 @@ public class TassaAlgorithmImpl {
             }
             
             clustersToCheck.removeAll(bigClusters);
+            modifiedClusters.removeAll(bigClusters);
             
             final LinkedList<TassaCluster> newClusters = new LinkedList<>();
             while (bigClusters.size() > 0) {
