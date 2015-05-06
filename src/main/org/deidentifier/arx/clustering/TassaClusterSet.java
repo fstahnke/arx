@@ -2,20 +2,20 @@ package org.deidentifier.arx.clustering;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TassaClusterSet extends LinkedList<TassaCluster> {
+import it.unimi.dsi.fastutil.objects.*;
+
+
+public class TassaClusterSet extends ReferenceLinkedOpenHashSet<TassaCluster> {
     
     /**
      * 
      */
-
     private final GeneralizationManager manager;
-    private final HashMap<TassaCluster,TreeMap<Double,TassaCluster>> clusterDistances;
+    private final ObjectRBTreeSet<ClusterPair> clusterPairs;
     
     public TassaClusterSet(List<TassaRecord> inputDataSet, int k, GeneralizationManager manager) {
         this(manager);
@@ -24,7 +24,7 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
     
     public TassaClusterSet(GeneralizationManager manager) {
         this.manager = manager;
-        clusterDistances = new HashMap<TassaCluster, TreeMap<Double, TassaCluster>>();
+        clusterPairs = new ObjectRBTreeSet<>();
     }
     
     /**
@@ -67,14 +67,20 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
     
     private static final long serialVersionUID = 1899366651589072401L;
     
-    private void calculateClusterDistances() {
-        clusterDistances.clear();
+    private void calculateClusterPairs() {
+        clusterPairs.clear();
         
-        for (TassaCluster c1 : this) {
-            for (TassaCluster c2 : this) {
-                if (c1 != c2) {
-                    
-                }
+        for (Iterator<TassaCluster> itr1 = this.iterator(); itr1.hasNext();) {
+            // Get next cluster to check
+            TassaCluster c1 = itr1.next();
+            // Create second iterator and iterate it to the current list element of itr1
+            Iterator<TassaCluster> itr2 = this.iterator();
+            for (TassaCluster c2 = itr2.next(); c1 != c2; c2 = itr2.next());
+            // From here on calculate the missing pairs
+            while (itr2.hasNext()) {
+                TassaCluster c2 = itr2.next();
+                ClusterPair newPair = new ClusterPair(c1, c2);
+                clusterPairs.add(newPair);
             }
         }
     }
@@ -83,36 +89,63 @@ public class TassaClusterSet extends LinkedList<TassaCluster> {
      * Merges the closest pair of clusters in this set of clusters.
      * @return
      */
+    public TassaCluster mergeClosestPair2() {
+        if (clusterPairs.isEmpty()) {
+            calculateClusterPairs();
+        }
+        
+        ClusterPair closestPair = clusterPairs.first();
+        while (!this.contains(closestPair.getFirst()) || !this.contains(closestPair.getSecond())) {
+            clusterPairs.remove(closestPair);
+            closestPair = clusterPairs.first();
+        }
+        
+        closestPair.getFirst().addAll(closestPair.getSecond());
+        
+        return closestPair.getFirst();
+    }
+    
+    
+    
+    /**
+     * Merges the closest pair of clusters in this set of clusters.
+     * @return
+     */
     public TassaCluster mergeClosestPair() {
+        clusterPairs.clear();
         
         double closestPairDistance = Double.MAX_VALUE;
         final TassaCluster[] closestPair = new TassaCluster[2];
-
-        for (int i = 0; i < size(); i++) {
-
+        
+        for (Iterator<TassaCluster> itr = this.iterator(); itr.hasNext();) {
+            
             double closestDistance = Double.MAX_VALUE;
-            final TassaCluster currentCluster = get(i);
             TassaCluster closestCluster = null;
-            for (int j = i + 1; j < size(); j++) {
-                final double dist = currentCluster.getAddedGC(get(j));
+            // Get next cluster to check
+            TassaCluster c1 = itr.next();
+            
+            Iterator<TassaCluster> itr2 = this.iterator();
+            // Move to the next element until the iterator reaches the current list element
+            for (TassaCluster c2 = itr2.next(); c1 != c2; c2 = itr2.next());
+            // From here on calculate the missing distances
+            while (itr2.hasNext()) {
+                TassaCluster c2 = itr2.next();
+                double dist = c1.getAddedGC(c2);
                 if (dist < closestDistance) {
                     closestDistance = dist;
-                    closestCluster = get(j);
+                    closestCluster = c2;
                 }
             }
             if (closestDistance < closestPairDistance) {
                 closestPairDistance = closestDistance;
-                closestPair[0] = currentCluster;
+                closestPair[0] = c1;
                 closestPair[1] = closestCluster;
             }
         }
-        
         closestPair[0].addAll(closestPair[1]);
         this.remove(closestPair[1]);
         return closestPair[0];
     }
-    
-    
     
     public TassaCluster mergeClosestPair(TassaCluster inputCluster) {
         

@@ -1,13 +1,14 @@
 package org.deidentifier.arx.clustering;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.ARXInterface;
 import org.deidentifier.arx.Data;
+
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 
 public class TassaAlgorithmImpl {
     
@@ -25,9 +26,8 @@ public class TassaAlgorithmImpl {
      */
     
     public TassaClusterSet executeTassa(double alpha, double omega) {
-        
-        // TODO: value "alpha" should be a variable 0 < a <= 1 provided by the ARXInterface
-        // TODO: value "omega" should be a variable 1 < w <= 2 provided by the ARXInterface
+
+
         // check for correct arguments
         if (alpha <= 0 || alpha > 1) {
             throw new IllegalArgumentException("executeTassa: Argument 'alpha' is out of bound: " + alpha);
@@ -56,13 +56,15 @@ public class TassaAlgorithmImpl {
         boolean recordsChanged = true;
         int recordChangeCount = 0;
         
-        HashSet<TassaCluster> modifiedClusters = new HashSet<>(output);
+        ObjectOpenHashSet<TassaCluster> modifiedClusters = new ObjectOpenHashSet<>();
+        modifiedClusters.addAll(output);
         double lastIL = 0;
         
         while (recordsChanged) {
             // reset recordsChanged flag
             recordsChanged = false;
-            HashSet<TassaCluster> clustersToCheck = new HashSet<>(modifiedClusters);
+            ObjectOpenHashSet<TassaCluster> clustersToCheck = new ObjectOpenHashSet<>();
+            clustersToCheck.addAll(modifiedClusters);
             modifiedClusters.clear();
             
             int recordCount = 1;
@@ -107,9 +109,11 @@ public class TassaAlgorithmImpl {
                 if (sourceCluster.size() == 1 && targetCluster != null)
                 {
                     // move record to target cluster
+                    //output.remove(targetCluster);
                     modifiedClusters.remove(targetCluster);
                     clustersToCheck.remove(targetCluster);
                     targetCluster.add(record);
+                    //output.add(targetCluster);
                     modifiedClusters.add(targetCluster);
                     clustersToCheck.add(targetCluster);
                     
@@ -130,16 +134,20 @@ public class TassaAlgorithmImpl {
                 else if (deltaIL < -0.0000000001 && targetCluster != null) {
                     
                     // remove record from source cluster
+                    //output.remove(sourceCluster);
                     modifiedClusters.remove(sourceCluster);
                     clustersToCheck.remove(sourceCluster);
                     sourceCluster.remove(record);
+                    //output.add(sourceCluster);
                     modifiedClusters.add(sourceCluster);
                     clustersToCheck.add(sourceCluster);
                     
                     // move record to target cluster
+                    //output.remove(targetCluster);
                     modifiedClusters.remove(targetCluster);
                     clustersToCheck.remove(targetCluster);
                     targetCluster.add(record);
+                    //output.add(targetCluster);
                     modifiedClusters.add(targetCluster);
                     clustersToCheck.add(targetCluster);
                     
@@ -224,7 +232,7 @@ public class TassaAlgorithmImpl {
         
         while (smallClusters.size() > 1) {
 
-            if (iface.logging && mergeNumber > 0) {
+            if (iface.logging && mergeNumber % iface.logNumberOfClusters == 0 && mergeNumber > 0) {
                 final long stopTime = System.nanoTime();
                 System.out.println("Merged clusters: " + mergeNumber + ", Execution time: " + Math.round((stopTime - startTime) / 1000000.0) + " ms, Average time: " + Math.round((stopTime - initTime) / (mergeNumber * 1000000.0)) + " ms");
                 startTime = stopTime;
@@ -240,7 +248,7 @@ public class TassaAlgorithmImpl {
         }
         
         if (smallClusters.size() == 1) {
-            output.mergeClosestPair(smallClusters.getFirst());
+            output.mergeClosestPair(smallClusters.iterator().next());
         }
         
         

@@ -2,9 +2,9 @@ package org.deidentifier.arx.clustering;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 
 public class TassaCluster extends LinkedList<TassaRecord> implements IGeneralizable {
     
@@ -16,8 +16,8 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
     private int[]                              generalizationLevels;
     private int[]                              transformation;
 
-    private final HashMap<TassaRecord, Double> removedNodeGC;
-    private final HashMap<TassaRecord, Double> addedGCCache;
+    private final Object2DoubleOpenHashMap<TassaRecord> removedNodeGC;
+    private final Object2DoubleOpenHashMap<IGeneralizable> addedGCCache;
     
     // caching of calculated values
     private double                             generalizationCost;
@@ -30,15 +30,15 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
      */
     private int                                lastModCount;
 
-    private final GeneralizationManager              manager;
+    private final GeneralizationManager        manager;
     
     public TassaCluster(Collection<? extends TassaRecord> recordCollection, GeneralizationManager manager) {
         super();
         this.manager = manager;
         numAtt = manager.getNumAttributes();
         generalizationLevels = new int[numAtt];
-        removedNodeGC = new HashMap<>();
-        addedGCCache = new HashMap<>(recordCollection.size());
+        removedNodeGC = new Object2DoubleOpenHashMap<>();
+        addedGCCache = new Object2DoubleOpenHashMap<>();
         super.addAll(recordCollection);
         update(this);
     }
@@ -123,36 +123,43 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
     }
     
     public double getAddedGC(IGeneralizable addedObject) {
-        Double result = 0d;
+        double result = 0;
         
         if (addedObject instanceof TassaRecord) {
-            TassaRecord record = (TassaRecord)addedObject;
-            result =  addedGCCache.get(addedObject);
-            if (result == null) {
+            /*if (result != 0) {
+                result =  addedGCCache.get(addedObject);
+            }
+            else */{
+                TassaRecord record = (TassaRecord)addedObject;
                 result = manager.calculateGeneralizationCost(record, manager.calculateGeneralizationLevels(record.getValues(), getFirst().getValues(), generalizationLevels));
+                //addedGCCache.put(record, result);
             }
         }
         if (addedObject instanceof TassaCluster) {
-            TassaCluster cluster = (TassaCluster)addedObject;
-            final int[] levels = new int[numAtt];
-            for (int i = 0; i < numAtt; i++) {
-                levels[i] = Math.max(this.generalizationLevels[i], cluster.generalizationLevels[i]);
+            result = addedGCCache.getDouble(addedObject);
+            if (result == 0) {
+                TassaCluster cluster = (TassaCluster)addedObject;
+                final int[] levels = new int[numAtt];
+                for (int i = 0; i < numAtt; i++) {
+                    levels[i] = Math.max(this.generalizationLevels[i], cluster.generalizationLevels[i]);
+                }
+                result = manager.calculateGeneralizationCost(cluster.getFirst(), manager.calculateGeneralizationLevels(cluster.getFirst(), getFirst(), levels));
+                addedGCCache.put(cluster, result);
             }
-            result = manager.calculateGeneralizationCost(cluster.getFirst(), manager.calculateGeneralizationLevels(cluster.getFirst(), getFirst(), levels));
         }
         return result;
     }
     
     public double getRemovedGC(TassaRecord record) {
-        Double result = 0d;
+        double result = 0;
         if (size() > 1) {
-            result = removedNodeGC.get(record);
+            result = removedNodeGC.getDouble(record);
             // We don't have a cached value for the GC without this record
-            if (result == null) {
+            if (result == 0) {
                 // The record was not yet removed,
                 // so we have to add it back after the calculation
                 final boolean recordExisted = super.remove(record);
-                result = manager.calculateGeneralizationCost(getFirst(), manager.calculateGeneralizationLevels(this));
+                result = manager.calculateGeneralizationCost(getFirst(), manager.calculateGeneralizationLevels(this.getValuesByAttribute()));
                 // If record existed before removal, we have to put it back and add GC to the cache
                 if (recordExisted) {
                     removedNodeGC.put(record, result);
@@ -160,6 +167,9 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
                     lastModCount = modCount;
                 }
             }
+        }
+        else {
+            return 0;
         }
         return result;
     }
@@ -180,7 +190,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         if (addedObject instanceof TassaCluster) {
             TassaCluster cluster = (TassaCluster)addedObject;
             if (cluster == this) {
-                generalizationLevels = manager.calculateGeneralizationLevels(this);
+                generalizationLevels = manager.calculateGeneralizationLevels(this.getValuesByAttribute());
             }
             else {
                 for (int i = 0; i < numAtt; i++) {
@@ -200,7 +210,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
                 generalizationCost = getAddedGC(record);
             }
             else {
-                generalizationLevels = manager.calculateGeneralizationLevels(this);
+                generalizationLevels = manager.calculateGeneralizationLevels(this.getValuesByAttribute());
                 generalizationCost = getRemovedGC(record);
             }
         }

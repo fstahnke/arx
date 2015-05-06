@@ -26,10 +26,9 @@ public class GeneralizationManager {
     }
     
     // Calculate generalization levels for set of values from scratch
-    public int[] calculateGeneralizationLevels(IGeneralizable generalizeObject) {
+    public int[] calculateGeneralizationLevels(int[][] valuesByAttribute) {
         
         final int[] result = new int[numAtt];
-        final int[][] valuesByAttribute = generalizeObject.getValuesByAttribute();
         
         for (int i = 0; i < numAtt; i++) {
             result[i] = generalizationTrees[i].getGeneralizationLevel(valuesByAttribute[i], 0);

@@ -41,7 +41,9 @@ public final class TassaRecord implements IGeneralizable {
             return true;
         }
         if (this.hashCode() == o.hashCode() && o instanceof TassaRecord) {
-            return (Arrays.equals(recordContent, ((TassaRecord) o).recordContent));
+            if (Arrays.equals(recordContent, ((TassaRecord) o).recordContent)) {
+                return true;
+            }
         }
         return false;
     }
