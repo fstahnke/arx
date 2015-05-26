@@ -47,11 +47,11 @@ public class TassaTest {
 
         for (int i = 0; i < 50; i++) {
             final long initTime = System.nanoTime();
-            final TassaClusterSet clusterList2 = tassa2.execute(0.5, 1.5);
+            tassa2.execute(0.5, 1.5);
             final long stopTime = System.nanoTime();
             final double initialInformationLoss = tassa2.getInititalInformationLoss();
             final double finalInformationLoss = tassa2.getFinalInformationLoss();
-            System.out.println("Total runtime: " + Math.round((stopTime-initTime) / 1000000.0) + ", Initial Information Loss: " + initialInformationLoss + ", Final Information Loss: " + finalInformationLoss);
+            System.out.println("Total runtime: " + Math.round((stopTime-initTime) / 1000000000.0) + " s, Initial Information Loss: " + initialInformationLoss + ", Final Information Loss: " + finalInformationLoss);
         }
         
     }
