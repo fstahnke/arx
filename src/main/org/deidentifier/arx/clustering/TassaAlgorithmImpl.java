@@ -215,6 +215,9 @@ public class TassaAlgorithmImpl {
             clustersToCheck.addAll(newClusters);
             
             final double IL = getAverageGeneralizationCost(tempOutput);
+            if (iface.logging) {
+                System.out.println("Current average information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + modifiedClusters.size() +"/"+ tempOutput.size());
+            }
             
             clustersToCheck.clear();
             recordChangeCount = 0;
@@ -268,8 +271,9 @@ public class TassaAlgorithmImpl {
         
         finalInformationLoss = getAverageGeneralizationCost(output);
         
-        System.out.println("Final average information loss: " + finalInformationLoss);
-        
+        if (iface.logging) {
+            System.out.println("Final average information loss: " + finalInformationLoss);
+        }
         
         final int[][] buffer = iface.getBuffer();
         ListIterator<TassaRecord> itr = dataSet.listIterator();

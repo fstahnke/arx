@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
@@ -99,29 +100,26 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
     public int[] getValues() {
     	return getFirst().getValues();
     }
-
-    @Override
-    public double getGeneralizationCost() {
+    
+    
+    public double getGC() {
         if (lastModCount < modCount) {
             update(this);
         }
         return generalizationCost;
     }
-
-    @Override
-    public int[][] getValuesByAttribute() {
-
-        final int[][] valuesByAttribute = new int[numAtt][this.size()];
-        Iterator<TassaRecord> itr = this.iterator();
-        for (int i = 0; i < valuesByAttribute[0].length; i++)
+    
+    private int[][] getRecordArray() {
+        
+        final int[][] recordArray = new int[this.size()][numAtt];
+        
+        ListIterator<TassaRecord> itr = this.listIterator();
+        for (int i = 0; i < recordArray.length; i++)
         {
-            int[] recordValues = itr.next().getValues();
-            for (int j = 0; j < numAtt; j++) {
-                valuesByAttribute[j][i] = recordValues[j];
-            }
+            recordArray[i] = itr.next().getValues();
         }
         
-        return valuesByAttribute;
+        return recordArray;
     }
     
     public double getAddedGC(IGeneralizable addedObject) {
@@ -161,7 +159,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
                 // The record was not yet removed,
                 // so we have to add it back after the calculation
                 final boolean recordExisted = super.remove(record);
-                result = manager.calculateGeneralizationCost(getFirst(), manager.calculateGeneralizationLevels(this.getValuesByAttribute()));
+                result = manager.calculateGeneralizationCost(getFirst(), manager.calculateGeneralizationLevels(this.getRecordArray()));
                 // If record existed before removal, we have to put it back and add GC to the cache
                 if (recordExisted) {
                     removedNodeGC.put(record, result);
@@ -192,7 +190,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         if (addedObject instanceof TassaCluster) {
             TassaCluster cluster = (TassaCluster)addedObject;
             if (cluster == this) {
-                generalizationLevels = manager.calculateGeneralizationLevels(this.getValuesByAttribute());
+                generalizationLevels = manager.calculateGeneralizationLevels(this.getRecordArray());
             }
             else {
                 for (int i = 0; i < numAtt; i++) {
@@ -212,7 +210,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
                 generalizationCost = getAddedGC(record);
             }
             else {
-                generalizationLevels = manager.calculateGeneralizationLevels(this.getValuesByAttribute());
+                generalizationLevels = manager.calculateGeneralizationLevels(this.getRecordArray());
                 generalizationCost = getRemovedGC(record);
             }
         }
@@ -229,22 +227,12 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         }
     }
     
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
         }
-        /*if (obj instanceof TassaCluster && obj.hashCode() == this.hashCode()) {
-            TassaCluster cluster = (TassaCluster)obj;
-            if (cluster.size() == this.size()) {
-                boolean equals = true;
-                final int[] transformation2 = cluster.getTransformation();
-                for (int i = 0; equals && i < transformation.length; i++) {
-                    equals &= (transformation[i] == transformation2[i]);
-                }
-                return equals;
-            }
-        }*/
         return false;
     }
     
@@ -258,7 +246,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         }
         return hashCode;
     }
-
+    
     
     
 }

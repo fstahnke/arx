@@ -1,6 +1,6 @@
 package org.deidentifier.arx.clustering;
 
-public class ClusterPair implements IGeneralizable, Comparable<IGeneralizable> {
+public class ClusterPair implements Comparable<TassaCluster> {
     
     private double generalizationCost;
     private final int hashCode;
@@ -15,11 +15,6 @@ public class ClusterPair implements IGeneralizable, Comparable<IGeneralizable> {
         hashCode = 31 + first.hashCode() * second.hashCode();
     }
     
-    @Override
-    public int[] getValues() {
-        return first.getValues();
-    }
-    
     public TassaCluster getFirst() {
         return first;
     }
@@ -28,22 +23,8 @@ public class ClusterPair implements IGeneralizable, Comparable<IGeneralizable> {
         return second;
     }
     
-    @Override
     public double getGeneralizationCost() {
         return generalizationCost;
-    }
-    
-    @Override
-    public int[][] getValuesByAttribute() {
-        final int[] firstValues = first.getValues();
-        final int[] secondValues = second.getValues();
-        final int numAtt = firstValues.length;
-        final int[][] valuesByAttribute = new int[numAtt][2];
-        for(int i = 0; i < numAtt; i++) {
-            valuesByAttribute[i][0] = firstValues[i];
-            valuesByAttribute[i][1] = secondValues[i];
-        }
-        return valuesByAttribute;
     }
     
     @Override
@@ -51,6 +32,7 @@ public class ClusterPair implements IGeneralizable, Comparable<IGeneralizable> {
         if (this == obj) {
             return true;
         }
+        /*
         if (obj instanceof ClusterPair) {
             ClusterPair other = (ClusterPair) obj;
             if (first == other.first && second == other.second) {
@@ -60,6 +42,7 @@ public class ClusterPair implements IGeneralizable, Comparable<IGeneralizable> {
                 return true;
             }
         }
+        */
         return false;
     }
     
@@ -69,8 +52,8 @@ public class ClusterPair implements IGeneralizable, Comparable<IGeneralizable> {
     }
 
     @Override
-    public int compareTo(IGeneralizable o) {
-        return Double.compare(this.getGeneralizationCost(), o.getGeneralizationCost());
+    public int compareTo(TassaCluster o) {
+        return Double.compare(this.getGeneralizationCost(), o.getGC());
     }
     
 }

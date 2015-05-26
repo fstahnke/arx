@@ -5,14 +5,12 @@ import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 
 public class GeneralizationTree {
     
-    final GeneralizationHierarchy   hierarchy;
-    final int[][]                   hierarchyArray;
-    final int[][]                   cardinalityCache;
-    final int                       attributeCardinality;
-	final int                       maxLevel;
+    private final int[][]                   hierarchyArray;
+    private final int[][]                   cardinalityCache;
+	private final int                       maxLevel;
+    private final int                       attributeCardinality;
     
     public GeneralizationTree(GeneralizationHierarchy hierarchy) {
-        this.hierarchy = hierarchy;
         maxLevel = hierarchy.getHeight() - 1;
         hierarchyArray = hierarchy.getArray();
         cardinalityCache = getCardinalities();
@@ -67,5 +65,9 @@ public class GeneralizationTree {
         }
         
         return cardinalities;
+    }
+
+    public int getAttributeCardinality() {
+        return attributeCardinality;
     }
 }

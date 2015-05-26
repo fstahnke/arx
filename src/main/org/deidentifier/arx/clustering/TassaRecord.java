@@ -3,8 +3,6 @@
  */
 package org.deidentifier.arx.clustering;
 
-import java.util.Arrays;
-
 /**
  * @author Fabian Stahnke
  *
@@ -12,16 +10,16 @@ import java.util.Arrays;
 public final class TassaRecord implements IGeneralizable {
     
     private final int[]  recordContent;
-    private final int   hashCode;
+    //private final int   hashCode;
     
     private TassaCluster assignedCluster;
     
     public TassaRecord(int[] content)
     {
         recordContent = content;
-        hashCode = calculateHashCode();
+        //hashCode = calculateHashCode();
     }
-    
+    /*
     private int calculateHashCode() {
         int result = 0;
         for (int i : recordContent) {
@@ -29,7 +27,8 @@ public final class TassaRecord implements IGeneralizable {
         }
         return result;
     }
-    
+    */
+    /*
     @Override
     public int hashCode() {
         return hashCode;
@@ -47,10 +46,7 @@ public final class TassaRecord implements IGeneralizable {
         }
         return false;
     }
-    
-    public double getGeneralizationCost() {
-        return 0;
-    }
+    */
     
     public int[] getValues() {
         return recordContent;
@@ -61,11 +57,5 @@ public final class TassaRecord implements IGeneralizable {
     }
     public void setAssignedCluster(TassaCluster cluster) {
         assignedCluster = cluster;
-    }
-
-    @Override
-    public int[][] getValuesByAttribute() {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

@@ -66,6 +66,7 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
         }
     }
     
+    /*
     private void calculateClusterPairs() {
         clusterPairs.clear();
         
@@ -83,11 +84,12 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
             }
         }
     }
-    
+    */
     /**
-     * Merges the closest pair of clusters in this set of clusters.
+     * Merges the closest pair of clusters in this set of clusters. New Version.
      * @return
      */
+    /*
     public TassaCluster mergeClosestPair2() {
         if (clusterPairs.isEmpty()) {
             calculateClusterPairs();
@@ -103,7 +105,7 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
         
         return closestPair.getFirst();
     }
-    
+    */
     
     
     /**
@@ -160,17 +162,6 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
         }
         closestCluster.addAll(inputCluster);
         return closestCluster;
-    }
-    
-    public double getAverageGeneralizationCost(List<TassaCluster> clusterList) {
-        double result = 0.0;
-        int numRecords = 0;
-        for (final TassaCluster c : clusterList) {
-            numRecords += c.size();
-            result += c.getGeneralizationCost() * c.size();
-        }
-        return result / numRecords;
-        
     }
     
 }
