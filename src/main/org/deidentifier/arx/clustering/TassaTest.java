@@ -51,7 +51,7 @@ public class TassaTest {
             final long stopTime = System.nanoTime();
             final double initialInformationLoss = tassa2.getInititalInformationLoss();
             final double finalInformationLoss = tassa2.getFinalInformationLoss();
-            System.out.println("Total runtime: " + Math.round((stopTime-initTime) / 1000000000.0) + " s, Initial Information Loss: " + initialInformationLoss + ", Final Information Loss: " + finalInformationLoss);
+            System.out.println("#: " + i + ", Total runtime: " + Math.round((stopTime-initTime) / 1000000000.0) + " s, Initial Information Loss: " + initialInformationLoss + ", Final Information Loss: " + finalInformationLoss);
         }
         
     }
