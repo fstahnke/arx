@@ -1,8 +1,6 @@
 package org.deidentifier.arx.clustering;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -68,7 +66,10 @@ public class TassaAlgorithmImpl {
         final TassaClusterSet output = new TassaClusterSet(dataSet, k_0, iface.getGeneralizationManager());
         double lastIL = getAverageGeneralizationCost(output);
         inititalInformationLoss = lastIL;
-        System.out.println("Initial average information loss: " + inititalInformationLoss + ", Initial cluster count: " + output.size());
+        
+        if (iface.logging) {
+            System.out.println("Initial average information loss: " + inititalInformationLoss + ", Initial cluster count: " + output.size());
+        }
         
         // Helper variable to check, if records were changed
         boolean recordsChanged = true;
@@ -215,8 +216,6 @@ public class TassaAlgorithmImpl {
             
             final double IL = getAverageGeneralizationCost(tempOutput);
             
-            System.out.println("Current average information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + modifiedClusters.size() +"/"+ tempOutput.size());
-            
             clustersToCheck.clear();
             recordChangeCount = 0;
             lastIL = IL;
@@ -297,8 +296,8 @@ public class TassaAlgorithmImpl {
         
         double deltaIL = (sourceCluster.getRemovedGC(movedRecord) * (sourceCluster.size() - 1)
                   + targetCluster.getAddedGC(movedRecord) * (targetCluster.size() + 1))
-                  - (sourceCluster.getGeneralizationCost() * sourceCluster.size()
-                  + targetCluster.getGeneralizationCost() * targetCluster.size());
+                  - (sourceCluster.getGC() * sourceCluster.size()
+                  + targetCluster.getGC() * targetCluster.size());
         deltaIL /= n;
         
         return deltaIL;
@@ -309,7 +308,7 @@ public class TassaAlgorithmImpl {
         int numRecords = 0;
         for (final TassaCluster c : clusterList) {
             numRecords += c.size();
-            result += c.getGeneralizationCost() * c.size();
+            result += c.getGC() * c.size();
         }
         return result / numRecords;
         
