@@ -4,20 +4,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+
+import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class TassaCluster extends LinkedList<TassaRecord> implements IGeneralizable {
-    
-    private static final long                  serialVersionUID = 1L;
     
     /** The number of attributes. */
     private final int                          numAtt;
     
     private int[]                              generalizationLevels;
     private int[]                              transformation;
+    public int[] getTransformation() {
+        return transformation;
+    }
 
-    private final Object2DoubleOpenHashMap<TassaRecord> removedNodeGC;
-    private final Object2DoubleOpenHashMap<IGeneralizable> addedGCCache;
+    private final ObjectDoubleOpenHashMap<TassaRecord> removedNodeGC;
+    private final ObjectDoubleOpenHashMap<IGeneralizable> addedGCCache;
     
     // caching of calculated values
     private double                             generalizationCost;
@@ -37,8 +39,8 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         this.manager = manager;
         numAtt = manager.getNumAttributes();
         generalizationLevels = new int[numAtt];
-        removedNodeGC = new Object2DoubleOpenHashMap<>();
-        addedGCCache = new Object2DoubleOpenHashMap<>();
+        removedNodeGC = new ObjectDoubleOpenHashMap<>();
+        addedGCCache = new ObjectDoubleOpenHashMap<>();
         super.addAll(recordCollection);
         update(this);
     }
@@ -136,7 +138,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
             }
         }
         if (addedObject instanceof TassaCluster) {
-            result = addedGCCache.getDouble(addedObject);
+            result = addedGCCache.getOrDefault(addedObject, 0);
             if (result == 0) {
                 TassaCluster cluster = (TassaCluster)addedObject;
                 final int[] levels = new int[numAtt];
@@ -153,7 +155,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
     public double getRemovedGC(TassaRecord record) {
         double result = 0;
         if (size() > 1) {
-            result = removedNodeGC.getDouble(record);
+            result = removedNodeGC.getOrDefault(record, 0);
             // We don't have a cached value for the GC without this record
             if (result == 0) {
                 // The record was not yet removed,

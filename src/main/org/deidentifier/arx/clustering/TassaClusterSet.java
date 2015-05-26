@@ -1,21 +1,22 @@
 package org.deidentifier.arx.clustering;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeSet;
 
-import it.unimi.dsi.fastutil.objects.*;
 
-
-public class TassaClusterSet extends ReferenceLinkedOpenHashSet<TassaCluster> {
+public class TassaClusterSet extends ArrayList<TassaCluster> {
     
     /**
      * 
      */
     private final GeneralizationManager manager;
-    private final ObjectRBTreeSet<ClusterPair> clusterPairs;
+    private final TreeSet<ClusterPair> clusterPairs;
     
     public TassaClusterSet(List<TassaRecord> inputDataSet, int k, GeneralizationManager manager) {
         this(manager);
@@ -24,7 +25,7 @@ public class TassaClusterSet extends ReferenceLinkedOpenHashSet<TassaCluster> {
     
     public TassaClusterSet(GeneralizationManager manager) {
         this.manager = manager;
-        clusterPairs = new ObjectRBTreeSet<>();
+        clusterPairs = new TreeSet<>();
     }
     
     /**
@@ -64,8 +65,6 @@ public class TassaClusterSet extends ReferenceLinkedOpenHashSet<TassaCluster> {
             this.add(new TassaCluster(c, manager));
         }
     }
-    
-    private static final long serialVersionUID = 1899366651589072401L;
     
     private void calculateClusterPairs() {
         clusterPairs.clear();
@@ -163,10 +162,10 @@ public class TassaClusterSet extends ReferenceLinkedOpenHashSet<TassaCluster> {
         return closestCluster;
     }
     
-    public double getAverageGeneralizationCost() {
+    public double getAverageGeneralizationCost(List<TassaCluster> clusterList) {
         double result = 0.0;
         int numRecords = 0;
-        for (final TassaCluster c : this) {
+        for (final TassaCluster c : clusterList) {
             numRecords += c.size();
             result += c.getGeneralizationCost() * c.size();
         }
