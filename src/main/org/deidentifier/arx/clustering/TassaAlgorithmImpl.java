@@ -16,7 +16,18 @@ import org.deidentifier.arx.Data;
 public class TassaAlgorithmImpl {
     
     private final ARXInterface iface;
+    private double inititalInformationLoss;
     
+    public double getInititalInformationLoss() {
+        return inititalInformationLoss;
+    }
+    
+    private double finalInformationLoss;
+
+    public double getFinalInformationLoss() {
+        return finalInformationLoss;
+    }
+
     public TassaAlgorithmImpl(Data data, ARXConfiguration config) throws IOException {
         iface = new ARXInterface(data, config);
     }
@@ -56,7 +67,8 @@ public class TassaAlgorithmImpl {
         // initialized with random partition of data records with the cluster size alpha*k
         final TassaClusterSet output = new TassaClusterSet(dataSet, k_0, iface.getGeneralizationManager());
         double lastIL = getAverageGeneralizationCost(output);
-        System.out.println("Initial average information loss: " + lastIL + ", Initial cluster count: " + output.size());
+        inititalInformationLoss = lastIL;
+        System.out.println("Initial average information loss: " + inititalInformationLoss + ", Initial cluster count: " + output.size());
         
         // Helper variable to check, if records were changed
         boolean recordsChanged = true;
@@ -255,8 +267,9 @@ public class TassaAlgorithmImpl {
             output.mergeClosestPair(smallClusters.iterator().next());
         }
         
+        finalInformationLoss = getAverageGeneralizationCost(output);
         
-        System.out.println("Final average information loss: " + getAverageGeneralizationCost(output));
+        System.out.println("Final average information loss: " + finalInformationLoss);
         
         
         final int[][] buffer = iface.getBuffer();
@@ -291,7 +304,7 @@ public class TassaAlgorithmImpl {
         return deltaIL;
     }
     
-    public static double getAverageGeneralizationCost(Iterable<TassaCluster> clusterList) {
+    public double getAverageGeneralizationCost(Iterable<TassaCluster> clusterList) {
         double result = 0.0;
         int numRecords = 0;
         for (final TassaCluster c : clusterList) {
