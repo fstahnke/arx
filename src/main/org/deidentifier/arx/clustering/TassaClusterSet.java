@@ -14,14 +14,21 @@ public class TassaClusterSet extends ArrayList<TassaCluster> {
     /**
      * 
      */
+    private List<TassaRecord> dataSet;
+    
+    public List<TassaRecord> getDataSet() {
+        return dataSet;
+    }
+    
     private final GeneralizationManager manager;
     private final TreeSet<ClusterPair> clusterPairs;
     
     public TassaClusterSet(List<TassaRecord> inputDataSet, int k, GeneralizationManager manager) {
         this(manager);
+        this.dataSet = inputDataSet;
         createRandomPartitioning(inputDataSet, k);
     }
-    
+
     public TassaClusterSet(GeneralizationManager manager) {
         this.manager = manager;
         clusterPairs = new TreeSet<>();

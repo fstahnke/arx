@@ -17,8 +17,8 @@ public class TassaTest {
         data.getDefinition().setAttributeType("gender", Hierarchy.create("data/test_hierarchy_gender.csv", ';'));
         data.getDefinition().setAttributeType("zipcode", Hierarchy.create("data/test_hierarchy_zipcode.csv", ';'));
         
-        //final Data data2 = Data.create("data/adult_subset.csv", ';');
-        final Data data2 = Data.create("data/adult.csv", ';');
+        final Data data2 = Data.create("data/adult_subset.csv", ';');
+        //final Data data2 = Data.create("data/adult.csv", ';');
         data2.getDefinition().setAttributeType("age", Hierarchy.create("data/adult_hierarchy_age.csv", ';'));
         data2.getDefinition().setAttributeType("education", Hierarchy.create("data/adult_hierarchy_education.csv", ';'));
         data2.getDefinition().setAttributeType("marital-status", Hierarchy.create("data/adult_hierarchy_marital-status.csv", ';'));
@@ -45,17 +45,31 @@ public class TassaTest {
         //final TassaClusterSet clusterList = tassa.execute(0.5, 1.5);
 
         TassaClusterSet output = null;
-        double lastDeltaIL = Double.MAX_VALUE;
+        double lastDeltaIL = -Double.MAX_VALUE;
 
-        for (int i = 0; lastDeltaIL >= 0.001d; i++) {
+        
+        final long initTime = System.nanoTime();
+        output = tassa2.execute(0.5, 1.5, output);
+        final long stopTime = System.nanoTime();
+        final double initialInformationLoss = tassa2.getInititalInformationLoss();
+        final double finalInformationLoss = tassa2.getFinalInformationLoss();
+        lastDeltaIL = finalInformationLoss - initialInformationLoss;
+        System.out.println("Total runtime: " + Math.round((stopTime-initTime) / 1000000000.0) + " s, Initial Information Loss: " + initialInformationLoss + ", Final Information Loss: " + finalInformationLoss);
+    
+        
+        /*
+        for (int i = 0; lastDeltaIL <= -0.000000001d || lastDeltaIL > 0; i++) {
             final long initTime = System.nanoTime();
             output = tassa2.execute(0.5, 1.5, output);
             final long stopTime = System.nanoTime();
             final double initialInformationLoss = tassa2.getInititalInformationLoss();
             final double finalInformationLoss = tassa2.getFinalInformationLoss();
+            lastDeltaIL = finalInformationLoss - initialInformationLoss;
             System.out.println("#: " + i + ", Total runtime: " + Math.round((stopTime-initTime) / 1000000000.0) + " s, Initial Information Loss: " + initialInformationLoss + ", Final Information Loss: " + finalInformationLoss);
         }
+        */
 
+        /*
         for (int i = 0; i < 50; i++) {
             final long initTime = System.nanoTime();
             tassa2.execute(0.5, 1.5, null);
@@ -64,6 +78,7 @@ public class TassaTest {
             final double finalInformationLoss = tassa2.getFinalInformationLoss();
             System.out.println("#: " + i + ", Total runtime: " + Math.round((stopTime-initTime) / 1000000000.0) + " s, Initial Information Loss: " + initialInformationLoss + ", Final Information Loss: " + finalInformationLoss);
         }
+        */
         
     }
 }

@@ -49,11 +49,15 @@ public class TassaAlgorithmImpl {
         }
         
         // Input parameters of clustering
-        
-        final int[][] inputArrays = iface.getDataQI();
-        final List<TassaRecord> dataSet = new LinkedList<>();
-        for (final int[] record : inputArrays) {
-            dataSet.add(new TassaRecord(record));
+        final List<TassaRecord> dataSet;
+        if (input == null) {
+            final int[][] inputArrays = iface.getDataQI();
+            dataSet = new LinkedList<>();
+            for (final int[] record : inputArrays) {
+                dataSet.add(new TassaRecord(record));
+            }
+        } else {
+            dataSet = input.getDataSet();
         }
         
         final int k = iface.getK();
@@ -249,7 +253,7 @@ public class TassaAlgorithmImpl {
 
         final long initTime = System.nanoTime();
         long startTime = initTime;
-        int mergeNumber = 0;
+        int mergeNumber = 1;
         
         // Add temporary clustering to output and merge clusters < k
         output.clear();
@@ -257,7 +261,7 @@ public class TassaAlgorithmImpl {
         
         while (smallClusters.size() > 1) {
 
-            if (iface.logging && mergeNumber % iface.logNumberOfClusters == 0 && mergeNumber > 0) {
+            if (iface.logging && (mergeNumber % iface.logNumberOfClusters == 0 || smallClusters.size() == 2)) {
                 final long stopTime = System.nanoTime();
                 System.out.println("Merged clusters: " + mergeNumber + ", Execution time: " + Math.round((stopTime - startTime) / 1000000.0) + " ms, Average time: " + Math.round((stopTime - initTime) / (mergeNumber * 1000000.0)) + " ms");
                 startTime = stopTime;
@@ -273,6 +277,13 @@ public class TassaAlgorithmImpl {
         }
         
         if (smallClusters.size() == 1) {
+
+            if (iface.logging) {
+                final long stopTime = System.nanoTime();
+                System.out.println("Merged clusters: " + mergeNumber + ", Execution time: " + Math.round((stopTime - startTime) / 1000000.0) + " ms, Average time: " + Math.round((stopTime - initTime) / (mergeNumber * 1000000.0)) + " ms");
+                startTime = stopTime;
+            }
+            
             output.mergeClosestPair(smallClusters.iterator().next());
         }
         
