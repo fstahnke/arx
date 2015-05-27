@@ -37,7 +37,7 @@ public class TassaAlgorithmImpl {
      * @return a list of clusters with the local optimum for generalization cost
      */
     
-    public TassaClusterSet execute(double alpha, double omega) {
+    public TassaClusterSet execute(double alpha, double omega, TassaClusterSet input) {
 
 
         // check for correct arguments
@@ -63,7 +63,14 @@ public class TassaAlgorithmImpl {
         
         // Output variable: Collection of clusters
         // initialized with random partition of data records with the cluster size alpha*k
-        final TassaClusterSet output = new TassaClusterSet(dataSet, k_0, iface.getGeneralizationManager());
+        final TassaClusterSet output;
+        if (input == null) {
+            output = new TassaClusterSet(dataSet, k_0, iface.getGeneralizationManager());
+        }
+        else {
+            output = input;
+        }
+        
         double lastIL = getAverageGeneralizationCost(output);
         inititalInformationLoss = lastIL;
         

@@ -43,11 +43,22 @@ public class TassaTest {
         final TassaAlgorithmImpl tassa2 = new TassaAlgorithmImpl(data2, config2);
         
         //final TassaClusterSet clusterList = tassa.execute(0.5, 1.5);
-        
+
+        TassaClusterSet output = null;
+        double lastDeltaIL = Double.MAX_VALUE;
+
+        for (int i = 0; lastDeltaIL >= 0.001d; i++) {
+            final long initTime = System.nanoTime();
+            output = tassa2.execute(0.5, 1.5, output);
+            final long stopTime = System.nanoTime();
+            final double initialInformationLoss = tassa2.getInititalInformationLoss();
+            final double finalInformationLoss = tassa2.getFinalInformationLoss();
+            System.out.println("#: " + i + ", Total runtime: " + Math.round((stopTime-initTime) / 1000000000.0) + " s, Initial Information Loss: " + initialInformationLoss + ", Final Information Loss: " + finalInformationLoss);
+        }
 
         for (int i = 0; i < 50; i++) {
             final long initTime = System.nanoTime();
-            tassa2.execute(0.5, 1.5);
+            tassa2.execute(0.5, 1.5, null);
             final long stopTime = System.nanoTime();
             final double initialInformationLoss = tassa2.getInititalInformationLoss();
             final double finalInformationLoss = tassa2.getFinalInformationLoss();
