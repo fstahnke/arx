@@ -19,8 +19,8 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         return transformation;
     }
 
-    private final ObjectDoubleOpenHashMap<TassaRecord> removedNodeGC;
-    private final ObjectDoubleOpenHashMap<IGeneralizable> addedGCCache;
+    private final ObjectDoubleOpenHashMap<TassaRecord> removedGCs;
+    private final ObjectDoubleOpenHashMap<IGeneralizable> addedGCs;
     
     // caching of calculated values
     private double                             generalizationCost;
@@ -40,8 +40,8 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         this.manager = manager;
         numAtt = manager.getNumAttributes();
         generalizationLevels = new int[numAtt];
-        removedNodeGC = new ObjectDoubleOpenHashMap<>();
-        addedGCCache = new ObjectDoubleOpenHashMap<>();
+        removedGCs = new ObjectDoubleOpenHashMap<>();
+        addedGCs = new ObjectDoubleOpenHashMap<>();
         super.addAll(recordCollection);
         update(this);
     }
@@ -126,17 +126,11 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
         double result = 0;
         
         if (addedObject instanceof TassaRecord) {
-            /*if (result != 0) {
-                result =  addedGCCache.get(addedObject);
-            }
-            else */{
-                TassaRecord record = (TassaRecord)addedObject;
-                result = manager.calculateGeneralizationCost(record, manager.calculateGeneralizationLevels(record.getValues(), getFirst().getValues(), generalizationLevels));
-                //addedGCCache.put(record, result);
-            }
+            TassaRecord record = (TassaRecord)addedObject;
+            result = manager.calculateGeneralizationCost(record, manager.calculateGeneralizationLevels(record.getValues(), getFirst().getValues(), generalizationLevels));
         }
         if (addedObject instanceof TassaCluster) {
-            result = addedGCCache.getOrDefault(addedObject, 0);
+            result = addedGCs.getOrDefault(addedObject, 0);
             if (result == 0) {
                 TassaCluster cluster = (TassaCluster)addedObject;
                 final int[] levels = new int[numAtt];
@@ -144,7 +138,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
                     levels[i] = Math.max(this.generalizationLevels[i], cluster.generalizationLevels[i]);
                 }
                 result = manager.calculateGeneralizationCost(cluster.getFirst(), manager.calculateGeneralizationLevels(cluster.getFirst(), getFirst(), levels));
-                addedGCCache.put(cluster, result);
+                addedGCs.put(cluster, result);
             }
         }
         return result;
@@ -153,7 +147,7 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
     public double getRemovedGC(TassaRecord record) {
         double result = 0;
         if (size() > 1) {
-            result = removedNodeGC.getOrDefault(record, 0);
+            result = removedGCs.getOrDefault(record, 0);
             // We don't have a cached value for the GC without this record
             if (result == 0) {
                 // The record was not yet removed,
@@ -162,21 +156,18 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
                 result = manager.calculateGeneralizationCost(getFirst(), manager.calculateGeneralizationLevels(this.getRecordArray()));
                 // If record existed before removal, we have to put it back and add GC to the cache
                 if (recordExisted) {
-                    removedNodeGC.put(record, result);
+                    removedGCs.put(record, result);
                     super.add(record);
                     lastModCount = modCount;
                 }
             }
-        }
-        else {
-            return 0;
         }
         return result;
     }
     
     /**
      * 
-     * @param addedObject
+     * @param changedObject
      * 
      * We want to update:
      * - generalizationLevels
@@ -185,10 +176,10 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
      * - the hash code
      * - the removedGC cache
      */
-    private void update(Object addedObject) {
+    private void update(Object changedObject) {
         final int[] levels = new int[numAtt];
-        if (addedObject instanceof TassaCluster) {
-            TassaCluster cluster = (TassaCluster)addedObject;
+        if (changedObject instanceof TassaCluster) {
+            TassaCluster cluster = (TassaCluster)changedObject;
             if (cluster == this) {
                 generalizationLevels = manager.calculateGeneralizationLevels(this.getRecordArray());
             }
@@ -202,8 +193,8 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
             generalizationCost = manager.calculateGeneralizationCost(getFirst(), generalizationLevels);
             assignAllRecords();
         }
-        if (addedObject instanceof TassaRecord) {
-            TassaRecord record = (TassaRecord)addedObject;
+        if (changedObject instanceof TassaRecord) {
+            TassaRecord record = (TassaRecord)changedObject;
             if (record.getAssignedCluster() != this) {
                 record.setAssignedCluster(this);
                 generalizationLevels = manager.calculateGeneralizationLevels(record, this, generalizationLevels);
@@ -214,8 +205,8 @@ public class TassaCluster extends LinkedList<TassaRecord> implements IGeneraliza
                 generalizationCost = getRemovedGC(record);
             }
         }
-        addedGCCache.clear();
-        removedNodeGC.clear();
+        addedGCs.clear();
+        removedGCs.clear();
         transformation = manager.calculateTransformation(getFirst(), generalizationLevels);
         hashCode();
         lastModCount = modCount;

@@ -316,10 +316,18 @@ public class TassaAlgorithmImpl {
         
         final TassaCluster sourceCluster = movedRecord.getAssignedCluster();
         
-        double deltaIL = (sourceCluster.getRemovedGC(movedRecord) * (sourceCluster.size() - 1)
+        double removedGC = sourceCluster.getRemovedGC(movedRecord);
+        double sourceGC = sourceCluster.getGC();
+        double targetGC = targetCluster.getGC();
+        if (removedGC >= sourceGC && removedGC > 0 && targetGC >= sourceGC ) {
+            return 1.0;
+        }
+        
+        
+        double deltaIL = (removedGC * (sourceCluster.size() - 1)
                   + targetCluster.getAddedGC(movedRecord) * (targetCluster.size() + 1))
-                  - (sourceCluster.getGC() * sourceCluster.size()
-                  + targetCluster.getGC() * targetCluster.size());
+                  - (sourceGC * sourceCluster.size()
+                  + targetGC * targetCluster.size());
         deltaIL /= n;
         
         return deltaIL;

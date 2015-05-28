@@ -21,6 +21,7 @@ public class GeneralizationManager {
         }
     }
     
+    //TODO: Design flaw!
     public double calculateGeneralizationCost(IGeneralizable generalizeObject, int[] generalizationLevels) {
         return calculateGeneralizationCost_LossMetric(generalizeObject.getValues(), generalizationLevels);
     }
