@@ -19,7 +19,8 @@ public class TassaAlgorithmImpl {
     public double getInititalInformationLoss() {
         return inititalInformationLoss;
     }
-    
+    private int skippedAddedGCCount = 0;
+    private int totalAddedGCCount = 0;
     private double finalInformationLoss;
 
     public double getFinalInformationLoss() {
@@ -227,11 +228,13 @@ public class TassaAlgorithmImpl {
             
             final double IL = getAverageGeneralizationCost(tempOutput);
             if (iface.logging) {
-                System.out.println("Current average information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + modifiedClusters.size() +"/"+ tempOutput.size());
+                System.out.println("Current average information loss: " + IL + ", DeltaIL: " + (IL-lastIL) + ", Records changed: " + recordChangeCount + ", Clusters to check: " + modifiedClusters.size() +"/"+ tempOutput.size() + ", addedGCs skipped: " + skippedAddedGCCount + ", in %: " + (double)skippedAddedGCCount*100.0/totalAddedGCCount);
             }
             
             clustersToCheck.clear();
             recordChangeCount = 0;
+            skippedAddedGCCount = 0;
+            totalAddedGCCount = 0;
             lastIL = IL;
         }
         
@@ -319,7 +322,9 @@ public class TassaAlgorithmImpl {
         double removedGC = sourceCluster.getRemovedGC(movedRecord);
         double sourceGC = sourceCluster.getGC();
         double targetGC = targetCluster.getGC();
+        totalAddedGCCount++;
         if (removedGC >= sourceGC && removedGC > 0 && targetGC >= sourceGC ) {
+            skippedAddedGCCount++;
             return 1.0;
         }
         
