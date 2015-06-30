@@ -50,7 +50,7 @@ public class ARXInterface {
     /** The number of records that is processed between each logging tick. */
     public final int logNumberOfRecords = 1000;
     /** The number of clusters that is processed between each logging tick. */
-    public final int logNumberOfClusters = 10;
+    public final int logNumberOfClusters = 100;
 
     /**
      * Creates a new interface to the internal ARX data structures.
