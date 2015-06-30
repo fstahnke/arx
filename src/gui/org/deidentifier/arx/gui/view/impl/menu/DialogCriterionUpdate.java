@@ -73,28 +73,13 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
     /** Model */
     private ModelCriterion       selection  = null;
 
-    /** Image */
-    private Image                symbolL    = null;
-
-    /** Image */
-    private Image                symbolT    = null;
-
-    /** Image */
-    private Image                symbolK    = null;
-
-    /** Image */
-    private Image                symbolD    = null;
-
-    /** Image */
-    private Image                symbolR    = null;
-
     /** Controller */
     private Controller           controller = null;
 
     /** Root */
     private Composite            root       = null;
 
-    /** Is cancelling supported */
+    /** Is cancel operation supported */
     private final boolean        edit;
 
     /**
@@ -106,9 +91,9 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
      * @param edit
      */
     public DialogCriterionUpdate(final Controller controller,
-                                   final Shell parent,
-                                   List<ModelCriterion> elements,
-                                   boolean edit) {
+                                 final Shell parent,
+                                 List<ModelCriterion> elements,
+                                 boolean edit) {
         super(parent);
         super.setShellStyle(super.getShellStyle() | SWT.RESIZE | SWT.MAX); 
         this.elements = elements;
@@ -136,11 +121,6 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
 
     @Override
     public boolean close() {
-        if (symbolL != null) symbolL.dispose();
-        if (symbolT != null) symbolT.dispose();
-        if (symbolK != null) symbolK.dispose();
-        if (symbolD != null) symbolD.dispose();
-        if (symbolR != null) symbolR.dispose();
         return super.close();
     }
 
@@ -261,11 +241,11 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
         column3.pack();
 
 
-        this.symbolL = controller.getResources().getImage("symbol_l.png"); //$NON-NLS-1$
-        this.symbolT = controller.getResources().getImage("symbol_t.png"); //$NON-NLS-1$
-        this.symbolK = controller.getResources().getImage("symbol_k.png"); //$NON-NLS-1$
-        this.symbolD = controller.getResources().getImage("symbol_d.png"); //$NON-NLS-1$
-        this.symbolR = controller.getResources().getImage("symbol_r.png"); //$NON-NLS-1$
+        Image symbolL = controller.getResources().getManagedImage("symbol_l.png"); //$NON-NLS-1$
+        Image symbolT = controller.getResources().getManagedImage("symbol_t.png"); //$NON-NLS-1$
+        Image symbolK = controller.getResources().getManagedImage("symbol_k.png"); //$NON-NLS-1$
+        Image symbolD = controller.getResources().getManagedImage("symbol_d.png"); //$NON-NLS-1$
+        Image symbolR = controller.getResources().getManagedImage("symbol_r.png"); //$NON-NLS-1$
         
         for (ModelCriterion c : elements) {
 

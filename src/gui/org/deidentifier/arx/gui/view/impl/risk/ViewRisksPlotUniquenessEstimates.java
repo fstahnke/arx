@@ -24,6 +24,7 @@ import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.ModelEvent;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
 import org.deidentifier.arx.gui.model.ModelRisk.ViewRiskType;
+import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.impl.common.ComponentStatusLabelProgressProvider;
 import org.deidentifier.arx.gui.view.impl.common.async.Analysis;
 import org.deidentifier.arx.gui.view.impl.common.async.AnalysisContext;
@@ -218,7 +219,15 @@ public class ViewRisksPlotUniquenessEstimates extends ViewRisks<AnalysisContextR
         // Update font
         FontData[] fd = chart.getFont().getFontData();
         fd[0].setHeight(8);
-        chart.setFont(new Font(chart.getDisplay(), fd[0]));
+        final Font font = new Font(chart.getDisplay(), fd[0]);
+        chart.setFont(font);
+        chart.addDisposeListener(new DisposeListener(){
+            public void widgetDisposed(DisposeEvent arg0) {
+                if (font != null && !font.isDisposed()) {
+                    font.dispose();
+                }
+            } 
+        });
         
         // Update title
         ITitle graphTitle = chart.getTitle();
@@ -237,11 +246,13 @@ public class ViewRisksPlotUniquenessEstimates extends ViewRisks<AnalysisContextR
             r = r>0 ? r : 0;
             r = g>0 ? g : 0;
             r = b>0 ? b : 0;
-            final Color c2 = new Color(chart.getDisplay(), r, g, b);
-            chart.setBackground(c2);
+            final Color background = new Color(chart.getDisplay(), r, g, b);
+            chart.setBackground(background);
             chart.addDisposeListener(new DisposeListener(){
                 public void widgetDisposed(DisposeEvent arg0) {
-                    c2.dispose();
+                    if (background != null && !background.isDisposed()) {
+                        background.dispose();
+                    }
                 } 
             });
         }
@@ -263,7 +274,7 @@ public class ViewRisksPlotUniquenessEstimates extends ViewRisks<AnalysisContextR
 
         // Initialize y-axis
         ITitle yAxisTitle = yAxis.getTitle();
-        yAxisTitle.setText("Frequency"); //$NON-NLS-1$
+        yAxisTitle.setText(Resources.getMessage("ViewRisksPlotUniquenessEstimates.0")); //$NON-NLS-1$
         chart.setEnabled(false);
         updateCategories();
     }

@@ -243,23 +243,23 @@ public class ARXConfiguration implements Serializable, Cloneable {
      * Creates a new config that allows the given percentage of outliers and
      * thus implements tuple suppression.
      *
-     * @param supp
+     * @param suppressionLimit
      * @return
      */
-    public static ARXConfiguration create(double supp) {
-        return new ARXConfiguration(supp);
+    public static ARXConfiguration create(double suppressionLimit) {
+        return new ARXConfiguration(suppressionLimit);
     }
 
     /**
      * Creates a new config that allows the given percentage of outliers and
      * thus implements tuple suppression. Defines the metric for measuring information loss.
      *
-     * @param supp
+     * @param suppressionLimit
      * @param metric
      * @return
      */
-    public static ARXConfiguration create(double supp, Metric<?> metric) {
-        return new ARXConfiguration(supp, metric);
+    public static ARXConfiguration create(double suppressionLimit, Metric<?> metric) {
+        return new ARXConfiguration(suppressionLimit, metric);
     }
 
     /**
@@ -854,6 +854,11 @@ public class ARXConfiguration implements Serializable, Cloneable {
         for (PrivacyCriterion c : criteria) {
             this.requirements |= c.getRequirements();
         }
+        
+        // Requirements for microaggregation
+        if (manager.getDataAnalyzed() != null) {
+            this.requirements |= ARXConfiguration.REQUIREMENT_DISTRIBUTION;
+        }
 
         // Initialize: Always make sure that d-presence is initialized first, because
         // the research subset needs to be available for initializing t-closeness
@@ -870,7 +875,7 @@ public class ARXConfiguration implements Serializable, Cloneable {
         if (this.containsCriterion(DPresence.class)) {
             dataLength = this.getCriterion(DPresence.class).getSubset().getArray().length;
         } else {
-            dataLength = manager.getDataQI().getDataLength();
+            dataLength = manager.getDataGeneralized().getDataLength();
         }
 
         // Compute max outliers
@@ -899,7 +904,7 @@ public class ARXConfiguration implements Serializable, Cloneable {
         // Compute snapshot length
         this.snapshotLength = 2;
         if (this.requires(REQUIREMENT_DISTRIBUTION)) {
-            this.snapshotLength += 2 * manager.getDataSE().getHeader().length;
+            this.snapshotLength += 2 * manager.getDataAnalyzed().getHeader().length;
         }
         if (this.requires(REQUIREMENT_SECONDARY_COUNTER)) {
             this.snapshotLength += 1;
