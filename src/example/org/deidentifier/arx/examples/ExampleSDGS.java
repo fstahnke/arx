@@ -1,4 +1,4 @@
-package org.deidentifier.arx.example;
+package org.deidentifier.arx.examples;
 
 import java.util.Map;
 
