@@ -18,15 +18,15 @@ public class RecursiveTest {
         // Define input files
         data.getDefinition()
             .setAttributeType("age",
-                              Hierarchy.create("data/test_hierarchy_age.csv",
+                              Hierarchy.create("data/adult_hierarchy_age.csv",
                                                ';'));
         data.getDefinition()
             .setAttributeType("gender",
-                              Hierarchy.create("data/test_hierarchy_gender.csv",
+                              Hierarchy.create("data/adult_hierarchy_gender.csv",
                                                ';'));
         data.getDefinition()
             .setAttributeType("zipcode",
-                              Hierarchy.create("data/test_hierarchy_zipcode.csv",
+                              Hierarchy.create("data/adult_hierarchy_zipcode.csv",
                                                ';'));
         
         
