@@ -32,8 +32,8 @@ public class RecursiveAlgorithm {
         
         // Create new data object for next anonymization step
         DefaultData outliers = Data.create();
+        outliers.getDefinition().read(data.getDefinition());
         outliers.add(inHandle.iterator().next()); // add header to outlier object
-        setupDataObject(outliers);
         // Declare list of rows that are currently suppressed
         // Be careful to always consider the header and skip it if necessary
         List<Integer> rows = new ArrayList<Integer>();
@@ -68,25 +68,5 @@ public class RecursiveAlgorithm {
             System.out.println(Arrays.toString(output[i]));
         }
         
-        
     }
-    
-    private void setupDataObject(Data data) throws IOException {
-
-        
-        // Define input files
-        data.getDefinition()
-            .setAttributeType("age",
-                              Hierarchy.create("data/test_hierarchy_age.csv",
-                                               ';'));
-        data.getDefinition()
-            .setAttributeType("gender",
-                              Hierarchy.create("data/test_hierarchy_gender.csv",
-                                               ';'));
-        data.getDefinition()
-            .setAttributeType("zipcode",
-                              Hierarchy.create("data/test_hierarchy_zipcode.csv",
-                                               ';'));
-    }
-    
 }

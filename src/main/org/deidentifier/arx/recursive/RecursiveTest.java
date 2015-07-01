@@ -13,7 +13,7 @@ public class RecursiveTest {
     public static void main(String[] args) throws IOException {
         
         RecursiveAlgorithm recursiveInstance = new RecursiveAlgorithm();
-        Data data = Data.create("data/test.csv", ';');
+        Data data = Data.create("data/adult.csv", ';');
         
         // Define input files
         data.getDefinition()

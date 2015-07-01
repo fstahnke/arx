@@ -49,7 +49,9 @@ public class DataConverter {
      */
     public String[][] toArray(DataHandle handle) {
         List<String[]> list = new ArrayList<String[]>();
-        for (Iterator<String[]> iter = handle.iterator(); iter.hasNext();) {
+        Iterator<String[]> iter = handle.iterator();
+        iter.next(); // Skip header
+        for (;iter.hasNext();) {
             list.add(iter.next());
         }
         return list.toArray(new String[list.size()][]);
@@ -64,7 +66,9 @@ public class DataConverter {
      */
     public String[][] toArray(DataHandle handle, DataHandle subset) {
         List<String[]> list = new ArrayList<String[]>();
-        for (Iterator<String[]> iter = subset.iterator(); iter.hasNext();) {
+        Iterator<String[]> iter = subset.iterator();
+        iter.next(); // Skip header
+        for (; iter.hasNext();) {
             list.add(iter.next());
         }
         
