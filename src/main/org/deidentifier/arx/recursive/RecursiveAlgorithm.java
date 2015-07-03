@@ -70,7 +70,7 @@ public class RecursiveAlgorithm {
         double outputPrecision = new UtilityMeasurePrecision<Double>(header, hierarchies).evaluate(output).getUtility();
         numOutliers = rows.size();
         
-        System.out.println("Suppressed entries: " + numOutliers + ", Utility: " + outputLoss);
+        System.out.println("Suppressed entries: " + numOutliers + ", Information Loss: " + outputLoss);
         if (rows.size() >= 2)
         // Anonymize the outliers and get the handle for the result
         result = anonymizer.anonymize(outliers, config);
