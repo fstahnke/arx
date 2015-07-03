@@ -49,7 +49,7 @@ public class RecursiveAlgorithm {
             String[] currentRow = rowIter.next();
             if (outHandle.isOutlier(i)) {
                 outliers.add(currentRow);
-                System.out.println(Arrays.toString(currentRow));
+                //System.out.println(Arrays.toString(currentRow));
                 rows.add(i);
             }
         }
@@ -65,7 +65,7 @@ public class RecursiveAlgorithm {
         }
         
         for (int i = 0; i < output.length; i++) {
-            System.out.println(Arrays.toString(output[i]));
+            //System.out.println(Arrays.toString(output[i]));
         }
         
     }
