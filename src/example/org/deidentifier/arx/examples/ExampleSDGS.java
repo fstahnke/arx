@@ -15,12 +15,14 @@ import org.deidentifier.arx.utility.UtilityMeasurePrecision;
 
 public class ExampleSDGS {
 
+    @SuppressWarnings("unused")
     public static void main(String[] args) {
         
         // ARX Stuff
         DataDefinition definition = null;
         ARXResult result = null; // TODO
         DataHandle inputHandle = null; // TODO
+        @SuppressWarnings("null")
         DataHandle outputHandle = result.getOutput();
         
         // Prepare
