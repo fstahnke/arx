@@ -74,14 +74,16 @@ public class RecursiveAlgorithm {
         if (rows.size() >= 2)
         // Anonymize the outliers and get the handle for the result
         result = anonymizer.anonymize(outliers, config);
+        inHandle = outliers.getHandle();
         outHandle = result.getOutput(false);
         
         rowIter = outHandle.iterator();
         rowIter.next(); // skip header
-        for (ListIterator<Integer> intIter = rows.listIterator(); intIter.hasNext();) {
-            int i = intIter.next();
+        ListIterator<Integer> intIter = rows.listIterator();
+        for (int i = 0; i < outHandle.getNumRows(); i++) {
+            int j = intIter.next();
             if (!inHandle.isOutlier(i)) {
-                output[i] = rowIter.next();
+                output[j] = rowIter.next();
                 numOutliers--;
             }
         }
