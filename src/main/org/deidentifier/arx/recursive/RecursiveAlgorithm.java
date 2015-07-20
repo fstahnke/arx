@@ -55,10 +55,8 @@ public class RecursiveAlgorithm {
          * and add the number of the row to the list
          */
         for (int i = 0; i < outHandle.getNumRows(); i++) {
-            String[] currentRow = rowIter.next();
             if (outHandle.isOutlier(i)) {
-                outliers.add(currentRow);
-                //System.out.println(Arrays.toString(currentRow));
+                outliers.add(rowIter.next());
                 rows.add(i);
             }
         }
