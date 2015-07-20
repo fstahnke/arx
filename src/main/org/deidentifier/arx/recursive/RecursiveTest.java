@@ -28,9 +28,9 @@ public class RecursiveTest {
         
         
         
-        ARXAnonymizer anonymizer = new ARXAnonymizer();
+        final ARXAnonymizer anonymizer = new ARXAnonymizer();
         
-        ARXConfiguration config = ARXConfiguration.create();
+        final ARXConfiguration config = ARXConfiguration.create();
         
 
         config.addCriterion(new KAnonymity(2));

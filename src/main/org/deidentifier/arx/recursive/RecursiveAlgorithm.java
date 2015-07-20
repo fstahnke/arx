@@ -31,63 +31,61 @@ public class RecursiveAlgorithm {
         DataHandle inHandle = data.getHandle();
         DataHandle outHandle = result.getOutput(false);
 
-        DataConverter converter = new DataConverter();
         // Convert input and output to array of string arrays
-        String[][] input = converter.toArray(inHandle);
+        DataConverter converter = new DataConverter();
         String[][] output = converter.toArray(outHandle);
         Map<String, String[][]> hierarchies = converter.toMap(data.getDefinition());
         String[] header = converter.getHeader(inHandle);
         
-        // Create new data object for next anonymization step
-        DefaultData outliers = Data.create();
-        outliers.getDefinition().read(data.getDefinition());
-        outliers.add(inHandle.iterator().next()); // add header to outlier object
-        int numOutliers = 0; // number of outliers
-        // Declare list of rows that are currently suppressed
-        // Be careful to always consider the header and skip it if necessary
-        List<Integer> rows = new ArrayList<Integer>();
-        // Create iterator for string arrays to iterate rows
-        Iterator<String[]> rowIter = inHandle.iterator();
-        rowIter.next(); // Skip header
+        int numOutliers = -1;
         
-        /* Iterate all rows of the input
-         * if a row is suppressed (an outlier), add it to the new data object
-         * and add the number of the row to the list
-         */
-        for (int i = 0; i < outHandle.getNumRows(); i++) {
-            if (outHandle.isOutlier(i)) {
-                outliers.add(rowIter.next());
-                rows.add(i);
+        while (numOutliers > 1 || numOutliers == -1) {
+        //for (int i = 0; i < 3; i++) {
+            
+            // Create new data object for next anonymization step
+            DefaultData outliers = Data.create();
+            outliers.getDefinition().read(data.getDefinition());
+            outliers.add(header); // add header to outlier object
+            // Declare list of rows that are currently suppressed
+            // Be careful to always consider the header and skip it if necessary
+            List<Integer> rows = new ArrayList<Integer>();
+            // Create iterator for string arrays to iterate rows
+            Iterator<String[]> rowIter = inHandle.iterator();
+            rowIter.next(); // Skip header
+            
+            /* Iterate all rows of the input
+             * if a row is suppressed (an outlier), add it to the new data object
+             * and add the number of the row to the list
+             */
+            for (int j = 0; j < outHandle.getNumRows(); j++) {
+                if (outHandle.isOutlier(j)) {
+                    outliers.add(rowIter.next());
+                    rows.add(j);
+                }
+            }
+            
+            // Calculate and print the current loss of the output and the number of suppressed entries
+            double outputLoss = new UtilityMeasureLoss<Double>(header, hierarchies, AggregateFunction.GEOMETRIC_MEAN).evaluate(output).getUtility();
+            numOutliers = rows.size();
+            System.out.println("Suppressed entries: " + numOutliers + ", Information Loss: " + outputLoss);
+            
+            if (numOutliers > 1) {
+             // Anonymize the outliers and get the handle for the result
+                result = anonymizer.anonymize(outliers, config);
+                inHandle = outliers.getHandle();
+                outHandle = result.getOutput(false);
+                
+                // Iterate over result and write all non-outliers to the output
+                rowIter = outHandle.iterator();
+                rowIter.next(); // skip header
+                ListIterator<Integer> intIter = rows.listIterator();
+                for (int j = 0; j < outHandle.getNumRows(); j++) {
+                    int k = intIter.next();
+                    if (!outHandle.isOutlier(j)) {
+                        output[k] = rowIter.next();
+                    }
+                }
             }
         }
-
-        double outputAECS = new UtilityMeasureAECS().evaluate(output).getUtility();
-        double outputDiscernibility = new UtilityMeasureDiscernibility().evaluate(output).getUtility();
-        double outputLoss = new UtilityMeasureLoss<Double>(header, hierarchies, AggregateFunction.GEOMETRIC_MEAN).evaluate(output).getUtility();
-        double outputEntropy = new UtilityMeasureNonUniformEntropy<Double>(header, input).evaluate(output).getUtility();
-        double outputPrecision = new UtilityMeasurePrecision<Double>(header, hierarchies).evaluate(output).getUtility();
-        numOutliers = rows.size();
-        
-        System.out.println("Suppressed entries: " + numOutliers + ", Information Loss: " + outputLoss);
-        if (rows.size() >= 2)
-        // Anonymize the outliers and get the handle for the result
-        result = anonymizer.anonymize(outliers, config);
-        inHandle = outliers.getHandle();
-        outHandle = result.getOutput(false);
-        
-        rowIter = outHandle.iterator();
-        rowIter.next(); // skip header
-        ListIterator<Integer> intIter = rows.listIterator();
-        for (int i = 0; i < outHandle.getNumRows(); i++) {
-            int j = intIter.next();
-            if (!inHandle.isOutlier(i)) {
-                output[j] = rowIter.next();
-                numOutliers--;
-            }
-        }
-        
-        outputLoss = new UtilityMeasureLoss<Double>(header, hierarchies, AggregateFunction.GEOMETRIC_MEAN).evaluate(output).getUtility();
-        System.out.println("Suppressed entries: " + numOutliers + ", Utility: " + outputLoss);
-        
     }
 }
