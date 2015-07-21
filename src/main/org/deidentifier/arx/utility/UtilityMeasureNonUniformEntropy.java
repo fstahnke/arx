@@ -63,9 +63,10 @@ public class UtilityMeasureNonUniformEntropy<T> extends UtilityMeasureAggregatab
     /**
      * Evaluates the utility measure
      * @param output
+     * @param transformation
      * @return
      */
-    public double[] evaluateAggregatable(String[][] output) {
+    protected double[] evaluateAggregatable(String[][] output, int[] transformation) {
         
         Map<String, Map<String, Double>> frequencyOutput = getFrequency(header, output);
 

@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.deidentifier.arx.DataDefinition;
 import org.deidentifier.arx.DataHandle;
+import org.deidentifier.arx.DataSubset;
 
 public class DataConverter {
 
@@ -40,6 +41,36 @@ public class DataConverter {
             header[i] = handle.getAttributeName(i);
         }
         return header;
+    }
+
+    /**
+     * Returns an array representation of the dataset. Extracts all attributes that are defined
+     * as quasi-identifiers in the given definition 
+     * 
+     * @param handle
+     * @param definition
+     * @return
+     */
+    public String[][] toArray(DataHandle handle, DataDefinition definition) {
+        
+        List<Integer> indices = new ArrayList<Integer>();
+        for (String attribute : definition.getQuasiIdentifyingAttributes()) {
+            indices.add(handle.getColumnIndexOf(attribute));
+        }
+        
+        List<String[]> list = new ArrayList<String[]>();
+        Iterator<String[]> iter = handle.iterator();
+        iter.next(); // Skip header
+        for (;iter.hasNext();) {
+            String[] input = iter.next();
+            String[] output = new String[indices.size()];
+            int i = 0;
+            for (int index : indices) {
+                output[i++] = input[index];
+            }
+            list.add(output);
+        }
+        return list.toArray(new String[list.size()][]);
     }
     
     /**
@@ -59,7 +90,9 @@ public class DataConverter {
     
     /**
      * Returns an array representation of the subset, in which all rows that are not part of the
-     * subset have been suppressed
+     * subset have been suppressed. This method does *not* preserve the order of tuples from the
+     * input handle.
+     * 
      * @param handle
      * @param subset
      * @return
@@ -76,6 +109,37 @@ public class DataConverter {
         Arrays.fill(suppressed, "*"); // TODO
         for (int i = 0; i < handle.getNumRows() - subset.getNumRows(); i++) {
             list.add(suppressed);
+        }
+        
+        return list.toArray(new String[list.size()][]);
+    }
+
+    /**
+     * Returns an array representation of the subset, in which all rows that are not part of the
+     * subset have been suppressed. This method *does* preserve the order of tuples from the
+     * input handle.
+     * 
+     * @param handle
+     * @param subset
+     * @return
+     */
+    public String[][] toArray(DataHandle handle, DataSubset subset) {
+        
+        List<String[]> list = new ArrayList<String[]>();
+        String[] suppressed = new String[handle.getNumColumns()];
+        Arrays.fill(suppressed, "*"); // TODO
+        
+        Iterator<String[]> iter = handle.iterator();
+        iter.next(); // Skip header
+        int row = 0;
+        for (; iter.hasNext();) {
+            if (subset.getSet().contains(row)) {
+                list.add(iter.next());
+            } else {
+                list.add(suppressed);
+                iter.next();
+            }
+            row++;
         }
         
         return list.toArray(new String[list.size()][]);

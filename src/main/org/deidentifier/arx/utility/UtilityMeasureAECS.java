@@ -33,9 +33,10 @@ public class UtilityMeasureAECS extends UtilityMeasure<Double>{
     /**
      * Evaluates the utility measure
      * @param input
+     * @param transformation
      * @return
      */
-    public Utility<Double> evaluate(String[][] input) {
+    public Utility<Double> evaluate(String[][] input, int[] transformation) {
         
         HashGroupify<StringArray> table = new HashGroupify<StringArray>(10);
         for (String[] row : input) {

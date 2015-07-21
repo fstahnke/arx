@@ -56,13 +56,14 @@ public class UtilityMeasureLoss<T> extends UtilityMeasureAggregatable<T>{
         }
     }
 
+
     /**
      * Evaluates the utility measure
-     * @param header
-     * @param input
+     * @param output
+     * @param transformation
      * @return
      */
-    public double[] evaluateAggregatable(String[][] input) {
+    protected double[] evaluateAggregatable(String[][] input, int[] transformation) {
         
         double[] result = new double[input[0].length];
         

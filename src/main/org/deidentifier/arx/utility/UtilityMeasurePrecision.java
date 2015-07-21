@@ -57,12 +57,12 @@ public class UtilityMeasurePrecision<T> extends UtilityMeasureAggregatable<T>{
     }
 
     /**
-     * Evaluates the measure
-     * @param header
-     * @param input
+     * Evaluates the utility measure
+     * @param output
+     * @param transformation
      * @return
      */
-    public double[] evaluateAggregatable(String[][] input) {
+    protected double[] evaluateAggregatable(String[][] input, int[] transformation) {
         
         double[] result = new double[input[0].length];
         

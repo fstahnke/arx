@@ -32,9 +32,9 @@ public abstract class UtilityMeasureAggregatable<T> extends UtilityMeasure<T>{
     }
 
     @Override
-    public Utility<T> evaluate(String[][] input) {
-        return function.aggregate(evaluateAggregatable(input));
+    public Utility<T> evaluate(String[][] input, int[] transformation) {
+        return function.aggregate(evaluateAggregatable(input, transformation));
     }
 
-    protected abstract double[] evaluateAggregatable(String[][] input);
+    protected abstract double[] evaluateAggregatable(String[][] input, int[] transformation);
 }
