@@ -1,6 +1,7 @@
 package org.deidentifier.arx;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,6 +9,7 @@ import org.deidentifier.arx.clustering.GeneralizationManager;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.LDiversity;
 import org.deidentifier.arx.criteria.TCloseness;
+import org.deidentifier.arx.framework.check.distribution.DistributionAggregateFunction;
 import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.Dictionary;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
@@ -84,7 +86,7 @@ public class ARXInterface {
 
         // Encode data
         DataHandle handle = data.getHandle();
-        handle.getDefinition().materialize(handle);
+        handle.getDefinition().materializeHierarchies(handle);
         checkBeforeEncoding(handle, config);
         handle.getRegistry().reset();
         handle.getRegistry().createInputSubset(config);
@@ -92,7 +94,7 @@ public class ARXInterface {
         String[] header = ((DataHandleInput) handle).header;
         int[][] dataArray = ((DataHandleInput) handle).data;
         Dictionary dictionary = ((DataHandleInput) handle).dictionary;
-        manager = new DataManager(header, dataArray, dictionary, handle.getDefinition(), config.getCriteria());
+        manager = new DataManager(header, dataArray, dictionary, handle.getDefinition(), config.getCriteria(), new HashMap<String, DistributionAggregateFunction>());
 
         // Initialize
         this.config = config;
@@ -118,16 +120,7 @@ public class ARXInterface {
      * @return the data qi
      */
     public int[][] getDataQI() {
-        return manager.getDataQI().getArray();
-    }
-
-	/**
-	 * Returns the input data array (sensitive attributes).
-	 *
-	 * @return the data se
-	 */
-    public int[][] getDataSE() {
-        return manager.getDataSE().getArray();
+        return manager.getDataGeneralized().getArray();
     }
 
     /**
@@ -156,7 +149,7 @@ public class ARXInterface {
      * @return the attribute
      */
     public String getAttribute(int index) {
-        return manager.getDataQI().getHeader()[index];
+        return manager.getDataGeneralized().getHeader()[index];
     }
 
     /**
@@ -187,14 +180,14 @@ public class ARXInterface {
 
         if (config.containsCriterion(KAnonymity.class)) {
             KAnonymity c = config.getCriterion(KAnonymity.class);
-            if ((c.getK() > manager.getDataQI().getDataLength()) || (c.getK() < 1)) {
-                throw new IllegalArgumentException("Parameter k (" + c.getK() + ") musst be positive and less or equal than the number of rows (" + manager.getDataQI().getDataLength() + ")");
+            if ((c.getK() > manager.getDataGeneralized().getDataLength()) || (c.getK() < 1)) {
+                throw new IllegalArgumentException("Parameter k (" + c.getK() + ") musst be positive and less or equal than the number of rows (" + manager.getDataGeneralized().getDataLength() + ")");
             }
         }
         if (config.containsCriterion(LDiversity.class)) {
             for (LDiversity c : config.getCriteria(LDiversity.class)) {
-                if ((c.getL() > manager.getDataQI().getDataLength()) || (c.getL() < 1)) {
-                    throw new IllegalArgumentException("Parameter l (" + c.getL() + ") musst be positive and less or equal than the number of rows (" + manager.getDataQI().getDataLength() + ")");
+                if ((c.getL() > manager.getDataGeneralized().getDataLength()) || (c.getL() < 1)) {
+                    throw new IllegalArgumentException("Parameter l (" + c.getL() + ") musst be positive and less or equal than the number of rows (" + manager.getDataGeneralized().getDataLength() + ")");
                 }
             }
         }
@@ -205,9 +198,9 @@ public class ARXInterface {
         }
 
         // check min and max sizes
-        final int[] hierarchyHeights = manager.getHierachyHeights();
-        final int[] minLevels = manager.getMinLevels();
-        final int[] maxLevels = manager.getMaxLevels();
+        final int[] hierarchyHeights = manager.getHierachiesHeights();
+        final int[] minLevels = manager.getHierarchiesMinLevels();
+        final int[] maxLevels = manager.getHierarchiesMaxLevels();
 
         for (int i = 0; i < hierarchyHeights.length; i++) {
             if (minLevels[i] > (hierarchyHeights[i] - 1)) {

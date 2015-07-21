@@ -34,7 +34,6 @@ public class ExampleTassa {
         ARXInterface iface = new ARXInterface(data, config);
         
         iface.getDataQI();
-        iface.getDataSE();
         iface.getBuffer(); 
         iface.getHierarchy(0);
         iface.getAttribute(0);
