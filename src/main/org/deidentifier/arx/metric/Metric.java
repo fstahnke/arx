@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,14 @@ import java.util.Map;
 
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.DataDefinition;
-import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
+import org.deidentifier.arx.RowSet;
+import org.deidentifier.arx.criteria.PrivacyCriterion;
 import org.deidentifier.arx.framework.check.groupify.HashGroupify;
+import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.data.Data;
+import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
-import org.deidentifier.arx.framework.lattice.Node;
+import org.deidentifier.arx.framework.lattice.Transformation;
 import org.deidentifier.arx.metric.v2.AbstractILMultiDimensional;
 import org.deidentifier.arx.metric.v2.AbstractMetricMultiDimensional;
 import org.deidentifier.arx.metric.v2.ILSingleDimensional;
@@ -43,10 +46,15 @@ import org.deidentifier.arx.metric.v2.MetricMDNUEntropyPrecomputed;
 import org.deidentifier.arx.metric.v2.MetricMDNUNMEntropy;
 import org.deidentifier.arx.metric.v2.MetricMDNUNMEntropyPotentiallyPrecomputed;
 import org.deidentifier.arx.metric.v2.MetricMDNUNMEntropyPrecomputed;
+import org.deidentifier.arx.metric.v2.MetricMDNUNMNormalizedEntropy;
+import org.deidentifier.arx.metric.v2.MetricMDNUNMNormalizedEntropyPotentiallyPrecomputed;
+import org.deidentifier.arx.metric.v2.MetricMDNUNMNormalizedEntropyPrecomputed;
 import org.deidentifier.arx.metric.v2.MetricMDPrecision;
 import org.deidentifier.arx.metric.v2.MetricSDAECS;
 import org.deidentifier.arx.metric.v2.MetricSDDiscernability;
+import org.deidentifier.arx.metric.v2.MetricSDNMAmbiguity;
 import org.deidentifier.arx.metric.v2.MetricSDNMDiscernability;
+import org.deidentifier.arx.metric.v2.MetricSDNMKLDivergence;
 import org.deidentifier.arx.metric.v2.__MetricV2;
 
 /**
@@ -57,7 +65,7 @@ import org.deidentifier.arx.metric.v2.__MetricV2;
  * @param <T>
  */
 public abstract class Metric<T extends InformationLoss<?>> implements Serializable {
-    
+
     /**
      * Pluggable aggregate functions.
      *
@@ -101,10 +109,10 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     
     /**  TODO */
     private static final long serialVersionUID = -2657745103125430229L;
-
+    
     /** For comparisons. */
     private static final double DIGITS           = 10d;
-
+    
     /** For comparisons. */
     private static final double FACTOR           = Math.pow(10d, DIGITS);
     
@@ -116,7 +124,30 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public static Metric<ILSingleDimensional> createAECSMetric() {
         return __MetricV2.createAECSMetric();
     }
-    
+
+    /**
+     * Creates a new instance of the AECS metric.
+     * 
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * 
+     * @return
+     */
+    public static Metric<ILSingleDimensional> createAECSMetric(double gsFactor) {
+        return __MetricV2.createAECSMetric(gsFactor);
+    }
+    /**
+     * Creates an instance of the ambiguity metric.
+     *
+     * @return
+     */
+    public static Metric<ILSingleDimensional> createAmbiguityMetric() {
+        return __MetricV2.createAmbiguityMetric();
+    }
 
     /**
      * Creates an instance of the discernability metric.
@@ -126,8 +157,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public static Metric<ILSingleDimensional> createDiscernabilityMetric() {
         return __MetricV2.createDiscernabilityMetric();
     }
-
-
+    
     /**
      * Creates an instance of the discernability metric. The monotonic variant is DM*.
      * 
@@ -137,7 +167,6 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public static Metric<ILSingleDimensional> createDiscernabilityMetric(boolean monotonic) {
         return __MetricV2.createDiscernabilityMetric(monotonic);
     }
-    
 
     /**
      * Creates an instance of the non-monotonic non-uniform entropy metric. The default aggregate function,
@@ -179,6 +208,64 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
 
 
     /**
+     * Creates an instance of the non-monotonic non-uniform entropy metric. The default aggregate function,
+     * which is the sum-function, will be used for comparing results.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createEntropyMetric(double gsFactor) {
+        return __MetricV2.createEntropyMetric(gsFactor);
+    }
+    
+    /**
+     * Creates an instance of the non-uniform entropy metric. The default aggregate function,
+     * which is the sum-function, will be used for comparing results.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * 
+     * @param monotonic If set to true, the monotonic variant of the metric will be created
+     * 
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createEntropyMetric(boolean monotonic, double gsFactor) {
+        return __MetricV2.createEntropyMetric(monotonic, gsFactor);
+    }
+    
+
+    /**
+     * Creates an instance of the non-uniform entropy metric.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param monotonic If set to true, the monotonic variant of the metric will be created
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @param function The aggregate function to be used for comparing results
+     * 
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createEntropyMetric(boolean monotonic, double gsFactor, AggregateFunction function) {
+        return __MetricV2.createEntropyMetric(monotonic, gsFactor, function);
+    }
+
+    
+    /**
      * Creates an instance of the height metric. The default aggregate function, which is the sum-function,
      * will be used for comparing results.
      * This metric will respect attribute weights defined in the configuration.
@@ -200,6 +287,17 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public static Metric<AbstractILMultiDimensional> createHeightMetric(AggregateFunction function) {
         return __MetricV2.createHeightMetric(function);
     }
+    
+
+    /**
+     * Creates an instance of the KL Divergence metric.
+     *
+     * @return
+     */
+    public static Metric<ILSingleDimensional> createKLDivergenceMetric() {
+        return __MetricV2.createKLDivergenceMetric();
+    }
+
 
     /**
      * Creates an instance of the loss metric which treats generalization and suppression equally.
@@ -275,7 +373,29 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
             return createMetric(metric);
         }
     }
-    
+
+    /**
+     * Creates an instance of the normalized entropy metric.
+     * The default aggregate function, which is the sum function, will be used.
+     * This metric will respect attribute weights defined in the configuration.
+     *
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createNormalizedEntropyMetric() {
+        return __MetricV2.createNormalizedEntropyMetric();
+    }
+
+    /**
+     * Creates an instance of the normalized entropy metric.
+     * This metric will respect attribute weights defined in the configuration.
+     *
+     * @param function The aggregate function to use for comparing results
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createNormalizedEntropyMetric(AggregateFunction function) {
+        return __MetricV2.createNormalizedEntropyMetric(function);
+    }
+
     /**
      * Creates an instance of the non-monotonic precision metric.
      * The default aggregate function, which is the arithmetic mean, will be used.
@@ -298,6 +418,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public static Metric<AbstractILMultiDimensional> createPrecisionMetric(AggregateFunction function) {
         return __MetricV2.createPrecisionMetric(function);
     }
+    
     /**
      * Creates an instance of the precision metric.
      * The default aggregate function, which is the arithmetic mean, will be used.
@@ -311,7 +432,6 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
         return __MetricV2.createPrecisionMetric(monotonic);
     }
 
-    
     /**
      * Creates an instance of the precision metric.
      * This metric will respect attribute weights defined in the configuration.
@@ -322,6 +442,79 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      */
     public static Metric<AbstractILMultiDimensional> createPrecisionMetric(boolean monotonic, AggregateFunction function) {
         return __MetricV2.createPrecisionMetric(monotonic, function);
+    }
+    
+
+    /**
+     * Creates an instance of the non-monotonic precision metric.
+     * The default aggregate function, which is the arithmetic mean, will be used.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createPrecisionMetric(double gsFactor) {
+        return __MetricV2.createPrecisionMetric(gsFactor);
+    }
+
+    /**
+     * Creates an instance of the non-monotonic precision metric.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param function The aggregate function to use for comparing results
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * 
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createPrecisionMetric(double gsFactor, AggregateFunction function) {
+        return __MetricV2.createPrecisionMetric(gsFactor, function);
+    }
+    
+    /**
+     * Creates an instance of the precision metric.
+     * The default aggregate function, which is the arithmetic mean, will be used.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param monotonic If set to true, the monotonic variant of the metric will be created
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * 
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createPrecisionMetric(boolean monotonic, double gsFactor) {
+        return __MetricV2.createPrecisionMetric(monotonic, gsFactor);
+    }
+
+    /**
+     * Creates an instance of the precision metric.
+     * This metric will respect attribute weights defined in the configuration.
+     *
+     * @param monotonic If set to true, the monotonic variant of the metric will be created
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @param function
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createPrecisionMetric(boolean monotonic, double gsFactor, AggregateFunction function) {
+        return __MetricV2.createPrecisionMetric(monotonic, gsFactor, function);
     }
 
     /**
@@ -338,7 +531,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
         return __MetricV2.createPrecomputedEntropyMetric(threshold);
     }
 
-
+    
     /**
      * Creates a potentially precomputed instance of the non-uniform entropy metric. The default aggregate function,
      * which is the sum-function, will be used for comparing results.
@@ -369,6 +562,76 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
         return __MetricV2.createPrecomputedEntropyMetric(threshold, monotonic, function);
     }
 
+
+    /**
+     * Creates a potentially precomputed instance of the non-monotonic non-uniform entropy metric. The default aggregate function,
+     * which is the sum-function, will be used for comparing results.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param threshold The precomputed variant of the metric will be used if 
+     *                  #distinctValues / #rows <= threshold for all quasi-identifiers.
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     *                  
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createPrecomputedEntropyMetric(double threshold, double gsFactor) {
+        return __MetricV2.createPrecomputedEntropyMetric(threshold, gsFactor);
+    }
+
+    
+    /**
+     * Creates a potentially precomputed instance of the non-uniform entropy metric. The default aggregate function,
+     * which is the sum-function, will be used for comparing results.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param threshold The precomputed variant of the metric will be used if 
+     *                  #distinctValues / #rows <= threshold for all quasi-identifiers.
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @param monotonic If set to true, the monotonic variant of the metric will be created
+     * 
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createPrecomputedEntropyMetric(double threshold, boolean monotonic, double gsFactor) {
+        return __MetricV2.createPrecomputedEntropyMetric(threshold, monotonic, gsFactor);
+    }
+
+    /**
+     * Creates a potentially precomputed instance of the non-uniform entropy metric.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param threshold The precomputed variant of the metric will be used if 
+     *                  #distinctValues / #rows <= threshold for all quasi-identifiers.
+     * @param monotonic If set to true, the monotonic variant of the metric will be created
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @param function The aggregate function to be used for comparing results
+     * 
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createPrecomputedEntropyMetric(double threshold, boolean monotonic, double gsFactor, AggregateFunction function) {
+        return __MetricV2.createPrecomputedEntropyMetric(threshold, monotonic, gsFactor, function);
+    }
+    
     /**
      * Creates a potentially precomputed instance of the loss metric which treats generalization
      * and suppression equally.
@@ -395,7 +658,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public static Metric<AbstractILMultiDimensional> createPrecomputedLossMetric(double threshold, AggregateFunction function) {
         return __MetricV2.createPrecomputedLossMetric(threshold, function);
     }
-    
+
     /**
      * Creates a potentially precomputed instance of the loss metric with factors for weighting generalization and suppression.
      * The default aggregate function, which is the rank function, will be used.
@@ -415,7 +678,6 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public static Metric<AbstractILMultiDimensional> createPrecomputedLossMetric(double threshold, double gsFactor) {
         return __MetricV2.createPrecomputedLossMetric(threshold, gsFactor);
     }
-    
 
     /**
      * Creates a potentially precomputed instance of the loss metric with factors for weighting generalization and suppression.
@@ -435,6 +697,35 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      */
     public static Metric<AbstractILMultiDimensional> createPrecomputedLossMetric(double threshold, double gsFactor, AggregateFunction function) {
         return __MetricV2.createPrecomputedLossMetric(threshold, gsFactor, function);
+    }
+    
+    /**
+     * Creates a potentially precomputed instance of the normalized entropy metric.
+     * The default aggregate function, which is the sum function, will be used.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param threshold The precomputed variant of the metric will be used if
+     *            #distinctValues / #rows <= threshold for all quasi-identifiers.
+     *
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createPrecomputedNormalizedEntropyMetric(double threshold) {
+        return __MetricV2.createPrecomputedNormalizedEntropyMetric(threshold);
+    }
+    
+
+    /**
+     * Creates a potentially precomputed instance of the normalized entropy metric.
+     * This metric will respect attribute weights defined in the configuration.
+     * 
+     * @param threshold The precomputed variant of the metric will be used if
+     *            #distinctValues / #rows <= threshold for all quasi-identifiers.
+     *
+     * @param function The aggregate function to use for comparing results
+     * @return
+     */
+    public static Metric<AbstractILMultiDimensional> createPrecomputedNormalizedEntropyMetric(double threshold, AggregateFunction function) {
+        return __MetricV2.createPrecomputedNormalizedEntropyMetric(threshold, function);
     }
 
 
@@ -475,7 +766,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
                new MetricDescription("Average equivalence class size",
                                      false,  // monotonic variant supported
                                      false,  // attribute weights supported
-                                     false,  // configurable coding model supported
+                                     true,  // configurable coding model supported
                                      false,  // pre-computation supported
                                      false){ // aggregate function supported
 
@@ -483,7 +774,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
 
                                     @Override
                                      public Metric<?> createInstance(MetricConfiguration config) {
-                                         return createAECSMetric();
+                                         return createAECSMetric(config.getGsFactor());
                                      }
 
                                     @Override
@@ -561,7 +852,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
                new MetricDescription("Non-uniform entropy",
                                      true,  // monotonic variant supported
                                      true,  // attribute weights supported
-                                     false, // configurable coding model supported
+                                     true, // configurable coding model supported
                                      true,  // pre-computation supported
                                      true){ // aggregate function supported
 
@@ -572,27 +863,33 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
                                          if (config.isPrecomputed()) {
                                              return createPrecomputedEntropyMetric(config.getPrecomputationThreshold(), 
                                                                                    config.isMonotonic(),
+                                                                                   config.getGsFactor(),
                                                                                    config.getAggregateFunction());                                             
                                          } else {
                                              return createEntropyMetric(config.isMonotonic(), 
+                                                                        config.getGsFactor(),
                                                                         config.getAggregateFunction());
                                          }
                                      } 
 
                                      @Override
                                      public boolean isInstance(Metric<?> metric) {
-                                         return (metric instanceof MetricMDNUEntropy) ||
-                                                (metric instanceof MetricMDNUEntropyPrecomputed) ||
-                                                (metric instanceof MetricMDNUEntropyPotentiallyPrecomputed) ||
-                                                (metric instanceof MetricMDNUNMEntropy) ||
-                                                (metric instanceof MetricMDNUNMEntropyPrecomputed) ||
-                                                (metric instanceof MetricMDNUNMEntropyPotentiallyPrecomputed);
+                                         return ((metric instanceof MetricMDNUEntropy) ||
+                                                 (metric instanceof MetricMDNUEntropyPrecomputed) ||
+                                                 (metric instanceof MetricMDNUEntropyPotentiallyPrecomputed) ||
+                                                 (metric instanceof MetricMDNUNMEntropy) ||
+                                                 (metric instanceof MetricMDNUNMEntropyPrecomputed) ||
+                                                 (metric instanceof MetricMDNUNMEntropyPotentiallyPrecomputed)) 
+                                                &&! 
+                                                ((metric instanceof MetricMDNUNMNormalizedEntropy) ||
+                                                 (metric instanceof MetricMDNUNMNormalizedEntropyPrecomputed) ||
+                                                 (metric instanceof MetricMDNUNMNormalizedEntropyPotentiallyPrecomputed));
                                      } 
                },
                new MetricDescription("Precision",
                                      true,  // monotonic variant supported
                                      true,  // attribute weights supported
-                                     false, // configurable coding model supported
+                                     true,  // configurable coding model supported
                                      false, // pre-computation supported
                                      true){ // aggregate function supported
 
@@ -601,6 +898,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
                                     @Override
                                      public Metric<?> createInstance(MetricConfiguration config) {
                                          return createPrecisionMetric(config.isMonotonic(), 
+                                                                      config.getGsFactor(),
                                                                       config.getAggregateFunction());
                                      }        
 
@@ -609,7 +907,75 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
                                          return (metric instanceof MetricMDPrecision) ||
                                                 (metric instanceof MetricMDNMPrecision);
                                      } 
-               }
+               },
+               new MetricDescription("Ambiguity",
+                                     false,   // monotonic variant supported
+                                     false,  // attribute weights supported
+                                     false,  // configurable coding model supported
+                                     false,  // pre-computation supported
+                                     false){ // aggregate function supported
+
+                                    /** SVUID */
+                                    private static final long serialVersionUID = 3549715700376537750L;
+                                    
+                                    @Override
+                                     public Metric<?> createInstance(MetricConfiguration config) {
+                                         return createAmbiguityMetric();
+                                     } 
+
+                                     @Override
+                                     public boolean isInstance(Metric<?> metric) {
+                                         return (metric instanceof MetricSDNMAmbiguity);
+                                     } 
+               },
+               new MetricDescription("Normalized non-uniform entropy",
+                                     false,  // monotonic variant supported
+                                     true,  // attribute weights supported
+                                     false, // configurable coding model supported
+                                     true,  // pre-computation supported
+                                     true){ // aggregate function supported
+
+
+                                    /** SVUID*/
+                                    private static final long serialVersionUID = 8536219303137546137L;
+
+                                    @Override
+                                     public Metric<?> createInstance(MetricConfiguration config) {
+                                         if (config.isPrecomputed()) {
+                                             return createPrecomputedNormalizedEntropyMetric(config.getPrecomputationThreshold(), 
+                                                                                             config.getAggregateFunction());                                             
+                                         } else {
+                                             return createNormalizedEntropyMetric(config.getAggregateFunction());
+                                         }
+                                     } 
+
+                                     @Override
+                                     public boolean isInstance(Metric<?> metric) {
+                                         return (metric instanceof MetricMDNUNMNormalizedEntropy) ||
+                                                (metric instanceof MetricMDNUNMNormalizedEntropyPrecomputed) ||
+                                                (metric instanceof MetricMDNUNMNormalizedEntropyPotentiallyPrecomputed);
+                                     } 
+               },
+               new MetricDescription("KL-Divergence",
+                                     false,   // monotonic variant supported
+                                     false,  // attribute weights supported
+                                     false,  // configurable coding model supported
+                                     false,  // pre-computation supported
+                                     false){ // aggregate function supported
+                   
+                                     /** SVUID */
+                                     private static final long serialVersionUID = 6152052294903443361L;
+
+                                     @Override
+                                     public Metric<?> createInstance(MetricConfiguration config) {
+                                         return createKLDivergenceMetric();
+                                     } 
+
+                                     @Override
+                                     public boolean isInstance(Metric<?> metric) {
+                                         return (metric instanceof MetricSDNMKLDivergence);
+                                     } 
+               },
         });
     }
 
@@ -622,7 +988,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     private static Metric<?> createMetric(Metric<?> metric) {
         
         if (metric instanceof MetricAECS) {
-            return __MetricV2.createAECSMetric(((MetricAECS)metric).getRowCount());
+            return __MetricV2.createAECSMetric((int)((MetricAECS)metric).getRowCount());
         } else if (metric instanceof MetricDM) {
             return __MetricV2.createDiscernabilityMetric(false, ((MetricDM)metric).getRowCount());
         } else if (metric instanceof MetricDMStar) {
@@ -670,7 +1036,15 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
 
     /** Is the metric monotonic?. */
     private boolean           monotonic        = false;
+
+    /** Configuration factor. */
+    private final Double      gFactor;
+
+    /** Configuration factor. */
+    private final Double      gsFactor;
     
+    /** Configuration factor. */
+    private final Double      sFactor;
 
     /**
      * Create a new metric.
@@ -678,9 +1052,15 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      * @param monotonic
      * @param independent
      */
-    protected Metric(final boolean monotonic, final boolean independent) {
+    protected Metric(final boolean monotonic, final boolean independent, final double gsFactor) {
         this.monotonic = monotonic;
         this.independent = independent;
+        if (gsFactor < 0d || gsFactor > 1d) {
+            throw new IllegalArgumentException("Parameter must be in [0, 1]");
+        }
+        this.gsFactor = gsFactor;
+        this.sFactor = gsFactor <  0.5d ? 2d * gsFactor : 1d;
+        this.gFactor = gsFactor <= 0.5d ? 1d            : 1d - 2d * (gsFactor - 0.5d);
     }
     
     /**
@@ -696,7 +1076,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      * @return
      */
     public abstract InformationLoss<?> createMinInformationLoss();
-
+    
     /**
      * Returns the aggregate function of a multi-dimensional metric, null otherwise.
      *
@@ -714,7 +1094,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public MetricConfiguration getConfiguration() {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Returns a description of this metric.
      *
@@ -722,6 +1102,40 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      */
     public MetricDescription getDescription() {
         return Metric.getDescription(this);
+    }
+
+    /**
+     * Returns the factor used weight generalized values.
+     *
+     * @return
+     */
+    public double getGeneralizationFactor() {
+        return gFactor != null ? gFactor : 1d;
+    }
+    
+    /**
+     * Returns the factor weighting generalization and suppression.
+     *
+     * @return A factor [0,1] weighting generalization and suppression.
+     *         The default value is 0.5, which means that generalization
+     *         and suppression will be treated equally. A factor of 0
+     *         will favor suppression, and a factor of 1 will favor
+     *         generalization. The values in between can be used for
+     *         balancing both methods.
+     */
+    public double getGeneralizationSuppressionFactor() {
+        return gsFactor != null ? gsFactor : 0.5d;
+    }
+    
+    /**
+     * Evaluates the metric for the given node.
+     *
+     * @param node The node for which to compute the information loss
+     * @param groupify The groupify operator of the previous check
+     * @return the information loss
+     */
+    public final InformationLossWithBound<T> getInformationLoss(final Transformation node, final HashGroupify groupify) {
+        return this.getInformationLossInternal(node, groupify);
     }
     
     /**
@@ -733,19 +1147,8 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      * @param entry
      * @return
      */
-    public final InformationLossWithBound<T> getInformationLoss(final Node node, final HashGroupifyEntry entry) {
+    public final InformationLossWithBound<T> getInformationLoss(final Transformation node, final HashGroupifyEntry entry) {
         return this.getInformationLossInternal(node, entry);
-    }
-    
-    /**
-     * Evaluates the metric for the given node.
-     *
-     * @param node The node for which to compute the information loss
-     * @param groupify The groupify operator of the previous check
-     * @return the information loss
-     */
-    public final InformationLossWithBound<T> getInformationLoss(final Node node, final HashGroupify groupify) {
-        return this.getInformationLossInternal(node, groupify);
     }
     
     /**
@@ -758,15 +1161,14 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      * @return
      */
     @SuppressWarnings("unchecked")
-    public T getLowerBound(final Node node) {
+    public T getLowerBound(final Transformation node) {
         if (node.getLowerBound() != null) {
             return (T)node.getLowerBound();
         } else {
             return getLowerBoundInternal(node);
         }
     }
-
-
+    
     /**
      * Returns a lower bound for the information loss for the given node.
      * This can be used to expose the results of monotonic shares of a metric,
@@ -778,14 +1180,15 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      * @return
      */
     @SuppressWarnings("unchecked")
-    public T getLowerBound(final Node node, final HashGroupify groupify) {
+    public T getLowerBound(final Transformation node, final HashGroupify groupify) {
         if (node.getLowerBound() != null) {
             return (T)node.getLowerBound();
         } else {
             return getLowerBoundInternal(node, groupify);
         }
     }
-    
+
+
     /**
      * Returns the name of metric.
      *
@@ -796,15 +1199,25 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     }
     
     /**
+     * Returns the factor used to weight suppressed values.
+     *
+     * @return
+     */
+    public double getSuppressionFactor() {
+        return sFactor != null ? sFactor : 1d;
+    }
+    
+    /**
      * Initializes the metric.
      *
+     * @param manager
      * @param definition
      * @param input
      * @param hierarchies
      * @param config
      */
-    public final void initialize(final DataDefinition definition, final Data input, final GeneralizationHierarchy[] hierarchies, final ARXConfiguration config) {
-        initializeInternal(definition, input, hierarchies, config);
+    public final void initialize(final DataManager manager, final DataDefinition definition, final Data input, final GeneralizationHierarchy[] hierarchies, final ARXConfiguration config) {
+        initializeInternal(manager, definition, input, hierarchies, config);
     }
 
     /**
@@ -816,7 +1229,6 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public boolean isIndependent() {
         return independent;
     }
-
     /**
      * Returns false if the metric is non-monotone using suppression.
      *
@@ -834,7 +1246,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public final boolean isMultiDimensional(){
         return (this instanceof AbstractMetricMultiDimensional);
     }
-    
+
     /**
      * Returns true if the metric is weighted.
      *
@@ -852,6 +1264,15 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
     public String toString() {
         return this.getClass().getSimpleName();
     }
+    
+    /**
+     * Evaluates the metric for the given node.
+     *
+     * @param node The node for which to compute the information loss
+     * @param groupify The groupify operator of the previous check
+     * @return the double
+     */
+    protected abstract InformationLossWithBound<T> getInformationLossInternal(final Transformation node, final HashGroupify groupify);
 
     /**
      * Returns the information loss that would be induced by suppressing the given entry. The loss
@@ -862,18 +1283,9 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      * @param entry
      * @return
      */
-    protected abstract InformationLossWithBound<T> getInformationLossInternal(final Node node, HashGroupifyEntry entry);
+    protected abstract InformationLossWithBound<T> getInformationLossInternal(final Transformation node, HashGroupifyEntry entry);
     
  
-    /**
-     * Evaluates the metric for the given node.
-     *
-     * @param node The node for which to compute the information loss
-     * @param groupify The groupify operator of the previous check
-     * @return the double
-     */
-    protected abstract InformationLossWithBound<T> getInformationLossInternal(final Node node, final HashGroupify groupify);
-
     /**
      * Returns a lower bound for the information loss for the given node. 
      * This can be used to expose the results of monotonic shares of a metric,
@@ -883,7 +1295,7 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      * @param node
      * @return
      */
-    protected abstract T getLowerBoundInternal(Node node);
+    protected abstract T getLowerBoundInternal(Transformation node);
 
     /**
      * Returns a lower bound for the information loss for the given node.
@@ -900,17 +1312,51 @@ public abstract class Metric<T extends InformationLoss<?>> implements Serializab
      * @param groupify
      * @return
      */
-    protected abstract T getLowerBoundInternal(final Node node, final HashGroupify groupify);
+    protected abstract T getLowerBoundInternal(final Transformation node, final HashGroupify groupify);
+
+    /**
+     * Returns the number of records
+     * @param config
+     * @param input
+     * @return
+     */
+    protected int getNumRecords(ARXConfiguration config, Data input) {
+        if (getSubset(config) != null) {
+            return getSubset(config).size();
+        } else{
+            return input.getDataLength();
+        }
+    }
+
+    /**
+     * Returns the subset
+     * @param config
+     * @param input
+     * @return
+     */
+    protected RowSet getSubset(ARXConfiguration config) {
+        for (PrivacyCriterion c : config.getCriteria()) {
+            if (c.getSubset() != null) {
+                return c.getSubset().getSet();
+            }
+        }
+        return null;
+    }
 
     /**
      * Implement this to initialize the metric.
      *
+     * @param manager
      * @param definition
      * @param input
      * @param hierarchies
      * @param config
      */
-    protected abstract void initializeInternal(final DataDefinition definition, final Data input, final GeneralizationHierarchy[] hierarchies, final ARXConfiguration config);
+    protected abstract void initializeInternal(final DataManager manager,
+                                               final DataDefinition definition, 
+                                               final Data input, 
+                                               final GeneralizationHierarchy[] hierarchies, 
+                                               final ARXConfiguration config);
 
     /**
      * Ignore anything but the first DIGITS digits. 

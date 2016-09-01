@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,11 +84,11 @@ public class LayoutDefinition implements ILayout {
         compositeBottomRight.setLayout(SWTUtil.createGridLayout(1));
 
         // Create views
-        new ViewDataInput(compositeLeft, controller, true);
+        new ViewDataInput(compositeLeft, controller, "id-140", true); //$NON-NLS-1$
         new ViewSubsetDefinition(compositeLeft, controller);
-        new ViewDataDefinition(compositeTopRight, controller);
+        new LayoutAttributeSettings(compositeTopRight, controller);
         new LayoutCriteria(compositeCenterRight, controller);
-        new LayoutTransformationSettings(compositeBottomRight, controller);
+        new LayoutTransformationModel(compositeBottomRight, controller);
     }
 
 }

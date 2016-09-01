@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,7 @@ public class WorkerTransform extends Worker<DataHandle> {
     }
 
     @Override
-    public void
-            run(final IProgressMonitor arg0) throws InvocationTargetException,
+    public void run(final IProgressMonitor arg0) throws InvocationTargetException,
                                             InterruptedException {
 
         arg0.beginTask(Resources.getMessage("WorkerTransform.0"), 1); //$NON-NLS-1$

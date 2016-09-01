@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.carrotsearch.hppc.IntArrayList;
 
 /**
  * This class represents a data subset as required for d-presence.
@@ -72,7 +74,7 @@ public class DataSubset implements Serializable {
         }
     }
 
-    /**  TODO */
+    /**  SVUID */
     private static final long serialVersionUID = 3945730896172205344L;
     
     /**
@@ -192,8 +194,18 @@ public class DataSubset implements Serializable {
      * @return
      */
     public static DataSubset create(Data data, Set<Integer> subset){
-        int rows = data.getHandle().getNumRows();
-        RowSet bitset = RowSet.create(data);
+        return create(data.getHandle().getNumRows(), subset);
+    }
+    
+    /**
+     * Creates a new subset from the given set of tuple indices.
+     *
+     * @param rows
+     * @param subset
+     * @return
+     */
+    public static DataSubset create(int rows, Set<Integer> subset){
+        RowSet bitset = RowSet.create(rows);
         int[] array = new int[subset.size()];
         int idx = 0;
         for (Integer line : subset) {
@@ -226,7 +238,7 @@ public class DataSubset implements Serializable {
     }
 
     /**
-     * 
+     * Getter
      *
      * @return
      */
@@ -235,11 +247,39 @@ public class DataSubset implements Serializable {
     }
 
     /**
+     * Getter
      * 
-     *
      * @return
      */
     public RowSet getSet() {
         return set;
+    }
+    
+    /**
+     * Clone
+     */
+    public DataSubset clone() {
+        return new DataSubset(this.set.clone(), Arrays.copyOf(this.array, this.array.length));
+    }
+
+    /**
+     * Returns a new data subset, only containing those rows that are included in the subset
+     * @param rowset
+     * @return
+     */
+    protected DataSubset getSubsetInstance(RowSet rowset) {
+        int index = -1;
+        RowSet newset = RowSet.create(rowset.size());
+        IntArrayList list = new IntArrayList();
+        for (int row = 0; row < this.set.length(); row++) {
+            if (rowset.contains(row)) {
+                index++;
+                if (this.set.contains(row)) {
+                    newset.add(index);
+                    list.add(index);
+                }
+            }
+        }
+        return new DataSubset(newset, list.toArray());
     }
 }

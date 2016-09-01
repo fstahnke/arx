@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,9 +154,9 @@ public class ComponentStatus {
         Composite composite = new Composite(parent, SWT.NONE);
         composite.setLayout(new FillLayout());
         ComponentStatusLabel label = new ComponentStatusLabel(composite, SWT.CENTER);
-        InputStream stream = controller.getResources().getStream("working.gif");
+        InputStream stream = controller.getResources().getStream("working.gif"); //$NON-NLS-1$
         try {
-            label.setGIF(stream); //$NON-NLS-1$
+            label.setGIF(stream);
         } finally {
             if (stream != null) {
                 try {

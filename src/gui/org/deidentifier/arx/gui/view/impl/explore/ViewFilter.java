@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.gui.view.def.IView;
 import org.deidentifier.arx.gui.view.impl.common.ComponentFilterTable;
 import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolder;
-import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButton;
+import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButtonBar;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -124,7 +124,7 @@ public class ViewFilter implements IView {
         Image imageOptimum = controller.getResources().getManagedImage("bullet_yellow.png"); //$NON-NLS-1$
 
         // Bar
-        ComponentTitledFolderButton bar = new ComponentTitledFolderButton("id-21"); //$NON-NLS-1$
+        ComponentTitledFolderButtonBar bar = new ComponentTitledFolderButtonBar("id-21"); //$NON-NLS-1$
         bar.add(Resources.getMessage("ViewFilter.0"), imageOptimum, new Runnable(){ //$NON-NLS-1$
             public void run() {
                 actionShowOptimum();
@@ -265,7 +265,7 @@ public class ViewFilter implements IView {
             }
 
             List<String> attributes = new ArrayList<String>();
-            attributes.addAll(definition.getQuasiIdentifyingAttributes());
+            attributes.addAll(definition.getQuasiIdentifiersWithGeneralization());
             Collections.sort(attributes, new Comparator<String>(){
                 public int compare(String arg0, String arg1) {
                     return model.getOutput().getColumnIndexOf(arg0)-

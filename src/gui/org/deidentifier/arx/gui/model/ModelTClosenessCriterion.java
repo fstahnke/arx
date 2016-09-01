@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.deidentifier.arx.criteria.EqualDistanceTCloseness;
 import org.deidentifier.arx.criteria.HierarchicalDistanceTCloseness;
 import org.deidentifier.arx.criteria.PrivacyCriterion;
 import org.deidentifier.arx.gui.resources.Resources;
+import org.deidentifier.arx.gui.view.SWTUtil;
 
 /**
  * This class implements a model for the t-closeness criterion.
@@ -44,6 +45,19 @@ public class ModelTClosenessCriterion extends ModelExplicitCriterion{
     /** T. */
     private double            t                    = 0.001d;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param attribute
+     */
+    public ModelTClosenessCriterion(String attribute,
+                                    int variant,
+                                    double t) {
+        super(attribute);
+        this.variant = variant;
+        this.t = t;
+    }
+    
     /**
      * Creates a new instance.
      *
@@ -96,7 +110,7 @@ public class ModelTClosenessCriterion extends ModelExplicitCriterion{
 	}
 
     @Override
-    public void parse(ModelCriterion criterion) {
+    public void parse(ModelCriterion criterion, boolean _default) {
         if (!(criterion instanceof ModelTClosenessCriterion)) {
             return;
         }
@@ -137,8 +151,8 @@ public class ModelTClosenessCriterion extends ModelExplicitCriterion{
     @Override
     public String toString() {
         switch (variant) {
-            case VARIANT_EQUAL: return String.valueOf(t)+Resources.getMessage("Model.3b"); //$NON-NLS-1$
-            case VARIANT_HIERARCHICAL: return String.valueOf(t)+Resources.getMessage("Model.4b"); //$NON-NLS-1$
+            case VARIANT_EQUAL: return SWTUtil.getPrettyString(t)+Resources.getMessage("Model.3b"); //$NON-NLS-1$
+            case VARIANT_HIERARCHICAL: return SWTUtil.getPrettyString(t)+Resources.getMessage("Model.4b"); //$NON-NLS-1$
             default: throw new RuntimeException(Resources.getMessage("Model.5b")); //$NON-NLS-1$
         }
     }

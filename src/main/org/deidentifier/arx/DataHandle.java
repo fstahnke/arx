@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import java.util.Set;
 
 import org.apache.commons.math3.util.Pair;
 import org.deidentifier.arx.ARXLattice.ARXNode;
-import org.deidentifier.arx.DataHandleStatistics.InterruptHandler;
+import org.deidentifier.arx.DataHandleInternal.InterruptHandler;
 import org.deidentifier.arx.DataType.ARXDate;
 import org.deidentifier.arx.DataType.ARXDecimal;
 import org.deidentifier.arx.DataType.ARXInteger;
@@ -118,7 +118,7 @@ public abstract class DataHandle {
         checkRegistry();
         return definition.getDataType(attribute);
     }
-
+    
     /**
      * Returns a date/time value from the specified cell.
      *
@@ -154,7 +154,7 @@ public abstract class DataHandle {
      * @return the distinct values
      */
     public final String[] getDistinctValues(int column) {
-        return getDistinctValues(column, new InterruptHandler() {
+        return getDistinctValues(column, false, new InterruptHandler() {
             @Override
             public void checkInterrupt() {
                 // Nothing to do
@@ -458,7 +458,7 @@ public abstract class DataHandle {
      * @return the num rows
      */
     public abstract int getNumRows();
-    
+
     /**
      * Returns a risk estimator
      * @param model
@@ -467,7 +467,7 @@ public abstract class DataHandle {
     public RiskEstimateBuilder getRiskEstimator(ARXPopulationModel model) {
         return getRiskEstimator(model, getDefinition().getQuasiIdentifyingAttributes());
     }
-
+    
     /**
      * Returns a risk estimator
      * @param model
@@ -485,7 +485,7 @@ public abstract class DataHandle {
      * @return
      */
     public RiskEstimateBuilder getRiskEstimator(ARXPopulationModel model, RiskModelHistogram classes) {
-        return new RiskEstimateBuilder(model, this, classes);
+        return new RiskEstimateBuilder(model, new DataHandleInternal(this), classes, getConfiguration());
     }
 
     /**
@@ -496,7 +496,7 @@ public abstract class DataHandle {
      * @return
      */
     public RiskEstimateBuilder getRiskEstimator(ARXPopulationModel model, RiskModelHistogram classes, ARXSolverConfiguration config) {
-        return new RiskEstimateBuilder(model, this, classes, config);
+        return new RiskEstimateBuilder(model, new DataHandleInternal(this), classes, config, getConfiguration());
     }
 
     /**
@@ -506,7 +506,7 @@ public abstract class DataHandle {
      * @return
      */
     public RiskEstimateBuilder getRiskEstimator(ARXPopulationModel model, Set<String> qis) {
-        return new RiskEstimateBuilder(model, this, qis);
+        return new RiskEstimateBuilder(model, new DataHandleInternal(this), qis, getConfiguration());
     }
 
     /**
@@ -517,7 +517,7 @@ public abstract class DataHandle {
      * @return
      */
     public RiskEstimateBuilder getRiskEstimator(ARXPopulationModel model, Set<String> qis, ARXSolverConfiguration config) {
-        return new RiskEstimateBuilder(model, this, qis, config);
+        return new RiskEstimateBuilder(model, new DataHandleInternal(this), qis, config, getConfiguration());
     }
 
     /**
@@ -560,6 +560,15 @@ public abstract class DataHandle {
         } else {
             return subset;
         }
+    }
+
+    /**
+     * Has this handle been optimized with local recoding?
+     * @return
+     */
+    public boolean isOptimized() {
+        checkRegistry();
+        return false;
     }
 
     /**
@@ -878,6 +887,12 @@ public abstract class DataHandle {
     }
 
     /**
+     * Returns the ARXConfiguration that is currently being used, null if this is an input handle
+     * @return
+     */
+    protected abstract ARXConfiguration getConfiguration();
+
+    /**
      * Generates an array of data types.
      *
      * @return the data type array
@@ -888,10 +903,11 @@ public abstract class DataHandle {
      * Returns the distinct values.
      *
      * @param column the column
+     * @param ignoreSuppression
      * @param handler the handler
      * @return the distinct values
      */
-    protected abstract String[] getDistinctValues(int column, InterruptHandler handler);
+    protected abstract String[] getDistinctValues(int column, boolean ignoreSuppression, InterruptHandler handler);
 
     /**
      * Returns the registry associated with this handle.
@@ -900,15 +916,6 @@ public abstract class DataHandle {
      */
     protected DataRegistry getRegistry() {
         return registry;
-    }
-
-    /**
-     * Returns the string inserted for suppressed data items.
-     *
-     * @return the suppression string
-     */
-    protected String getSuppressionString() {
-        return null;
     }
 
     /**
@@ -933,8 +940,8 @@ public abstract class DataHandle {
             for (int i = 0; i < columns.length; i++) {
 
                 int index = columns[i];
-                int cmp = dataTypes[0][index].compare(internalGetValue(row1, index),
-                                                      internalGetValue(row2, index));
+                int cmp = dataTypes[0][index].compare(internalGetValue(row1, index, false),
+                                                      internalGetValue(row2, index, false));
                 if (cmp != 0) {
                     return ascending ? cmp : -cmp;
                 }
@@ -952,7 +959,7 @@ public abstract class DataHandle {
      * @param col the col
      * @return the string
      */
-    protected abstract String internalGetValue(int row, int col);
+    protected abstract String internalGetValue(int row, int col, boolean ignoreSuppression);
 
     /**
      * Internal replacement method.
@@ -963,6 +970,14 @@ public abstract class DataHandle {
      * @return true, if successful
      */
     protected abstract boolean internalReplace(int column, String original, String replacement);
+
+    /**
+     * Returns whether the data represented by this handle is anonymous
+     * @return
+     */
+    protected boolean isAnonymous() {
+        return false;
+    }
 
     /**
      * Updates the registry.

@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@
 
 package org.deidentifier.arx.gui.view.impl.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.deidentifier.arx.gui.model.ModelCriterion;
 import org.deidentifier.arx.gui.model.ModelTClosenessCriterion;
 import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
@@ -28,7 +32,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Text;
+
+import de.linearbits.swt.widgets.Knob;
 
 /**
  * Implements a view on a t-closeness criterion.
@@ -38,17 +44,18 @@ import org.eclipse.swt.widgets.Scale;
 public class EditorCriterionTCloseness extends EditorCriterion<ModelTClosenessCriterion> {
 
     /**  View */
-    private static final String VARIANTS[] = {Resources.getMessage("CriterionDefinitionView.9"), Resources.getMessage("CriterionDefinitionView.10") }; //$NON-NLS-1$ //$NON-NLS-2$
+    private static final String VARIANTS[] = {Resources.getMessage("CriterionDefinitionView.9"), //$NON-NLS-1$
+                                              Resources.getMessage("CriterionDefinitionView.10") }; //$NON-NLS-1$
 
-    /**  View */
-    private Scale               sliderT;
-    
-    /**  View */
+    /** View */
+    private Knob<Double>        knobT;
+
+    /** View */
     private Combo               comboVariant;
-    
-    /**  View */
-    private Label               labelT;
-    
+
+    /** View */
+    private Text                labelT;
+
     /**
      * Creates a new instance.
      *
@@ -59,16 +66,6 @@ public class EditorCriterionTCloseness extends EditorCriterion<ModelTClosenessCr
                                      final ModelTClosenessCriterion model) {
 
         super(parent, model);
-    }
-
-    /**
-     * Updates the label and tool tip text.
-     *
-     * @param text
-     */
-    private void updateLabel(String text) {
-        labelT.setText(text);
-        labelT.setToolTipText(text);
     }
 
     @Override
@@ -103,25 +100,14 @@ public class EditorCriterionTCloseness extends EditorCriterion<ModelTClosenessCr
         final Label zLabel = new Label(group, SWT.NONE);
         zLabel.setText(Resources.getMessage("CriterionDefinitionView.43")); //$NON-NLS-1$
 
-        labelT = new Label(group, SWT.BORDER | SWT.CENTER);
-        final GridData d9 = new GridData();
-        d9.minimumWidth = LABEL_WIDTH;
-        d9.widthHint = LABEL_WIDTH;
-        labelT.setLayoutData(d9);
-        updateLabel("0.001"); //$NON-NLS-1$
-
-        sliderT = new Scale(group, SWT.HORIZONTAL);
-        final GridData d6 = SWTUtil.createFillHorizontallyGridData();
-        d6.horizontalSpan = 1;
-        sliderT.setLayoutData(d6);
-        sliderT.setMaximum(SWTUtil.SLIDER_MAX);
-        sliderT.setMinimum(0);
-        sliderT.setSelection(0);
-        sliderT.addSelectionListener(new SelectionAdapter() {
+        labelT = createLabel(group);
+        knobT = createKnobDouble(group, 0.000001d, 1d);
+        updateLabel(labelT, knobT.getValue());
+        knobT.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(final SelectionEvent arg0) {
-                model.setT(SWTUtil.sliderToDouble(0.001d, 1d, sliderT.getSelection()));
-                updateLabel(String.valueOf(model.getT()));
+                model.setT(knobT.getValue());
+                updateLabel(labelT, model.getT());
             }
         });
 
@@ -129,10 +115,22 @@ public class EditorCriterionTCloseness extends EditorCriterion<ModelTClosenessCr
     }
     
     @Override
-    protected void parse(ModelTClosenessCriterion model) {
+    protected void parse(ModelTClosenessCriterion model, boolean _default) {
         
-        sliderT.setSelection(SWTUtil.doubleToSlider(0.001d, 1d, model.getT()));
-        updateLabel(String.valueOf(model.getT()));
+        knobT.setValue(model.getT());
+        updateLabel(labelT, model.getT());
         comboVariant.select(model.getVariant());
+    }
+
+
+    @Override
+    protected List<ModelCriterion> getTypicalParameters() {
+
+        List<ModelCriterion> result = new ArrayList<ModelCriterion>();
+        result.add(new ModelTClosenessCriterion(this.model.getAttribute(), ModelTClosenessCriterion.VARIANT_EQUAL, 0.15));
+        result.add(new ModelTClosenessCriterion(this.model.getAttribute(), ModelTClosenessCriterion.VARIANT_EQUAL, 0.2));
+        result.add(new ModelTClosenessCriterion(this.model.getAttribute(), ModelTClosenessCriterion.VARIANT_HIERARCHICAL, 0.15));
+        result.add(new ModelTClosenessCriterion(this.model.getAttribute(), ModelTClosenessCriterion.VARIANT_HIERARCHICAL, 0.2));
+        return result;
     }
 }

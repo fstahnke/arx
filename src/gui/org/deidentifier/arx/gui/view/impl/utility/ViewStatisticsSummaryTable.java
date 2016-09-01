@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import de.linearbits.swt.table.DynamicTableColumn;
  *
  * @author Fabian Prasser
  */
-public class ViewStatisticsSummaryTable extends ViewStatistics<AnalysisContextVisualizationDistribution> {
+public class ViewStatisticsSummaryTable extends ViewStatistics<AnalysisContextDistribution> {
     
     /** View */
     private Composite                      root;
@@ -65,10 +65,28 @@ public class ViewStatisticsSummaryTable extends ViewStatistics<AnalysisContextVi
                                      final ModelPart target,
                                      final ModelPart reset) {
         
-        super(parent, controller, target, reset);
+        super(parent, controller, target, reset, true);
         this.manager = new AnalysisManager(parent.getDisplay());
     }
     
+    @Override
+    public LayoutUtility.ViewUtilityType getType() {
+        return LayoutUtility.ViewUtilityType.SUMMARY;
+    }
+
+    /**
+     * Creates a table item
+     * @param key
+     * @param value
+     */
+    private void createItem(String key,
+                            String value) {
+        
+        TableItem item = new TableItem(table, SWT.NONE);
+        item.setText(0, key);
+        item.setText(1, value);
+    }
+
     @Override
     protected Control createControl(Composite parent) {
 
@@ -94,21 +112,25 @@ public class ViewStatisticsSummaryTable extends ViewStatistics<AnalysisContextVi
     }
 
     @Override
-    protected AnalysisContextVisualizationDistribution createViewConfig(AnalysisContext context) {
-        return new AnalysisContextVisualizationDistribution(context);
+    protected AnalysisContextDistribution createViewConfig(AnalysisContext context) {
+        return new AnalysisContextDistribution(context);
     }
 
     @Override
     protected void doReset() {
-        table.setRedraw(false);
+        root.setRedraw(false);
+        if (this.manager != null) {
+            this.manager.stop();
+        }
         for (final TableItem i : table.getItems()) {
             i.dispose();
         }
-        table.setRedraw(true);
+        root.setRedraw(true);
+        setStatusEmpty();
     }
 
     @Override
-    protected void doUpdate(AnalysisContextVisualizationDistribution context) {
+    protected void doUpdate(AnalysisContextDistribution context) {
 
         // The statistics builder
         final StatisticsBuilderInterruptible builder = context.handle.getStatistics().getInterruptibleInstance();
@@ -133,7 +155,8 @@ public class ViewStatisticsSummaryTable extends ViewStatistics<AnalysisContextVi
             @Override
             public void onFinish() {
 
-                if (stopped) {
+                // Check
+                if (stopped || !isEnabled()) {
                     return;
                 }
 
@@ -163,7 +186,11 @@ public class ViewStatisticsSummaryTable extends ViewStatistics<AnalysisContextVi
 
             @Override
             public void onInterrupt() {
-                setStatusWorking();
+                if (!isEnabled()) {
+                    setStatusEmpty();
+                } else {
+                    setStatusWorking();
+                }
             }
 
             @Override
@@ -195,15 +222,9 @@ public class ViewStatisticsSummaryTable extends ViewStatistics<AnalysisContextVi
     }
 
     /**
-     * Creates a table item
-     * @param key
-     * @param value
+     * Is an analysis running
      */
-    private void createItem(String key,
-                            String value) {
-        
-        TableItem item = new TableItem(table, SWT.NONE);
-        item.setText(0, key);
-        item.setText(1, value);
+    protected boolean isRunning() {
+        return manager != null && manager.isRunning();
     }
 }

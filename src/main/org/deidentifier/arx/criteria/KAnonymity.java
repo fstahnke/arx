@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,13 @@ public class KAnonymity extends ImplicitPrivacyCriterion{
      * @param k
      */
     public KAnonymity(int k){
-        super(true);
+        super(true, true);
         this.k = k;
+    }
+
+    @Override
+    public KAnonymity clone() {
+        return new KAnonymity(this.getK());
     }
 
     /**
@@ -63,14 +68,43 @@ public class KAnonymity extends ImplicitPrivacyCriterion{
         // Requires only one counter
         return ARXConfiguration.REQUIREMENT_COUNTER;
     }
-
-    @Override
+    
+	@Override
     public boolean isAnonymous(HashGroupifyEntry entry) {
         throw new RuntimeException("This should never be called!");
     }
-    
-	@Override
+
+    @Override
+    public boolean isLocalRecodingSupported() {
+        return true;
+    }
+
+    @Override
 	public String toString() {
 		return k+"-anonymity";
 	}
+
+    /**
+     * Return prosecutor risk threshold, 1 if there is none
+     * @return
+     */
+    public double getRiskThresholdProsecutor() {
+        return 1d / (double)k;
+    }
+
+    /**
+     * Return journalist risk threshold, 1 if there is none
+     * @return
+     */
+    public double getRiskThresholdJournalist() {
+        return getRiskThresholdProsecutor();
+    }
+
+    /**
+     * Return marketer risk threshold, 1 if there is none
+     * @return
+     */
+    public double getRiskThresholdMarketer() {
+        return getRiskThresholdProsecutor();
+    }
 }

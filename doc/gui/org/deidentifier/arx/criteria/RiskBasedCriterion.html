@@ -134,7 +134,8 @@ extends <a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#RiskBasedCriterion(boolean, double)">RiskBasedCriterion</a></strong>(boolean&nbsp;monotonic,
+<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#RiskBasedCriterion(boolean,%20boolean,%20double)">RiskBasedCriterion</a></strong>(boolean&nbsp;monotonicWithSuppression,
+                  boolean&nbsp;monotonicWithGeneralization,
                   double&nbsp;riskThreshold)</code>
 <div class="block">Creates a new instance of this criterion.</div>
 </td>
@@ -156,7 +157,7 @@ extends <a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution, int)">enforce</a></strong>(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution&nbsp;distribution,
+<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution,%20int)">enforce</a></strong>(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution&nbsp;distribution,
        int&nbsp;numMaxSuppressedOutliers)</code>
 <div class="block">This method enforces the criterion on the current hash table.</div>
 </td>
@@ -192,14 +193,14 @@ extends <a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;org.deidentifier.arx.criteria.<a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html" title="class in org.deidentifier.arx.criteria">PrivacyCriterion</a></h3>
-<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#initialize(org.deidentifier.arx.framework.data.DataManager)">initialize</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isMonotonic()">isMonotonic</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#toString()">toString</a></code></li>
+<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#clone()">clone</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getPopulationModel()">getPopulationModel</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRiskThresholdJournalist()">getRiskThresholdJournalist</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRiskThresholdMarketer()">getRiskThresholdMarketer</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRiskThresholdProsecutor()">getRiskThresholdProsecutor</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getSubset()">getSubset</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#initialize(org.deidentifier.arx.framework.data.DataManager)">initialize</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isLocalRecodingSupported()">isLocalRecodingSupported</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isMonotonicWithGeneralization()">isMonotonicWithGeneralization</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isMonotonicWithSuppression()">isMonotonicWithSuppression</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#toString()">toString</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
-<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
+<code>equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -215,16 +216,17 @@ extends <a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="RiskBasedCriterion(boolean, double)">
+<a name="RiskBasedCriterion(boolean, boolean, double)">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>RiskBasedCriterion</h4>
-<pre>public&nbsp;RiskBasedCriterion(boolean&nbsp;monotonic,
+<pre>public&nbsp;RiskBasedCriterion(boolean&nbsp;monotonicWithSuppression,
+                  boolean&nbsp;monotonicWithGeneralization,
                   double&nbsp;riskThreshold)</pre>
 <div class="block">Creates a new instance of this criterion.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>monotonic</code> - </dd><dd><code>riskThreshold</code> - </dd></dl>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>monotonicWithSuppression</code> - </dd><dd><code>monotonicWithGeneralization</code> - </dd><dd><code>riskThreshold</code> - </dd></dl>
 </li>
 </ul>
 </li>
@@ -243,14 +245,14 @@ extends <a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.
 <h4>enforce</h4>
 <pre>public&nbsp;void&nbsp;enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution&nbsp;distribution,
            int&nbsp;numMaxSuppressedOutliers)</pre>
-<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution, int)">SampleBasedCriterion</a></code></strong></div>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution,%20int)">SampleBasedCriterion</a></code></strong></div>
 <div class="block">This method enforces the criterion on the current hash table. 
  Criteria can be enforced by suppressing classes in the distribution by passing a 
  PrivacyCondition. Criteria may abort early, if the threshold is reached 
  (<code>distribution.getNumOfSuppressedTuples() > numMaxSuppressedOutliers</code>).</div>
 <dl>
 <dt><strong>Specified by:</strong></dt>
-<dd><code><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution, int)">enforce</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html" title="class in org.deidentifier.arx.criteria">SampleBasedCriterion</a></code></dd>
+<dd><code><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution,%20int)">enforce</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html" title="class in org.deidentifier.arx.criteria">SampleBasedCriterion</a></code></dd>
 </dl>
 </li>
 </ul>

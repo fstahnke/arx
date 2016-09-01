@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 
-import org.deidentifier.arx.DataHandle;
-import org.deidentifier.arx.risk.Groupify.Group;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.ComputationInterruptedException;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedBoolean;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedInteger;
+import org.deidentifier.arx.DataHandleInternal;
+import org.deidentifier.arx.common.Groupify;
+import org.deidentifier.arx.common.Groupify.Group;
+import org.deidentifier.arx.common.TupleWrapper;
+import org.deidentifier.arx.common.WrappedBoolean;
+import org.deidentifier.arx.common.WrappedInteger;
+import org.deidentifier.arx.exceptions.ComputationInterruptedException;
 
 import com.carrotsearch.hppc.IntIntOpenHashMap;
 
@@ -36,77 +38,17 @@ import com.carrotsearch.hppc.IntIntOpenHashMap;
  */
 public class RiskModelHistogram {
 
-    /**
-     * For hash tables
-     * 
-     * @author Fabian Prasser
-     */
-    private static class TupleWrapper {
-
-        /** Hash code */
-        private final int      hashcode;
-        /** Indices */
-        private final String[] values;
-
-        /**
-         * Constructor
-         * 
-         * @param handle
-         * @param row
-         */
-        private TupleWrapper(DataHandle handle, int[] indices, int row) {
-            this.values = new String[indices.length];
-            int hashcode = 1;
-            int idx = 0;
-            for (int index : indices) {
-                String value = handle.getValue(row, index);
-                hashcode = 31 * hashcode + value.hashCode();
-                values[idx++] = value;
-            }
-            this.hashcode = hashcode;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return Arrays.equals(((TupleWrapper) other).values, this.values);
-        }
-
-        @Override
-        public int hashCode() {
-            return hashcode;
-        }
-    }
-
     /** The equivalence classes */
     private int[]  equivalenceClasses;
     /** Summary */
     private double avgClassSize;
     /** Summary */
-    private double numTuples;
+    private double numRecords;
     /** Summary */
     private double numClasses;
 
     /**
-     * Creates a new instance
-     * 
-     * @param handle
-     */
-    public RiskModelHistogram(final DataHandle handle) {
-        this(handle, handle.getDefinition().getQuasiIdentifyingAttributes());
-    }
-
-    /**
-     * Creates a new instance
-     * 
-     * @param handle
-     * @param qis
-     */
-    public RiskModelHistogram(final DataHandle handle, final Set<String> qis) {
-        this(handle, qis, new WrappedBoolean(), new WrappedInteger(), 1.0d);
-    }
-
-    /**
-     * Creates a new instance
+     * Creates a new instance from the given distribution
      * 
      * @param distribution
      */
@@ -117,30 +59,30 @@ public class RiskModelHistogram {
     }
 
     /**
-     * Creates a new instance
+     * Creates a new instance by analyzing the given data handle. 
+     * IMPORTANT: Suppressed records will be ignored!
      * 
      * @param handle
      * @param qis
      */
-    RiskModelHistogram(final DataHandle handle,
+    RiskModelHistogram(final DataHandleInternal handle,
                        final Set<String> qis,
                        final WrappedBoolean stop,
                        final WrappedInteger progress,
                        double factor) {
 
         /* ********************************
-         * Check *******************************
-         */
+         * Check 
+         * ********************************/
         if (handle == null) { throw new NullPointerException("Handle is null"); }
         if (qis == null) { throw new NullPointerException("Quasi identifiers must not be null"); }
         for (String q : qis) {
-            if (handle.getColumnIndexOf(q) == -1) { throw new IllegalArgumentException(q +
-                                                                                       " is not an attribute"); }
+            if (handle.getColumnIndexOf(q) == -1) { throw new IllegalArgumentException(q + " is not an attribute"); }
         }
 
         /* ********************************
-         * Build equivalence classes *******************************
-         */
+         * Build equivalence classes 
+         * ********************************/
         final int[] indices = new int[qis.size()];
         int index = 0;
         for (final String attribute : qis) {
@@ -155,14 +97,15 @@ public class RiskModelHistogram {
         int numRows = handle.getNumRows();
         for (int row = 0; row < numRows; row++) {
 
-            int prog = (int) Math.round((double) row / (double) numRows *
-                                        factor * 80d);
+            int prog = (int) Math.round((double) row / (double) numRows * factor * 80d);
             if (prog != progress.value) {
                 progress.value = prog;
             }
 
-            TupleWrapper tuple = new TupleWrapper(handle, indices, row);
-            map.add(tuple);
+            if (!handle.isOutlier(row)) {
+                TupleWrapper tuple = new TupleWrapper(handle, indices, row, false);
+                map.add(tuple);
+            }
             if (stop.value) { throw new ComputationInterruptedException(); }
         }
 
@@ -173,9 +116,7 @@ public class RiskModelHistogram {
         int size = map.size();
         Group<TupleWrapper> element = map.first();
         while (element != null) {
-            int prog = (int) Math.round((80d + (double) i++ / (double) size *
-                                               20d) *
-                                        factor);
+            int prog = (int) Math.round((80d + (double) i++ / (double) size * 20d) * factor);
             if (prog != progress.value) {
                 progress.value = prog;
             }
@@ -220,10 +161,10 @@ public class RiskModelHistogram {
     /**
      * Returns a property of the class distribution
      * 
-     * @return the numTuples
+     * @return the numRecords
      */
-    public double getNumTuples() {
-        return numTuples;
+    public double getNumRecords() {
+        return numRecords;
     }
 
     /**
@@ -271,8 +212,8 @@ public class RiskModelHistogram {
             numTuples += entry[0] * entry[1];
             if (stop.value) { throw new ComputationInterruptedException(); }
         }
-        this.numTuples = numTuples;
+        this.numRecords = numTuples;
         this.numClasses = numClasses;
-        this.avgClassSize = this.numTuples / this.numClasses;
+        this.avgClassSize = this.numRecords / this.numClasses;
     }
 }

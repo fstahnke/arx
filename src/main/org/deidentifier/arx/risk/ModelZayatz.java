@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.deidentifier.arx.risk;
 
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
 import org.deidentifier.arx.ARXPopulationModel;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedBoolean;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedInteger;
+import org.deidentifier.arx.common.WrappedBoolean;
+import org.deidentifier.arx.common.WrappedInteger;
 
 /**
  * This class implements the ZayatzModel based on equivalence classes, for
@@ -41,14 +41,12 @@ class ModelZayatz extends RiskModelPopulation {
      * 
      * @param model
      * @param histogram
-     * @param sampleSize
      * @param stop
      */
     ModelZayatz(ARXPopulationModel model,
                 final RiskModelHistogram histogram,
-                final int sampleSize,
                 final WrappedBoolean stop) {
-        super(histogram, model, sampleSize, stop, new WrappedInteger());
+        super(histogram, model, stop, new WrappedInteger());
 
         int[] _histogram = getHistogram().getHistogram();
         double uniqueness = computeConditionalUniqueness(_histogram, getPopulationSize(), getSampleSize(), getNumClasses());

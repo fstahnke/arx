@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class LayoutExplore implements ILayout {
         root.setLayout(SWTUtil.createGridLayout(1));
  
         // Create top composite
-        folder = new ComponentTitledFolder(root, controller, null, "id-30", true); //$NON-NLS-1$
+        folder = new ComponentTitledFolder(root, controller, null, "id-30", true, false); //$NON-NLS-1$
         folder.setLayoutData(SWTUtil.createFillGridData());
         
         // Lattice

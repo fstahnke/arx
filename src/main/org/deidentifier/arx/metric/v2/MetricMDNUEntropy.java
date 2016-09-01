@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 package org.deidentifier.arx.metric.v2;
 
-import org.deidentifier.arx.framework.lattice.Node;
+import org.deidentifier.arx.framework.lattice.Transformation;
 import org.deidentifier.arx.metric.MetricConfiguration;
 
 
@@ -43,10 +43,11 @@ public class MetricMDNUEntropy extends MetricMDNUEntropyPrecomputed {
     /**
      * Creates a new instance.
      *
+     * @param gsFactor
      * @param function
      */
-    protected MetricMDNUEntropy(AggregateFunction function){
-        super(function);
+    protected MetricMDNUEntropy(double gsFactor, AggregateFunction function){
+        super(gsFactor, function);
     }
 
     /**
@@ -56,7 +57,7 @@ public class MetricMDNUEntropy extends MetricMDNUEntropyPrecomputed {
      */
     public MetricConfiguration getConfiguration() {
         return new MetricConfiguration(true,                       // monotonic
-                                       0.5d,                       // gs-factor
+                                       super.getGeneralizationSuppressionFactor(), // gs-factor
                                        false,                      // precomputed
                                        0.0d,                       // precomputation threshold
                                        this.getAggregateFunction() // aggregate function
@@ -75,7 +76,7 @@ public class MetricMDNUEntropy extends MetricMDNUEntropyPrecomputed {
     }
 
     @Override
-    protected AbstractILMultiDimensional getLowerBoundInternal(Node node) {
+    protected AbstractILMultiDimensional getLowerBoundInternal(Transformation node) {
         return null;
     }
 }

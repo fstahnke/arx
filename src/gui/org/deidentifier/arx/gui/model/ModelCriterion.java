@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,9 @@ public abstract class ModelCriterion implements Serializable {
     /**
      * Parse
      * @param other
+     * @param _default Defines whether the model represents a typical parameter configuration for the criterion
      */
-    public abstract void parse(ModelCriterion other);
+    public abstract void parse(ModelCriterion other, boolean _default);
     
     /**
      * Sets the criterion active/inactive.

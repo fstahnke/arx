@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,14 @@
 
 package org.deidentifier.arx.metric;
 
-import java.util.Set;
-
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.DataDefinition;
-import org.deidentifier.arx.criteria.DPresence;
-import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.check.groupify.HashGroupify;
+import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.data.Data;
+import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
-import org.deidentifier.arx.framework.lattice.Node;
+import org.deidentifier.arx.framework.lattice.Transformation;
 
 /**
  * This class provides an implementation of a weighted precision metric as 
@@ -89,12 +87,12 @@ public class MetricNMPrecision extends MetricWeighted<InformationLossDefault> {
     }
 
     @Override
-    protected InformationLossWithBound<InformationLossDefault> getInformationLossInternal(Node node, HashGroupifyEntry entry) {
+    protected InformationLossWithBound<InformationLossDefault> getInformationLossInternal(Transformation node, HashGroupifyEntry entry) {
         return new InformationLossDefaultWithBound(entry.count, entry.count);
     }
     
     @Override
-    protected InformationLossWithBound<InformationLossDefault> getInformationLossInternal(final Node node, final HashGroupify g) {
+    protected InformationLossWithBound<InformationLossDefault> getInformationLossInternal(final Transformation node, final HashGroupify g) {
         
         int suppressedTuples = 0;
         int unsuppressedTuples = 0;
@@ -110,7 +108,7 @@ public class MetricNMPrecision extends MetricWeighted<InformationLossDefault> {
         double precision = 0;
         for (int i = 0; i<height.length; i++) {
             double weight = weights != null ? weights[i] : 1d;
-            double value = height[i] == 0 ? 0 : (double) node.getTransformation()[i] / (double) height[i];
+            double value = height[i] == 0 ? 0 : (double) node.getGeneralization()[i] / (double) height[i];
             precision += (double)unsuppressedTuples * value * weight;
             precision += (double)suppressedTuples * 1d * weight;
         }
@@ -122,9 +120,9 @@ public class MetricNMPrecision extends MetricWeighted<InformationLossDefault> {
     }
 
     @Override
-    protected InformationLossDefault getLowerBoundInternal(Node node) {
+    protected InformationLossDefault getLowerBoundInternal(Transformation node) {
         double result = 0;
-        final int[] transformation = node.getTransformation();
+        final int[] transformation = node.getGeneralization();
         for (int i = 0; i < transformation.length; i++) {
             double weight = weights != null ? weights[i] : 1d;
             double level = (double) transformation[i];
@@ -137,17 +135,18 @@ public class MetricNMPrecision extends MetricWeighted<InformationLossDefault> {
     }
 
     @Override
-    protected InformationLossDefault getLowerBoundInternal(Node node,
+    protected InformationLossDefault getLowerBoundInternal(Transformation node,
                                                            HashGroupify groupify) {
        return getLowerBoundInternal(node);
     }
     
     @Override
-    protected void initializeInternal(final DataDefinition definition,
+    protected void initializeInternal(final DataManager manager,
+                                      final DataDefinition definition, 
                                       final Data input, 
                                       final GeneralizationHierarchy[] hierarchies, 
                                       final ARXConfiguration config) {
-        super.initializeInternal(definition, input, hierarchies, config);
+        super.initializeInternal(manager, definition, input, hierarchies, config);
 
         // Initialize maximum levels
         height = new int[hierarchies.length];
@@ -155,16 +154,7 @@ public class MetricNMPrecision extends MetricWeighted<InformationLossDefault> {
             height[j] = hierarchies[j].getArray()[0].length - 1;
         }
         
-        int rowCount = 0;
-        if (config.containsCriterion(DPresence.class)) {
-            Set<DPresence> crits = config.getCriteria(DPresence.class);
-            if (crits.size() > 1) { throw new IllegalArgumentException("Only one d-presence criterion supported!"); }
-            for (DPresence dPresence : crits) {
-                rowCount = dPresence.getSubset().getArray().length;
-            }
-        } else {
-            rowCount = input.getDataLength();
-        }
+        int rowCount = super.getNumRecords(config, input);
         this.cells = (double)rowCount * (double)input.getHeader().length;
     }
 }

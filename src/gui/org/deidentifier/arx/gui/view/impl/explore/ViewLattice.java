@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class ViewLattice extends ViewSolutionSpace {
     @SuppressWarnings("unused")
     private static class Bounds implements Serializable {
         
-        /**  TODO */
+        /**  SVUID */
         private static final long serialVersionUID = -7472570696920782588L;
     }
     
@@ -77,13 +77,13 @@ public class ViewLattice extends ViewSolutionSpace {
      */
     private static enum DragType {
         
-        /**  TODO */
+        /**  MOVE */
         MOVE,
         
-        /**  TODO */
+        /**  ZOOM */
         ZOOM,
         
-        /**  TODO */
+        /**  NONE */
         NONE
     }
 
@@ -92,15 +92,13 @@ public class ViewLattice extends ViewSolutionSpace {
      */
     private static class SerializablePath implements Serializable {
         
-        /**  TODO */
+        /**  SVUID */
         private static final long serialVersionUID = -4572722688452678425L;
         
-        /**  TODO */
+        /**  Path */
         private final transient Path path;
         
-        /**
-         * 
-         *
+        /** Constructor
          * @param path
          */
         public SerializablePath(Path path){
@@ -108,7 +106,7 @@ public class ViewLattice extends ViewSolutionSpace {
         }
         
         /**
-         * 
+         * Dispose
          */
         public void dispose(){
             if (!this.path.isDisposed()) {
@@ -117,8 +115,7 @@ public class ViewLattice extends ViewSolutionSpace {
         }
         
         /**
-         * 
-         *
+         * Returns the path
          * @return
          */
         public Path getPath(){
@@ -629,6 +626,7 @@ public class ViewLattice extends ViewSolutionSpace {
                 if (!node.getAttributes().containsKey(ATTRIBUTE_LABEL)) {
                     String text = Arrays.toString(node.getTransformation());
                     text = text.substring(1, text.length() - 1);
+                    text = super.trimLabel(text);
                     node.getAttributes().put(ATTRIBUTE_LABEL, text);
                 }
             }

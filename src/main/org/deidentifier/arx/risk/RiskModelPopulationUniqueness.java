@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.io.Serializable;
 
 import org.deidentifier.arx.ARXPopulationModel;
 import org.deidentifier.arx.ARXSolverConfiguration;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedBoolean;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedInteger;
+import org.deidentifier.arx.common.WrappedBoolean;
+import org.deidentifier.arx.common.WrappedInteger;
 
 /**
  * Class for risks based on population uniqueness. It implements Dankar et al.'s
@@ -66,8 +66,6 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
     /** Parameter */
     private ARXSolverConfiguration    config;
     /** Parameter */
-    private int                       sampleSize;
-    /** Parameter */
     private WrappedBoolean            stop;
 
     /**
@@ -75,16 +73,13 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
      * 
      * @param model
      * @param classes
-     * @param sampleSize
      * @param config
      */
     public RiskModelPopulationUniqueness(ARXPopulationModel model,
                                          RiskModelHistogram classes,
-                                         int sampleSize,
                                          ARXSolverConfiguration config) {
         this(model,
              classes,
-             sampleSize,
              new WrappedBoolean(),
              new WrappedInteger(),
              config,
@@ -96,7 +91,6 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
      * 
      * @param model
      * @param histogram
-     * @param sampleSize
      * @param stop
      * @param progress
      * @param config
@@ -104,19 +98,17 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
      */
     RiskModelPopulationUniqueness(ARXPopulationModel model,
                                   RiskModelHistogram histogram,
-                                  int sampleSize,
                                   WrappedBoolean stop,
                                   WrappedInteger progress,
                                   ARXSolverConfiguration config,
                                   boolean precompute) {
-        super(histogram, model, sampleSize, stop, progress);
+        super(histogram, model, stop, progress);
 
         // Init
         this.numClassesOfSize1 = (int) super.getNumClassesOfSize(1);
         this.samplingFraction = super.getSamplingFraction();
         this.model = model;
         this.histogram = histogram;
-        this.sampleSize = sampleSize;
         this.config = config;
         this.stop = stop;
 
@@ -164,7 +156,16 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
      * decision rule
      */
     public double getFractionOfUniqueTuplesDankar() {
-        return getNumUniqueTuplesDankar() / super.getPopulationSize();
+        return getFractionOfUniqueTuplesDankar(true);
+    }
+
+    /**
+     * Estimated number of unique tuples in the population according to Dankar's
+     * decision rule
+     * @param useZayatzAsFallback 
+     */
+    public double getFractionOfUniqueTuplesDankar(boolean useZayatzAsFallback) {
+        return getNumUniqueTuplesDankar(useZayatzAsFallback) / super.getPopulationSize();
     }
 
     /**
@@ -211,9 +212,19 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
 
     /**
      * Estimated number of unique tuples in the population according to Dankar's
-     * decision rule
+     * decision rule.
      */
     public double getNumUniqueTuplesDankar() {
+        return getNumUniqueTuplesDankar(true);
+    }
+    
+    /**
+     * Estimated number of unique tuples in the population according to Dankar's
+     * decision rule
+     * 
+     * @param useZayatzAsFallback
+     */
+    public double getNumUniqueTuplesDankar(boolean useZayatzAsFallback) {
         if (numUniquesDankar == -1) {
             if (this.numClassesOfSize1 == 0) {
                 numUniquesDankar = 0;
@@ -225,11 +236,11 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
                     if (isValid(numUniquesPitman)) {
                         numUniquesDankar = numUniquesPitman;
                         dankarModel = PopulationUniquenessModel.PITMAN;
-                    } else {
+                    } else if (useZayatzAsFallback) {
                         getNumUniqueTuplesZayatz();
                         numUniquesDankar = numUniquesZayatz;
                         dankarModel = PopulationUniquenessModel.ZAYATZ;
-                    }
+                    } 
                 } else {
                     getNumUniqueTuplesSNB();
                     getNumUniqueTuplesZayatz();
@@ -262,7 +273,6 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
             } else {
                 numUniquesPitman = new ModelPitman(model,
                                                    histogram,
-                                                   sampleSize,
                                                    config,
                                                    stop).getNumUniques();
             }
@@ -281,7 +291,6 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
             } else {
                 numUniquesSNB = new ModelSNB(model,
                                              histogram,
-                                             sampleSize,
                                              config,
                                              stop).getNumUniques();
             }
@@ -300,7 +309,6 @@ public class RiskModelPopulationUniqueness extends RiskModelPopulation {
             } else {
                 numUniquesZayatz = new ModelZayatz(model,
                                                    histogram,
-                                                   sampleSize,
                                                    stop).getNumUniques();
             }
         }

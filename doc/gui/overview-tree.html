@@ -66,7 +66,10 @@
 <ul class="horizontal">
 <li><a href="org/deidentifier/arx/package-tree.html">org.deidentifier.arx</a>, </li>
 <li><a href="org/deidentifier/arx/aggregates/package-tree.html">org.deidentifier.arx.aggregates</a>, </li>
+<li><a href="org/deidentifier/arx/aggregates/classification/package-tree.html">org.deidentifier.arx.aggregates.classification</a>, </li>
+<li><a href="org/deidentifier/arx/common/package-tree.html">org.deidentifier.arx.common</a>, </li>
 <li><a href="org/deidentifier/arx/criteria/package-tree.html">org.deidentifier.arx.criteria</a>, </li>
+<li><a href="org/deidentifier/arx/exceptions/package-tree.html">org.deidentifier.arx.exceptions</a>, </li>
 <li><a href="org/deidentifier/arx/gui/package-tree.html">org.deidentifier.arx.gui</a>, </li>
 <li><a href="org/deidentifier/arx/gui/model/package-tree.html">org.deidentifier.arx.gui.model</a>, </li>
 <li><a href="org/deidentifier/arx/gui/resources/package-tree.html">org.deidentifier.arx.gui.resources</a>, </li>
@@ -88,7 +91,8 @@
 <li><a href="org/deidentifier/arx/io/package-tree.html">org.deidentifier.arx.io</a>, </li>
 <li><a href="org/deidentifier/arx/metric/package-tree.html">org.deidentifier.arx.metric</a>, </li>
 <li><a href="org/deidentifier/arx/metric/v2/package-tree.html">org.deidentifier.arx.metric.v2</a>, </li>
-<li><a href="org/deidentifier/arx/risk/package-tree.html">org.deidentifier.arx.risk</a></li>
+<li><a href="org/deidentifier/arx/risk/package-tree.html">org.deidentifier.arx.risk</a>, </li>
+<li><a href="org/deidentifier/arx/risk/resources/us/package-tree.html">org.deidentifier.arx.risk.resources.us</a></li>
 </ul>
 </div>
 <div class="contentContainer">
@@ -209,9 +213,10 @@
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/AggregateFunction.AggregateFunctionBuilder.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">AggregateFunction.AggregateFunctionBuilder</span></a>&lt;T&gt;</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.async.<a href="org/deidentifier/arx/gui/view/impl/common/async/Analysis.html" title="class in org.deidentifier.arx.gui.view.impl.common.async"><span class="strong">Analysis</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.async.<a href="org/deidentifier/arx/gui/view/impl/common/async/AnalysisContext.html" title="class in org.deidentifier.arx.gui.view.impl.common.async"><span class="strong">AnalysisContext</span></a></li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/AnalysisContextRisk.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">AnalysisContextRisk</span></a> (implements org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/AnalysisContextVisualization.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">AnalysisContextVisualization</a>)</li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/AnalysisContextVisualizationContingency.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">AnalysisContextVisualizationContingency</span></a> (implements org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/AnalysisContextVisualization.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">AnalysisContextVisualization</a>)</li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/AnalysisContextVisualizationDistribution.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">AnalysisContextVisualizationDistribution</span></a> (implements org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/AnalysisContextVisualization.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">AnalysisContextVisualization</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/AnalysisContextClassification.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">AnalysisContextClassification</span></a> (implements org.deidentifier.arx.gui.view.impl.common.async.<a href="org/deidentifier/arx/gui/view/impl/common/async/AnalysisContextVisualization.html" title="interface in org.deidentifier.arx.gui.view.impl.common.async">AnalysisContextVisualization</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/AnalysisContextContingency.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">AnalysisContextContingency</span></a> (implements org.deidentifier.arx.gui.view.impl.common.async.<a href="org/deidentifier/arx/gui/view/impl/common/async/AnalysisContextVisualization.html" title="interface in org.deidentifier.arx.gui.view.impl.common.async">AnalysisContextVisualization</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/AnalysisContextDistribution.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">AnalysisContextDistribution</span></a> (implements org.deidentifier.arx.gui.view.impl.common.async.<a href="org/deidentifier/arx/gui/view/impl/common/async/AnalysisContextVisualization.html" title="interface in org.deidentifier.arx.gui.view.impl.common.async">AnalysisContextVisualization</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/AnalysisContextRisk.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">AnalysisContextRisk</span></a> (implements org.deidentifier.arx.gui.view.impl.common.async.<a href="org/deidentifier/arx/gui/view/impl/common/async/AnalysisContextVisualization.html" title="interface in org.deidentifier.arx.gui.view.impl.common.async">AnalysisContextVisualization</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.async.<a href="org/deidentifier/arx/gui/view/impl/common/async/AnalysisData.html" title="class in org.deidentifier.arx.gui.view.impl.common.async"><span class="strong">AnalysisData</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.async.<a href="org/deidentifier/arx/gui/view/impl/common/async/AnalysisManager.html" title="class in org.deidentifier.arx.gui.view.impl.common.async"><span class="strong">AnalysisManager</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXAnonymizer.html" title="class in org.deidentifier.arx"><span class="strong">ARXAnonymizer</span></a></li>
@@ -222,6 +227,7 @@
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXLattice.ARXNode.html" title="class in org.deidentifier.arx"><span class="strong">ARXLattice.ARXNode</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXLattice.ARXNode.Access.html" title="class in org.deidentifier.arx"><span class="strong">ARXLattice.ARXNode.Access</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXLattice.LatticeDeserializationContext.html" title="class in org.deidentifier.arx"><span class="strong">ARXLattice.LatticeDeserializationContext</span></a></li>
+<li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXLogisticRegressionConfiguration.html" title="class in org.deidentifier.arx"><span class="strong">ARXLogisticRegressionConfiguration</span></a> (implements java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx"><span class="strong">ARXPopulationModel</span></a> (implements java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXResult.html" title="class in org.deidentifier.arx"><span class="strong">ARXResult</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.wizard.<a href="org/deidentifier/arx/gui/view/impl/wizard/ARXWizardDialog.ARXWizardButton.html" title="class in org.deidentifier.arx.gui.view.impl.wizard"><span class="strong">ARXWizardDialog.ARXWizardButton</span></a></li>
@@ -237,16 +243,25 @@
 </li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/AttributeType.MicroAggregationFunctionDescription.html" title="class in org.deidentifier.arx"><span class="strong">AttributeType.MicroAggregationFunctionDescription</span></a> (implements java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/Cardinalities.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">Cardinalities</span></a> (implements java.io.Serializable)</li>
+<li type="circle">org.deidentifier.arx.gui.resources.<a href="org/deidentifier/arx/gui/resources/Charsets.html" title="class in org.deidentifier.arx.gui.resources"><span class="strong">Charsets</span></a></li>
+<li type="circle">org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/ClassificationDataSpecification.html" title="class in org.deidentifier.arx.aggregates.classification"><span class="strong">ClassificationDataSpecification</span></a></li>
+<li type="circle">org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/ClassificationFeatureMetadata.html" title="class in org.deidentifier.arx.aggregates.classification"><span class="strong">ClassificationFeatureMetadata</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ClipboardHandlerTable.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ClipboardHandlerTable</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ClipboardHandlerTree.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ClipboardHandlerTree</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentDataTable.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentDataTable</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IComponent.html" title="interface in org.deidentifier.arx.gui.view.def">IComponent</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentFilterTable.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentFilterTable</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentGSSlider.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentGSSlider</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentHierarchy.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentHierarchy</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentHierarchyMenu.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentHierarchyMenu</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentMultiStack.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentMultiStack</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentResponsiveLayout.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentResponsiveLayout</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentRiskMonitor.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentRiskMonitor</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentRiskThresholds.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentRiskThresholds</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentStatus.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentStatus</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentTable.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentTable</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IComponent.html" title="interface in org.deidentifier.arx.gui.view.def">IComponent</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentTitledBorder.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentTitledBorder</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IComponent.html" title="interface in org.deidentifier.arx.gui.view.def">IComponent</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentTitledFolder.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentTitledFolder</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IComponent.html" title="interface in org.deidentifier.arx.gui.view.def">IComponent</a>)</li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentTitledFolderButton.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentTitledFolderButton</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IComponent.html" title="interface in org.deidentifier.arx.gui.view.def">IComponent</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentTitledFolderButtonBar.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentTitledFolderButtonBar</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IComponent.html" title="interface in org.deidentifier.arx.gui.view.def">IComponent</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.<a href="org/deidentifier/arx/gui/Controller.html" title="class in org.deidentifier.arx.gui"><span class="strong">Controller</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.io.<a href="org/deidentifier/arx/io/CSVDataInput.html" title="class in org.deidentifier.arx.io"><span class="strong">CSVDataInput</span></a></li>
 <li type="circle">org.deidentifier.arx.io.<a href="org/deidentifier/arx/io/CSVDataOutput.html" title="class in org.deidentifier.arx.io"><span class="strong">CSVDataOutput</span></a></li>
@@ -260,6 +275,7 @@
 </ul>
 </li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataDefinition.html" title="class in org.deidentifier.arx"><span class="strong">DataDefinition</span></a> (implements java.lang.Cloneable)</li>
+<li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataGeneralizationScheme.html" title="class in org.deidentifier.arx"><span class="strong">DataGeneralizationScheme</span></a> (implements java.lang.Cloneable, java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataHandle.html" title="class in org.deidentifier.arx"><span class="strong">DataHandle</span></a>
 <ul>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataHandleInput.html" title="class in org.deidentifier.arx"><span class="strong">DataHandleInput</span></a></li>
@@ -267,8 +283,8 @@
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataHandleSubset.html" title="class in org.deidentifier.arx"><span class="strong">DataHandleSubset</span></a></li>
 </ul>
 </li>
+<li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataHandleInternal.html" title="class in org.deidentifier.arx"><span class="strong">DataHandleInternal</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataHandleOutput.ResultIterator.html" title="class in org.deidentifier.arx"><span class="strong">DataHandleOutput.ResultIterator</span></a> (implements java.util.Iterator&lt;E&gt;)</li>
-<li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataHandleStatistics.html" title="class in org.deidentifier.arx"><span class="strong">DataHandleStatistics</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.table.<a href="org/deidentifier/arx/gui/view/impl/common/table/DataProviderWrapped.html" title="class in org.deidentifier.arx.gui.view.impl.common.table"><span class="strong">DataProviderWrapped</span></a> (implements org.deidentifier.arx.gui.view.impl.common.table.<a href="org/deidentifier/arx/gui/view/impl/common/table/CTDataProvider.html" title="interface in org.deidentifier.arx.gui.view.impl.common.table">CTDataProvider</a>)</li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataSelector.html" title="class in org.deidentifier.arx"><span class="strong">DataSelector</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataSource.html" title="class in org.deidentifier.arx"><span class="strong">DataSource</span></a></li>
@@ -295,6 +311,7 @@
 <li type="circle">org.deidentifier.arx.gui.worker.io.<a href="org/deidentifier/arx/gui/worker/io/XMLHandler.html" title="class in org.deidentifier.arx.gui.worker.io"><span class="strong">XMLHandler</span></a></li>
 </ul>
 </li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/DelayedChangeListener.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">DelayedChangeListener</span></a> (implements org.eclipse.swt.events.ModifyListener, org.eclipse.swt.events.SelectionListener)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogHelpConfig.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogHelpConfig</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogHelpConfig.Entry.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogHelpConfig.Entry</span></a></li>
 <li type="circle">org.eclipse.jface.dialogs.DialogPage (implements org.eclipse.jface.dialogs.IDialogPage, org.eclipse.jface.dialogs.IMessageProvider)
@@ -333,8 +350,11 @@
 </li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorCriterion.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorCriterion</span></a>&lt;T&gt;
 <ul>
+<li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorCriterionDDisclosurePrivacy.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorCriterionDDisclosurePrivacy</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorCriterionDifferentialPrivacy.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorCriterionDifferentialPrivacy</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorCriterionDPresence.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorCriterionDPresence</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorCriterionKAnonymity.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorCriterionKAnonymity</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorCriterionKMap.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorCriterionKMap</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorCriterionLDiversity.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorCriterionLDiversity</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorCriterionRiskBased.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorCriterionRiskBased</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorCriterionTCloseness.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorCriterionTCloseness</span></a></li>
@@ -342,11 +362,28 @@
 </li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorSelection.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorSelection</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IEditor.html" title="interface in org.deidentifier.arx.gui.view.def">IEditor</a>&lt;T&gt;)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/EditorString.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">EditorString</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IEditor.html" title="interface in org.deidentifier.arx.gui.view.def">IEditor</a>&lt;T&gt;)</li>
+<li type="circle">org.eclipse.draw2d.Figure (implements org.eclipse.draw2d.IFigure)
+<ul>
+<li type="circle">org.eclipse.nebula.visualization.widgets.figures.AbstractScaledWidgetFigure (implements org.eclipse.nebula.visualization.internal.widgets.introspection.Introspectable)
+<ul>
+<li type="circle">org.eclipse.nebula.visualization.widgets.figures.AbstractMarkedWidgetFigure
+<ul>
+<li type="circle">org.eclipse.nebula.visualization.widgets.figures.AbstractRoundRampedFigure
+<ul>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentMeterFigure.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentMeterFigure</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li type="circle">org.deidentifier.arx.gui.worker.io.<a href="org/deidentifier/arx/gui/worker/io/FileBuilder.html" title="class in org.deidentifier.arx.gui.worker.io"><span class="strong">FileBuilder</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.table.<a href="org/deidentifier/arx/gui/view/impl/common/table/FillLayerResetCommand.html" title="class in org.deidentifier.arx.gui.view.impl.common.table"><span class="strong">FillLayerResetCommand</span></a> (implements org.eclipse.nebula.widgets.nattable.command.ILayerCommand)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.explore.<a href="org/deidentifier/arx/gui/view/impl/explore/Gradient.html" title="class in org.deidentifier.arx.gui.view.impl.explore"><span class="strong">Gradient</span></a></li>
-<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/Groupify.html" title="class in org.deidentifier.arx.risk"><span class="strong">Groupify</span></a>&lt;T&gt;</li>
-<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/Groupify.Group.html" title="class in org.deidentifier.arx.risk"><span class="strong">Groupify.Group</span></a>&lt;U&gt;</li>
+<li type="circle">org.deidentifier.arx.common.<a href="org/deidentifier/arx/common/Groupify.html" title="class in org.deidentifier.arx.common"><span class="strong">Groupify</span></a>&lt;T&gt;</li>
+<li type="circle">org.deidentifier.arx.common.<a href="org/deidentifier/arx/common/Groupify.Group.html" title="class in org.deidentifier.arx.common"><span class="strong">Groupify.Group</span></a>&lt;U&gt;</li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/HierarchyBuilder.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">HierarchyBuilder</span></a>&lt;T&gt; (implements java.io.Serializable)
 <ul>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/HierarchyBuilderGroupingBased.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">HierarchyBuilderGroupingBased</span></a>&lt;T&gt; (implements java.io.Serializable)
@@ -403,6 +440,12 @@
 <li type="circle">org.deidentifier.arx.gui.view.impl.wizard.<a href="org/deidentifier/arx/gui/view/impl/wizard/HierarchyWizardModelGrouping.HierarchyWizardGroupingGroup.html" title="class in org.deidentifier.arx.gui.view.impl.wizard"><span class="strong">HierarchyWizardModelGrouping.HierarchyWizardGroupingGroup</span></a>&lt;U&gt;</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.wizard.<a href="org/deidentifier/arx/gui/view/impl/wizard/HierarchyWizardModelGrouping.HierarchyWizardGroupingInterval.html" title="class in org.deidentifier.arx.gui.view.impl.wizard"><span class="strong">HierarchyWizardModelGrouping.HierarchyWizardGroupingInterval</span></a>&lt;U&gt;</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.wizard.<a href="org/deidentifier/arx/gui/view/impl/wizard/HierarchyWizardModelGrouping.HierarchyWizardGroupingRange.html" title="class in org.deidentifier.arx.gui.view.impl.wizard"><span class="strong">HierarchyWizardModelGrouping.HierarchyWizardGroupingRange</span></a>&lt;U&gt;</li>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/HIPAAConstants.html" title="class in org.deidentifier.arx.risk"><span class="strong">HIPAAConstants</span></a>
+<ul>
+<li type="circle">org.deidentifier.arx.risk.resources.us.<a href="org/deidentifier/arx/risk/resources/us/HIPAAConstantsUS.html" title="class in org.deidentifier.arx.risk.resources.us"><span class="strong">HIPAAConstantsUS</span></a></li>
+</ul>
+</li>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/HIPAAIdentifierMatch.html" title="class in org.deidentifier.arx.risk"><span class="strong">HIPAAIdentifierMatch</span></a></li>
 <li type="circle">org.deidentifier.arx.io.<a href="org/deidentifier/arx/io/ImportAdapter.html" title="class in org.deidentifier.arx.io"><span class="strong">ImportAdapter</span></a> (implements java.util.Iterator&lt;E&gt;)
 <ul>
 <li type="circle">org.deidentifier.arx.io.<a href="org/deidentifier/arx/io/ImportAdapterCSV.html" title="class in org.deidentifier.arx.io"><span class="strong">ImportAdapterCSV</span></a></li>
@@ -460,11 +503,13 @@
 </ul>
 </li>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/IO.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">IO</span></a></li>
+<li type="circle">org.deidentifier.arx.io.<a href="org/deidentifier/arx/io/IOUtil.html" title="class in org.deidentifier.arx.io"><span class="strong">IOUtil</span></a></li>
 <li type="circle">de.linearbits.jhc.JHCData
 <ul>
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/DensityData.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">DensityData</span></a></li>
 </ul>
 </li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/LayoutAttributeSettings.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">LayoutAttributeSettings</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/ILayout.html" title="interface in org.deidentifier.arx.gui.view.def">ILayout</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/LayoutCriteria.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">LayoutCriteria</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/ILayout.html" title="interface in org.deidentifier.arx.gui.view.def">ILayout</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/LayoutDefinition.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">LayoutDefinition</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/ILayout.html" title="interface in org.deidentifier.arx.gui.view.def">ILayout</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.explore.<a href="org/deidentifier/arx/gui/view/impl/explore/LayoutExplore.html" title="class in org.deidentifier.arx.gui.view.impl.explore"><span class="strong">LayoutExplore</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/ILayout.html" title="interface in org.deidentifier.arx.gui.view.def">ILayout</a>)</li>
@@ -475,7 +520,7 @@
 <li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/LayoutRisksTop.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">LayoutRisksTop</span></a></li>
 </ul>
 </li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/LayoutTransformationSettings.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">LayoutTransformationSettings</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/ILayout.html" title="interface in org.deidentifier.arx.gui.view.def">ILayout</a>, org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/LayoutTransformationModel.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">LayoutTransformationModel</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/ILayout.html" title="interface in org.deidentifier.arx.gui.view.def">ILayout</a>, org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">LayoutUtility</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/ILayout.html" title="interface in org.deidentifier.arx.gui.view.def">ILayout</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">LayoutUtilityStatistics</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/ILayout.html" title="interface in org.deidentifier.arx.gui.view.def">ILayout</a>, org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.<a href="org/deidentifier/arx/gui/Main.html" title="class in org.deidentifier.arx.gui"><span class="strong">Main</span></a></li>
@@ -496,6 +541,7 @@
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricMDNMLossPotentiallyPrecomputed.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricMDNMLossPotentiallyPrecomputed</span></a></li>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricMDNUEntropyPotentiallyPrecomputed.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricMDNUEntropyPotentiallyPrecomputed</span></a></li>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricMDNUNMEntropyPotentiallyPrecomputed.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricMDNUNMEntropyPotentiallyPrecomputed</span></a></li>
+<li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricMDNUNMNormalizedEntropyPotentiallyPrecomputed.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricMDNUNMNormalizedEntropyPotentiallyPrecomputed</span></a></li>
 </ul>
 </li>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricMDHeight.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricMDHeight</span></a></li>
@@ -515,6 +561,11 @@
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricMDNUNMEntropyPrecomputed.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricMDNUNMEntropyPrecomputed</span></a>
 <ul>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricMDNUNMEntropy.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricMDNUNMEntropy</span></a></li>
+<li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricMDNUNMNormalizedEntropyPrecomputed.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricMDNUNMNormalizedEntropyPrecomputed</span></a>
+<ul>
+<li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricMDNUNMNormalizedEntropy.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricMDNUNMNormalizedEntropy</span></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -525,11 +576,13 @@
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/AbstractMetricSingleDimensional.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">AbstractMetricSingleDimensional</span></a>
 <ul>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricSDAECS.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricSDAECS</span></a></li>
+<li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricSDNMAmbiguity.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricSDNMAmbiguity</span></a></li>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricSDNMDiscernability.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricSDNMDiscernability</span></a>
 <ul>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricSDDiscernability.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricSDDiscernability</span></a></li>
 </ul>
 </li>
+<li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/MetricSDNMKLDivergence.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">MetricSDNMKLDivergence</span></a></li>
 </ul>
 </li>
 <li type="circle">org.deidentifier.arx.metric.<a href="org/deidentifier/arx/metric/MetricDefault.html" title="class in org.deidentifier.arx.metric"><span class="strong">MetricDefault</span></a>
@@ -562,29 +615,38 @@
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelAuditTrailEntry.AuditTrailEntryFindReplace.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelAuditTrailEntry.AuditTrailEntryFindReplace</span></a></li>
 </ul>
 </li>
+<li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelClassification.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelClassification</span></a> (implements java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelClipboard.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelClipboard</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelConfiguration.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelConfiguration</span></a> (implements java.lang.Cloneable, java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelCriterion</span></a> (implements java.io.Serializable)
 <ul>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelExplicitCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelExplicitCriterion</span></a>
 <ul>
+<li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelDDisclosurePrivacyCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelDDisclosurePrivacyCriterion</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelLDiversityCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelLDiversityCriterion</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelTClosenessCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelTClosenessCriterion</span></a></li>
 </ul>
 </li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelImplicitCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelImplicitCriterion</span></a>
 <ul>
+<li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelDifferentialPrivacyCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelDifferentialPrivacyCriterion</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelDPresenceCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelDPresenceCriterion</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelKAnonymityCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelKAnonymityCriterion</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelKMapCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelKMapCriterion</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelRiskBasedCriterion.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelRiskBasedCriterion</span></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelEvent.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelEvent</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelLocalRecoding.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelLocalRecoding</span></a> (implements java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelNodeFilter.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelNodeFilter</span></a> (implements java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelRisk.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelRisk</span></a> (implements java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelViewConfig.html" title="class in org.deidentifier.arx.gui.model"><span class="strong">ModelViewConfig</span></a> (implements java.io.Serializable)</li>
+<li type="circle">org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/MultiClassLogisticRegression.html" title="class in org.deidentifier.arx.aggregates.classification"><span class="strong">MultiClassLogisticRegression</span></a> (implements org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/ClassificationMethod.html" title="interface in org.deidentifier.arx.aggregates.classification">ClassificationMethod</a>)</li>
+<li type="circle">org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/MultiClassLogisticRegressionClassificationResult.html" title="class in org.deidentifier.arx.aggregates.classification"><span class="strong">MultiClassLogisticRegressionClassificationResult</span></a> (implements org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/ClassificationResult.html" title="interface in org.deidentifier.arx.aggregates.classification">ClassificationResult</a>)</li>
+<li type="circle">org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/MultiClassZeroR.html" title="class in org.deidentifier.arx.aggregates.classification"><span class="strong">MultiClassZeroR</span></a> (implements org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/ClassificationMethod.html" title="interface in org.deidentifier.arx.aggregates.classification">ClassificationMethod</a>)</li>
+<li type="circle">org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/MultiClassZeroRClassificationResult.html" title="class in org.deidentifier.arx.aggregates.classification"><span class="strong">MultiClassZeroRClassificationResult</span></a> (implements org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/ClassificationResult.html" title="interface in org.deidentifier.arx.aggregates.classification">ClassificationResult</a>)</li>
 <li type="circle">de.linearbits.newtonraphson.NewtonRaphsonConfiguration&lt;T&gt; (implements java.io.Serializable)
 <ul>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXSolverConfiguration.html" title="class in org.deidentifier.arx"><span class="strong">ARXSolverConfiguration</span></a></li>
@@ -594,6 +656,7 @@
 <ul>
 <li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/ExplicitPrivacyCriterion.html" title="class in org.deidentifier.arx.criteria"><span class="strong">ExplicitPrivacyCriterion</span></a>
 <ul>
+<li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/DDisclosurePrivacy.html" title="class in org.deidentifier.arx.criteria"><span class="strong">DDisclosurePrivacy</span></a></li>
 <li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/LDiversity.html" title="class in org.deidentifier.arx.criteria"><span class="strong">LDiversity</span></a>
 <ul>
 <li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/DistinctLDiversity.html" title="class in org.deidentifier.arx.criteria"><span class="strong">DistinctLDiversity</span></a></li>
@@ -616,7 +679,9 @@
 <li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/Inclusion.html" title="class in org.deidentifier.arx.criteria"><span class="strong">Inclusion</span></a></li>
 </ul>
 </li>
+<li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/EDDifferentialPrivacy.html" title="class in org.deidentifier.arx.criteria"><span class="strong">EDDifferentialPrivacy</span></a></li>
 <li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/KAnonymity.html" title="class in org.deidentifier.arx.criteria"><span class="strong">KAnonymity</span></a></li>
+<li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/KMap.html" title="class in org.deidentifier.arx.criteria"><span class="strong">KMap</span></a></li>
 </ul>
 </li>
 <li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/SampleBasedCriterion.html" title="class in org.deidentifier.arx.criteria"><span class="strong">SampleBasedCriterion</span></a>
@@ -639,20 +704,49 @@
 <li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelAttributes.QuasiIdentifierRisk.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelAttributes.QuasiIdentifierRisk</span></a> (implements java.lang.Comparable&lt;T&gt;)</li>
 <li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelHistogram.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelHistogram</span></a></li>
 <li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelPopulationUniqueness</span></a></li>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelSampleRiskDistribution.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelSampleRiskDistribution</span></a></li>
 <li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelSampleRisks.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelSampleRisks</span></a></li>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelSampleSummary.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelSampleSummary</span></a></li>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelSampleSummary.MarketerRisk.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelSampleSummary.MarketerRisk</span></a></li>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelSampleSummary.RiskSummary.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelSampleSummary.RiskSummary</span></a>
+<ul>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelSampleSummary.JournalistRisk.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelSampleSummary.JournalistRisk</span></a></li>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelSampleSummary.ProsecutorRisk.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelSampleSummary.ProsecutorRisk</span></a></li>
+</ul>
+</li>
 <li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelSampleUniqueness.html" title="class in org.deidentifier.arx.risk"><span class="strong">RiskModelSampleUniqueness</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/RowSet.html" title="class in org.deidentifier.arx"><span class="strong">RowSet</span></a> (implements java.lang.Cloneable, java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/StatisticsBuilder.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">StatisticsBuilder</span></a></li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/StatisticsBuilderInterruptible.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">StatisticsBuilderInterruptible</span></a></li>
+<li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/StatisticsClassification.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">StatisticsClassification</span></a></li>
+<li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/StatisticsClassification.PrecisionRecallMatrix.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">StatisticsClassification.PrecisionRecallMatrix</span></a></li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/StatisticsContingencyTable.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">StatisticsContingencyTable</span></a></li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/StatisticsContingencyTable.Entry.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">StatisticsContingencyTable.Entry</span></a></li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/StatisticsEquivalenceClasses.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">StatisticsEquivalenceClasses</span></a></li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/StatisticsFrequencyDistribution.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">StatisticsFrequencyDistribution</span></a></li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/StatisticsSummary.html" title="class in org.deidentifier.arx.aggregates"><span class="strong">StatisticsSummary</span></a>&lt;T&gt;</li>
 <li type="circle">org.deidentifier.arx.gui.view.<a href="org/deidentifier/arx/gui/view/SWTUtil.html" title="class in org.deidentifier.arx.gui.view"><span class="strong">SWTUtil</span></a></li>
+<li type="circle">java.lang.Throwable (implements java.io.Serializable)
+<ul>
+<li type="circle">java.lang.Exception
+<ul>
+<li type="circle">org.deidentifier.arx.exceptions.<a href="org/deidentifier/arx/exceptions/RollbackRequiredException.html" title="class in org.deidentifier.arx.exceptions"><span class="strong">RollbackRequiredException</span></a></li>
+<li type="circle">java.lang.RuntimeException
+<ul>
+<li type="circle">org.deidentifier.arx.exceptions.<a href="org/deidentifier/arx/exceptions/ComputationInterruptedException.html" title="class in org.deidentifier.arx.exceptions"><span class="strong">ComputationInterruptedException</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/TupleMatcher.html" title="class in org.deidentifier.arx.metric.v2"><span class="strong">TupleMatcher</span></a> (implements java.io.Serializable)</li>
+<li type="circle">org.deidentifier.arx.common.<a href="org/deidentifier/arx/common/TupleWrapper.html" title="class in org.deidentifier.arx.common"><span class="strong">TupleWrapper</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.<a href="org/deidentifier/arx/gui/Update.html" title="class in org.deidentifier.arx.gui"><span class="strong">Update</span></a> (implements java.lang.Runnable)</li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewAttributeDefinition.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewAttributeDefinition</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewAttributeList.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewAttributeList</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewAttributeTransformation.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewAttributeTransformation</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewAttributeWeights.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewAttributeWeights</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewClassificationAttributes.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewClassificationAttributes</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>, org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">ViewStatisticsBasic</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.explore.<a href="org/deidentifier/arx/gui/view/impl/explore/ViewClipboard.html" title="class in org.deidentifier.arx.gui.view.impl.explore"><span class="strong">ViewClipboard</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewCodingModel.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewCodingModel</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewCriteriaList.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewCriteriaList</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
@@ -662,13 +756,11 @@
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ViewDataOutput.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ViewDataOutput</span></a></li>
 </ul>
 </li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewDataDefinition.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewDataDefinition</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.explore.<a href="org/deidentifier/arx/gui/view/impl/explore/ViewFilter.html" title="class in org.deidentifier.arx.gui.view.impl.explore"><span class="strong">ViewFilter</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ViewHierarchy.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ViewHierarchy</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewMetric.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewMetric</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewLocalRecoding.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewLocalRecoding</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>, org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">ViewStatisticsBasic</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewPopulationModel.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewPopulationModel</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.explore.<a href="org/deidentifier/arx/gui/view/impl/explore/ViewProperties.html" title="class in org.deidentifier.arx.gui.view.impl.explore"><span class="strong">ViewProperties</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewProperties</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewProperties</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>, org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">ViewStatisticsBasic</a>)
 <ul>
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewPropertiesInput.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewPropertiesInput</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewPropertiesOutput.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewPropertiesOutput</span></a></li>
@@ -677,11 +769,13 @@
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewProperties.Property.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewProperties.Property</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisks.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisks</span></a>&lt;T&gt; (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)
 <ul>
-<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksAttributesTable.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksAttributesTable</span></a></li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksBasicEstimates.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksBasicEstimates</span></a></li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksClassDistributionPlot.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksClassDistributionPlot</span></a></li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksClassDistributionTable.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksClassDistributionTable</span></a></li>
-<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksPlotUniquenessEstimates.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksPlotUniquenessEstimates</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksHIPAAIdentifiersTable.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksHIPAAIdentifiersTable</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksPopulationUniques.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksPopulationUniques</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksQuasiIdentifiersTable.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksQuasiIdentifiersTable</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksReIdentification.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksReIdentification</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksReIdentificationTable.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksReIdentificationTable</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksRiskDistributionPlot.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksRiskDistributionPlot</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksRiskDistributionTable.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksRiskDistributionTable</span></a></li>
 </ul>
 </li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.risk.<a href="org/deidentifier/arx/gui/view/impl/risk/ViewRisksPopulationModel.html" title="class in org.deidentifier.arx.gui.view.impl.risk"><span class="strong">ViewRisksPopulationModel</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
@@ -699,11 +793,19 @@
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsContingencyTable.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewStatisticsContingencyTable</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsDistributionHistogram.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewStatisticsDistributionHistogram</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsDistributionTable.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewStatisticsDistributionTable</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsEquivalenceClassTable.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewStatisticsEquivalenceClassTable</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsLogisticRegression.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewStatisticsLogisticRegression</span></a>
+<ul>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsLogisticRegressionInput.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewStatisticsLogisticRegressionInput</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsLogisticRegressionOutput.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewStatisticsLogisticRegressionOutput</span></a></li>
+</ul>
+</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsSummaryTable.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewStatisticsSummaryTable</span></a></li>
 </ul>
 </li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewSubsetDefinition.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewSubsetDefinition</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewTransformationSettings.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewTransformationSettings</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.define.<a href="org/deidentifier/arx/gui/view/impl/define/ViewUtilityMeasures.html" title="class in org.deidentifier.arx.gui.view.impl.define"><span class="strong">ViewUtilityMeasures</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.worker.io.<a href="org/deidentifier/arx/gui/worker/io/Vocabulary.html" title="class in org.deidentifier.arx.gui.worker.io"><span class="strong">Vocabulary</span></a>
 <ul>
 <li type="circle">org.deidentifier.arx.gui.worker.io.<a href="org/deidentifier/arx/gui/worker/io/Vocabulary_V1.html" title="class in org.deidentifier.arx.gui.worker.io"><span class="strong">Vocabulary_V1</span></a>
@@ -726,6 +828,7 @@
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentStatusLabel.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentStatusLabel</span></a></li>
 </ul>
 </li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentTitledSeparator.html" title="class in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentTitledSeparator</span></a></li>
 </ul>
 </li>
 </ul>
@@ -748,13 +851,17 @@
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogCriterionSelection.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogCriterionSelection</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogCriterionUpdate.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogCriterionUpdate</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogDebug.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogDebug</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogDefaultParameters.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogDefaultParameters</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogError.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogError</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogFindReplace.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogFindReplace</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogGeneralizationSelection.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogGeneralizationSelection</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogHelp.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogHelp</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogMultiSelection.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogMultiSelection</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogOrderSelection.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogOrderSelection</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogProject.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogProject</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogQuery.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogQuery</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogSeparator.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogSeparator</span></a> (implements org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IDialog.html" title="interface in org.deidentifier.arx.gui.view.def">IDialog</a>)</li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.menu.<a href="org/deidentifier/arx/gui/view/impl/menu/DialogTopBottomCoding.html" title="class in org.deidentifier.arx.gui.view.impl.menu"><span class="strong">DialogTopBottomCoding</span></a></li>
 <li type="circle">org.eclipse.jface.wizard.WizardDialog (implements org.eclipse.jface.dialogs.IPageChangeProvider, org.eclipse.jface.wizard.IWizardContainer2)
 <ul>
 <li type="circle">org.deidentifier.arx.gui.view.impl.wizard.<a href="org/deidentifier/arx/gui/view/impl/wizard/ARXWizardDialog.html" title="class in org.deidentifier.arx.gui.view.impl.wizard"><span class="strong">ARXWizardDialog</span></a></li>
@@ -784,21 +891,26 @@
 <li type="circle">org.deidentifier.arx.gui.worker.<a href="org/deidentifier/arx/gui/worker/WorkerExport.html" title="class in org.deidentifier.arx.gui.worker"><span class="strong">WorkerExport</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.worker.<a href="org/deidentifier/arx/gui/worker/WorkerImport.html" title="class in org.deidentifier.arx.gui.worker"><span class="strong">WorkerImport</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.worker.<a href="org/deidentifier/arx/gui/worker/WorkerLoad.html" title="class in org.deidentifier.arx.gui.worker"><span class="strong">WorkerLoad</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.worker.<a href="org/deidentifier/arx/gui/worker/WorkerLocalRecode.html" title="class in org.deidentifier.arx.gui.worker"><span class="strong">WorkerLocalRecode</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.worker.<a href="org/deidentifier/arx/gui/worker/WorkerSave.html" title="class in org.deidentifier.arx.gui.worker"><span class="strong">WorkerSave</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.worker.<a href="org/deidentifier/arx/gui/worker/WorkerTransform.html" title="class in org.deidentifier.arx.gui.worker"><span class="strong">WorkerTransform</span></a></li>
 </ul>
 </li>
+<li type="circle">org.deidentifier.arx.common.<a href="org/deidentifier/arx/common/WrappedBoolean.html" title="class in org.deidentifier.arx.common"><span class="strong">WrappedBoolean</span></a></li>
+<li type="circle">org.deidentifier.arx.common.<a href="org/deidentifier/arx/common/WrappedInteger.html" title="class in org.deidentifier.arx.common"><span class="strong">WrappedInteger</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.worker.io.<a href="org/deidentifier/arx/gui/worker/io/XMLWriter.html" title="class in org.deidentifier.arx.gui.worker.io"><span class="strong">XMLWriter</span></a></li>
 </ul>
 </li>
 </ul>
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
-<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/AnalysisContextVisualization.html" title="interface in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">AnalysisContextVisualization</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.common.async.<a href="org/deidentifier/arx/gui/view/impl/common/async/AnalysisContextVisualization.html" title="interface in org.deidentifier.arx.gui.view.impl.common.async"><span class="strong">AnalysisContextVisualization</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXListener.html" title="interface in org.deidentifier.arx"><span class="strong">ARXListener</span></a></li>
+<li type="circle">org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/ClassificationMethod.html" title="interface in org.deidentifier.arx.aggregates.classification"><span class="strong">ClassificationMethod</span></a></li>
+<li type="circle">org.deidentifier.arx.aggregates.classification.<a href="org/deidentifier/arx/aggregates/classification/ClassificationResult.html" title="interface in org.deidentifier.arx.aggregates.classification"><span class="strong">ClassificationResult</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.<a href="org/deidentifier/arx/gui/view/impl/common/ComponentStatusLabelProgressProvider.html" title="interface in org.deidentifier.arx.gui.view.impl.common"><span class="strong">ComponentStatusLabelProgressProvider</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.common.table.<a href="org/deidentifier/arx/gui/view/impl/common/table/CTComponent.html" title="interface in org.deidentifier.arx.gui.view.impl.common.table"><span class="strong">CTComponent</span></a></li>
-<li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataHandleStatistics.InterruptHandler.html" title="interface in org.deidentifier.arx"><span class="strong">DataHandleStatistics.InterruptHandler</span></a></li>
+<li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataHandleInternal.InterruptHandler.html" title="interface in org.deidentifier.arx"><span class="strong">DataHandleInternal.InterruptHandler</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataType.DataTypeWithFormat.html" title="interface in org.deidentifier.arx"><span class="strong">DataType.DataTypeWithFormat</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataType.DataTypeWithRatioScale.html" title="interface in org.deidentifier.arx"><span class="strong">DataType.DataTypeWithRatioScale</span></a>&lt;T&gt;</li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.wizard.<a href="org/deidentifier/arx/gui/view/impl/wizard/HierarchyWizard.HierarchyWizardView.html" title="interface in org.deidentifier.arx.gui.view.impl.wizard"><span class="strong">HierarchyWizard.HierarchyWizardView</span></a></li>
@@ -813,7 +925,11 @@
 <li type="circle">org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IEditor.html" title="interface in org.deidentifier.arx.gui.view.def"><span class="strong">IEditor</span></a>&lt;T&gt;</li>
 <li type="circle">org.deidentifier.arx.io.<a href="org/deidentifier/arx/io/IImportColumnIndexed.html" title="interface in org.deidentifier.arx.io"><span class="strong">IImportColumnIndexed</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/ILayout.html" title="interface in org.deidentifier.arx.gui.view.def"><span class="strong">ILayout</span></a></li>
-<li type="circle">org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def"><span class="strong">IView</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.def.<a href="org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def"><span class="strong">IView</span></a>
+<ul>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html" title="interface in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">ViewStatisticsBasic</span></a></li>
+</ul>
+</li>
 <li type="circle">java.io.Serializable
 <ul>
 <li type="circle">org.deidentifier.arx.metric.v2.<a href="org/deidentifier/arx/metric/v2/DomainShare.html" title="interface in org.deidentifier.arx.metric.v2"><span class="strong">DomainShare</span></a></li>
@@ -827,19 +943,27 @@
 <li type="circle">java.lang.Enum&lt;E&gt; (implements java.lang.Comparable&lt;T&gt;, java.io.Serializable)
 <ul>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataScale.html" title="enum in org.deidentifier.arx"><span class="strong">DataScale</span></a> (implements java.io.Serializable)</li>
+<li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/DataGeneralizationScheme.GeneralizationDegree.html" title="enum in org.deidentifier.arx"><span class="strong">DataGeneralizationScheme.GeneralizationDegree</span></a> (implements java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXPopulationModel.Region.html" title="enum in org.deidentifier.arx"><span class="strong">ARXPopulationModel.Region</span></a> (implements java.io.Serializable)</li>
+<li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXLogisticRegressionConfiguration.PriorFunction.html" title="enum in org.deidentifier.arx"><span class="strong">ARXLogisticRegressionConfiguration.PriorFunction</span></a></li>
 <li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXLattice.Anonymity.html" title="enum in org.deidentifier.arx"><span class="strong">ARXLattice.Anonymity</span></a></li>
+<li type="circle">org.deidentifier.arx.<a href="org/deidentifier/arx/ARXConfiguration.Monotonicity.html" title="enum in org.deidentifier.arx"><span class="strong">ARXConfiguration.Monotonicity</span></a></li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/HierarchyBuilderRedactionBased.Order.html" title="enum in org.deidentifier.arx.aggregates"><span class="strong">HierarchyBuilderRedactionBased.Order</span></a></li>
 <li type="circle">org.deidentifier.arx.aggregates.<a href="org/deidentifier/arx/aggregates/HierarchyBuilder.Type.html" title="enum in org.deidentifier.arx.aggregates"><span class="strong">HierarchyBuilder.Type</span></a></li>
+<li type="circle">org.deidentifier.arx.criteria.<a href="org/deidentifier/arx/criteria/KMap.CellSizeEstimator.html" title="enum in org.deidentifier.arx.criteria"><span class="strong">KMap.CellSizeEstimator</span></a></li>
 <li type="circle">org.deidentifier.arx.io.<a href="org/deidentifier/arx/io/ImportConfigurationExcel.ExcelFileTypes.html" title="enum in org.deidentifier.arx.io"><span class="strong">ImportConfigurationExcel.ExcelFileTypes</span></a></li>
 <li type="circle">org.deidentifier.arx.metric.<a href="org/deidentifier/arx/metric/Metric.AggregateFunction.html" title="enum in org.deidentifier.arx.metric"><span class="strong">Metric.AggregateFunction</span></a> (implements java.io.Serializable)</li>
 <li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/RiskModelPopulationUniqueness.PopulationUniquenessModel.html" title="enum in org.deidentifier.arx.risk"><span class="strong">RiskModelPopulationUniqueness.PopulationUniquenessModel</span></a> (implements java.io.Serializable)</li>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/HIPAAIdentifierMatch.HIPAAIdentifier.html" title="enum in org.deidentifier.arx.risk"><span class="strong">HIPAAIdentifierMatch.HIPAAIdentifier</span></a></li>
+<li type="circle">org.deidentifier.arx.risk.<a href="org/deidentifier/arx/risk/HIPAAIdentifierMatch.MatchType.html" title="enum in org.deidentifier.arx.risk"><span class="strong">HIPAAIdentifierMatch.MatchType</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelViewConfig.Mode.html" title="enum in org.deidentifier.arx.gui.model"><span class="strong">ModelViewConfig.Mode</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelTransformationMode.html" title="enum in org.deidentifier.arx.gui.model"><span class="strong">ModelTransformationMode</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelRisk.RiskModelForAttributes.html" title="enum in org.deidentifier.arx.gui.model"><span class="strong">ModelRisk.RiskModelForAttributes</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelRisk.ViewRiskType.html" title="enum in org.deidentifier.arx.gui.model"><span class="strong">ModelRisk.ViewRiskType</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelLocalRecoding.LocalRecodingMode.html" title="enum in org.deidentifier.arx.gui.model"><span class="strong">ModelLocalRecoding.LocalRecodingMode</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/ModelEvent.ModelPart.html" title="enum in org.deidentifier.arx.gui.model"><span class="strong">ModelEvent.ModelPart</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.model.<a href="org/deidentifier/arx/gui/model/Model.Perspective.html" title="enum in org.deidentifier.arx.gui.model"><span class="strong">Model.Perspective</span></a></li>
+<li type="circle">org.deidentifier.arx.gui.view.impl.utility.<a href="org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.ViewUtilityType.html" title="enum in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">LayoutUtility.ViewUtilityType</span></a></li>
 <li type="circle">org.deidentifier.arx.gui.view.impl.wizard.<a href="org/deidentifier/arx/gui/view/impl/wizard/ImportWizardModel.SourceType.html" title="enum in org.deidentifier.arx.gui.view.impl.wizard"><span class="strong">ImportWizardModel.SourceType</span></a></li>
 </ul>
 </li>

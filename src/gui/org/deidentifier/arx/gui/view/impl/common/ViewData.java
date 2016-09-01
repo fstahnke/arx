@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 
 package org.deidentifier.arx.gui.view.impl.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.deidentifier.arx.AttributeType;
 import org.deidentifier.arx.DataDefinition;
 import org.deidentifier.arx.DataHandle;
@@ -32,6 +35,7 @@ import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.selection.event.ColumnSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -44,45 +48,51 @@ import org.eclipse.swt.widgets.ToolItem;
  * @author Fabian Prasser
  */
 public abstract class ViewData implements IView {
-    
-    /**  TODO */
-    private final Image                IMAGE_ASCENDING;
-    
-    /**  TODO */
-    private final Image                IMAGE_DESCENDING;
-    
-    /**  TODO */
-    private final Image                IMAGE_INSENSITIVE;
-    
-    /**  TODO */
-    private final Image                IMAGE_SENSITIVE;
-    
-    /**  TODO */
-    private final Image                IMAGE_QUASI_IDENTIFYING;
-    
-    /**  TODO */
-    private final Image                IMAGE_IDENTIFYING;
 
-    /**  TODO */
-    private final ToolItem             groupsButton;
-    
-    /**  TODO */
-    private final ToolItem             subsetButton;
-    
-    /**  TODO */
-    private final ToolItem             ascendingButton;
-    
-    /**  TODO */
-    private final ToolItem             descendingButton;
+    /** Image */
+    private final Image                  IMAGE_ASCENDING;
 
-    /**  TODO */
-    protected final ComponentDataTable table;
-    
-    /**  TODO */
-    protected final Controller         controller;
+    /** Image */
+    private final Image                  IMAGE_DESCENDING;
 
-    /**  TODO */
-    protected Model                    model;
+    /** Image */
+    private final Image                  IMAGE_INSENSITIVE;
+
+    /** Image */
+    private final Image                  IMAGE_SENSITIVE;
+
+    /** Image */
+    private final Image                  IMAGE_QUASI_IDENTIFYING;
+
+    /** Image */
+    private final Image                  IMAGE_IDENTIFYING;
+
+    /** Widget */
+    private final ToolItem               groupsButton;
+
+    /** Widget */
+    private final ToolItem               subsetButton;
+
+    /** Widget */
+    private final ToolItem               ascendingButton;
+
+    /** Widget */
+    private final ToolItem               descendingButton;
+
+    /** Widget */
+    private final ComponentTitledFolder  folder;
+
+    /** Widget */
+    protected final ComponentDataTable   table;
+
+    /** Controller */
+    protected final Controller           controller;
+
+    /** Model */
+    protected Model                      model;
+
+    /** View */
+    private final Map<Composite, String> helpids = new HashMap<Composite, String>();
 
     /**
      * 
@@ -91,9 +101,11 @@ public abstract class ViewData implements IView {
      * @param parent
      * @param controller
      * @param title
+     * @param helpid
      */
     public ViewData(final Composite parent,
                     final Controller controller,
+                    final String helpid,
                     final String title) {
 
         // Register
@@ -116,7 +128,7 @@ public abstract class ViewData implements IView {
         IMAGE_DESCENDING        = controller.getResources().getManagedImage("sort_descending.png");//$NON-NLS-1$
 
         // Create title bar
-        ComponentTitledFolderButton bar = new ComponentTitledFolderButton("id-140"); //$NON-NLS-1$
+        ComponentTitledFolderButtonBar bar = new ComponentTitledFolderButtonBar(helpid, helpids); //$NON-NLS-1$
         bar.add(Resources.getMessage("DataView.1"), //$NON-NLS-1$ 
                 IMAGE_ASCENDING,
                 new Runnable() {
@@ -154,7 +166,7 @@ public abstract class ViewData implements IView {
                 });
         
         // Build border
-        ComponentTitledFolder folder = new ComponentTitledFolder(parent, controller, bar, null);
+        folder = new ComponentTitledFolder(parent, controller, bar, null);
         folder.setLayoutData(SWTUtil.createFillGridData());
         Composite c = folder.createItem(title, null);
         folder.setSelection(0);
@@ -195,6 +207,18 @@ public abstract class ViewData implements IView {
         table.addScrollBarListener(listener);
     }
     
+    /**
+     * Adds an additional item to the folder
+     * @param title
+     * @param helpid 
+     * @return
+     */
+    public Composite createAdditionalItem(String title, String helpid) {
+        Composite result = folder.createItem(title, null);
+        helpids.put(result, helpid);
+        return result;
+    }
+    
     @Override
     public void dispose() {
         controller.removeListener(this);
@@ -209,7 +233,7 @@ public abstract class ViewData implements IView {
     public ViewportLayer getViewportLayer() {
         return table.getViewportLayer();
     }
-
+    
     @Override
     public void reset() {
         table.reset();
@@ -217,6 +241,14 @@ public abstract class ViewData implements IView {
         subsetButton.setEnabled(false);
         ascendingButton.setEnabled(false);
         descendingButton.setEnabled(false);
+    }
+
+    /**
+     * Sets the selection
+     * @param index
+     */
+    public void setSelectedItem(int index) {
+        folder.setSelection(index);
     }
 
     @Override
@@ -337,5 +369,29 @@ public abstract class ViewData implements IView {
         } else {
             table.getHeaderImages().set(index, IMAGE_QUASI_IDENTIFYING);
         }
+    }
+
+    /**
+     * Adds a listener to the folder
+     * @param listener
+     */
+    public void addSelectionListener(SelectionListener listener) {
+        this.folder.addSelectionListener(listener);
+    }
+
+    /**
+     * Returns the selection index of the folder
+     * @return
+     */
+    public int getSelectionIndex() {
+        return folder.getSelectionIndex();
+    }
+
+    /**
+     * Sets the selection index of the folder
+     * @param index
+     */
+    public void setSelectionIndex(int index) {
+        folder.setSelection(index);
     }
 }

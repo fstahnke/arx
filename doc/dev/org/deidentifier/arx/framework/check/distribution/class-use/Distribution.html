@@ -103,22 +103,35 @@
 </tr>
 <tbody>
 <tr class="altColor">
+<td class="colFirst"><code>protected &lt;T&gt;&nbsp;void</code></td>
+<td class="colLast"><span class="strong">DistributionAggregateFunction.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.html#addAll(org.apache.commons.math3.stat.descriptive.DescriptiveStatistics,%20org.deidentifier.arx.framework.check.distribution.Distribution,%20org.deidentifier.arx.DataType.DataTypeWithRatioScale,%20double)">addAll</a></strong>(org.apache.commons.math3.stat.descriptive.DescriptiveStatistics&nbsp;statistics,
+      <a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution,
+      <a href="../../../../../../../org/deidentifier/arx/DataType.DataTypeWithRatioScale.html" title="interface in org.deidentifier.arx">DataType.DataTypeWithRatioScale</a>&lt;T&gt;&nbsp;type,
+      double&nbsp;offset)</code>
+<div class="block">Adds all values from the distribution to the given descriptive statistics object</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>abstract &lt;T&gt;&nbsp;java.lang.String</code></td>
 <td class="colLast"><span class="strong">DistributionAggregateFunction.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.html#aggregate(org.deidentifier.arx.framework.check.distribution.Distribution)">aggregate</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>
 <div class="block">This function returns an aggregate value.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;java.lang.String</code></td>
 <td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionArithmeticMean.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionArithmeticMean.html#aggregate(org.deidentifier.arx.framework.check.distribution.Distribution)">aggregate</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;java.lang.String</code></td>
 <td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionGeneralization.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionGeneralization.html#aggregate(org.deidentifier.arx.framework.check.distribution.Distribution)">aggregate</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;java.lang.String</code></td>
 <td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionGeometricMean.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionGeometricMean.html#aggregate(org.deidentifier.arx.framework.check.distribution.Distribution)">aggregate</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;T&gt;&nbsp;java.lang.String</code></td>
+<td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionInterval.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionInterval.html#aggregate(org.deidentifier.arx.framework.check.distribution.Distribution)">aggregate</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;java.lang.String</code></td>
@@ -129,10 +142,32 @@
 <td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionMode.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionMode.html#aggregate(org.deidentifier.arx.framework.check.distribution.Distribution)">aggregate</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>&lt;T&gt;&nbsp;java.lang.String</code></td>
-<td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionInterval.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionInterval.html#aggregate(org.deidentifier.arx.framework.check.distribution.Distribution)">aggregate</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
+<td class="colFirst"><code>&lt;T&gt;&nbsp;double</code></td>
+<td class="colLast"><span class="strong">DistributionAggregateFunction.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.html#getMeanError(org.deidentifier.arx.framework.check.distribution.Distribution)">getMeanError</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>
+<div class="block">Returns the normalized mean squared error in [0,1], if supported, 0d otherwise</div>
+</td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>&lt;T&gt;&nbsp;double</code></td>
+<td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionArithmeticMean.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionArithmeticMean.html#getMeanError(org.deidentifier.arx.framework.check.distribution.Distribution)">getMeanError</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;T&gt;&nbsp;double</code></td>
+<td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionGeneralization.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionGeneralization.html#getMeanError(org.deidentifier.arx.framework.check.distribution.Distribution)">getMeanError</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;T&gt;&nbsp;double</code></td>
+<td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionGeometricMean.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionGeometricMean.html#getMeanError(org.deidentifier.arx.framework.check.distribution.Distribution)">getMeanError</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>&lt;T&gt;&nbsp;double</code></td>
+<td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionMedian.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionMedian.html#getMeanError(org.deidentifier.arx.framework.check.distribution.Distribution)">getMeanError</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>&lt;T&gt;&nbsp;double</code></td>
+<td class="colLast"><span class="strong">DistributionAggregateFunction.DistributionAggregateFunctionMode.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/DistributionAggregateFunction.DistributionAggregateFunctionMode.html#getMeanError(org.deidentifier.arx.framework.check.distribution.Distribution)">getMeanError</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;distribution)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><span class="strong">Distribution.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html#merge(org.deidentifier.arx.framework.check.distribution.Distribution)">merge</a></strong>(<a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>&nbsp;other)</code>
 <div class="block">Merges two frequency sets.</div>
@@ -169,7 +204,7 @@
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><span class="strong">HashGroupify.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/groupify/HashGroupify.html#addFromGroupify(int[], org.deidentifier.arx.framework.check.distribution.Distribution[], int, int, int)">addFromGroupify</a></strong>(int[]&nbsp;generalized,
+<td class="colLast"><span class="strong">HashGroupify.</span><code><strong><a href="../../../../../../../org/deidentifier/arx/framework/check/groupify/HashGroupify.html#addFromGroupify(int[],%20org.deidentifier.arx.framework.check.distribution.Distribution[],%20int,%20int,%20int)">addFromGroupify</a></strong>(int[]&nbsp;generalized,
                <a href="../../../../../../../org/deidentifier/arx/framework/check/distribution/Distribution.html" title="class in org.deidentifier.arx.framework.check.distribution">Distribution</a>[]&nbsp;distributions,
                int&nbsp;representative,
                int&nbsp;count,

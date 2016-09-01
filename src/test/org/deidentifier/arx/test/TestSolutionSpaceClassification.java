@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@
 
 package org.deidentifier.arx.test;
 
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.deidentifier.arx.ARXAnonymizer;
 import org.deidentifier.arx.ARXConfiguration;
@@ -35,9 +38,11 @@ import org.junit.Test;
 
 /**
  * 
+ * @author Fabian Prasser
+ * @author Florian Kohlmayer
  */
 public class TestSolutionSpaceClassification extends AbstractTest {
-
+    
     /**
      * 
      *
@@ -46,14 +51,14 @@ public class TestSolutionSpaceClassification extends AbstractTest {
      */
     @Test
     public void testNMEntropy() throws IllegalArgumentException, IOException {
-
-    	Data data = Data.create("data/adult.csv", ';');
-    	data.getDefinition().setAttributeType("sex", Hierarchy.create("data/adult_hierarchy_sex.csv", ';'));
-    	data.getDefinition().setAttributeType("age", Hierarchy.create("data/adult_hierarchy_age.csv", ';'));
-    	data.getDefinition().setAttributeType("race", Hierarchy.create("data/adult_hierarchy_race.csv", ';'));
-    	data.getDefinition().setAttributeType("education", Hierarchy.create("data/adult_hierarchy_education.csv", ';'));
-    	data.getDefinition().setAttributeType("marital-status", Hierarchy.create("data/adult_hierarchy_marital-status.csv", ';'));
-
+        
+        Data data = Data.create("data/adult.csv", StandardCharsets.UTF_8, ';');
+        data.getDefinition().setAttributeType("sex", Hierarchy.create("data/adult_hierarchy_sex.csv", StandardCharsets.UTF_8, ';'));
+        data.getDefinition().setAttributeType("age", Hierarchy.create("data/adult_hierarchy_age.csv", StandardCharsets.UTF_8, ';'));
+        data.getDefinition().setAttributeType("race", Hierarchy.create("data/adult_hierarchy_race.csv", StandardCharsets.UTF_8, ';'));
+        data.getDefinition().setAttributeType("education", Hierarchy.create("data/adult_hierarchy_education.csv", StandardCharsets.UTF_8, ';'));
+        data.getDefinition().setAttributeType("marital-status", Hierarchy.create("data/adult_hierarchy_marital-status.csv", StandardCharsets.UTF_8, ';'));
+        
         DataSelector selector = DataSelector.create(data).field("sex").equals("Male");
         DataSubset subset = DataSubset.create(data, selector);
         
@@ -62,21 +67,21 @@ public class TestSolutionSpaceClassification extends AbstractTest {
         config.addCriterion(new Inclusion(subset));
         config.setMaxOutliers(0.02d);
         config.setMetric(Metric.createEntropyMetric(false));
-
+        
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         ARXResult result = anonymizer.anonymize(data, config);
         
-        result.getOutput(false).sort(true, new int[]{0,1,2,3,4});
+        result.getOutput(false).sort(true, new int[] { 0, 1, 2, 3, 4 });
         
         ARXLattice lattice = result.getLattice();
         
-        for (ARXNode[] level : lattice.getLevels()){
-        	for (ARXNode node : level) {
-        		if (Double.compare((Double.valueOf(node.getMinimumInformationLoss().toString())), Double.NaN)==0 ||
-        			Double.compare((Double.valueOf(node.getMaximumInformationLoss().toString())), Double.NaN)==0){
-        			fail();
-        		}
-        	}
+        for (ARXNode[] level : lattice.getLevels()) {
+            for (ARXNode node : level) {
+                if (Double.compare((Double.valueOf(node.getMinimumInformationLoss().toString())), Double.NaN) == 0 ||
+                    Double.compare((Double.valueOf(node.getMaximumInformationLoss().toString())), Double.NaN) == 0) {
+                    fail();
+                }
+            }
         }
     }
 }

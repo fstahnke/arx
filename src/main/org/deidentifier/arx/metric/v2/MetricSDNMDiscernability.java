@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 
 package org.deidentifier.arx.metric.v2;
 
-import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.check.groupify.HashGroupify;
-import org.deidentifier.arx.framework.lattice.Node;
+import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
+import org.deidentifier.arx.framework.lattice.Transformation;
 import org.deidentifier.arx.metric.MetricConfiguration;
 
 /**
@@ -90,12 +90,12 @@ public class MetricSDNMDiscernability extends AbstractMetricSingleDimensional {
     }
 
     @Override
-    protected ILSingleDimensionalWithBound getInformationLossInternal(Node node, HashGroupifyEntry entry) {
+    protected ILSingleDimensionalWithBound getInformationLossInternal(Transformation node, HashGroupifyEntry entry) {
         return new ILSingleDimensionalWithBound(entry.count);
     }
     
     @Override
-    protected ILSingleDimensionalWithBound getInformationLossInternal(final Node node, final HashGroupify g) {
+    protected ILSingleDimensionalWithBound getInformationLossInternal(final Transformation node, final HashGroupify g) {
         
         double rows = getNumTuples();
         double dm = 0;
@@ -114,12 +114,12 @@ public class MetricSDNMDiscernability extends AbstractMetricSingleDimensional {
     }
 
     @Override
-    protected ILSingleDimensional getLowerBoundInternal(Node node) {
+    protected ILSingleDimensional getLowerBoundInternal(Transformation node) {
         return null;
     }
     
     @Override
-    protected ILSingleDimensional getLowerBoundInternal(Node node,
+    protected ILSingleDimensional getLowerBoundInternal(Transformation node,
                                                         HashGroupify groupify) {
         double lowerBound = 0;
         HashGroupifyEntry m = groupify.getFirstEquivalenceClass();

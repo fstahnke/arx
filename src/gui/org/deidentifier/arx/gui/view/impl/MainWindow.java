@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,16 @@
 
 package org.deidentifier.arx.gui.view.impl;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.math3.util.Pair;
 import org.deidentifier.arx.Data;
@@ -37,6 +41,7 @@ import org.deidentifier.arx.gui.model.ModelCriterion;
 import org.deidentifier.arx.gui.model.ModelEvent;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
 import org.deidentifier.arx.gui.model.ModelExplicitCriterion;
+import org.deidentifier.arx.gui.resources.Charsets;
 import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.gui.view.def.IView;
@@ -52,9 +57,11 @@ import org.deidentifier.arx.gui.view.impl.menu.DialogDebug;
 import org.deidentifier.arx.gui.view.impl.menu.DialogError;
 import org.deidentifier.arx.gui.view.impl.menu.DialogFindReplace;
 import org.deidentifier.arx.gui.view.impl.menu.DialogHelp;
+import org.deidentifier.arx.gui.view.impl.menu.DialogMultiSelection;
 import org.deidentifier.arx.gui.view.impl.menu.DialogOrderSelection;
 import org.deidentifier.arx.gui.view.impl.menu.DialogQuery;
 import org.deidentifier.arx.gui.view.impl.menu.DialogQueryResult;
+import org.deidentifier.arx.gui.view.impl.menu.DialogTopBottomCoding;
 import org.deidentifier.arx.gui.view.impl.risk.LayoutRisks;
 import org.deidentifier.arx.gui.view.impl.utility.LayoutUtility;
 import org.deidentifier.arx.gui.worker.Worker;
@@ -142,17 +149,22 @@ public class MainWindow implements IView {
         shell.setLayout(SWTUtil.createGridLayout(1));
 
         // Create the tab folder
-        root = new ComponentTitledFolder(shell, controller, null, "id-70"); //$NON-NLS-1$
+        Map<Composite, String> helpids = new HashMap<Composite, String>();
+        root = new ComponentTitledFolder(shell, controller, null, "id-70", helpids); //$NON-NLS-1$
         root.setLayoutData(SWTUtil.createFillGridData());
 
         // Create the subviews
         Composite item1 = root.createItem(Resources.getMessage("MainWindow.2"), controller.getResources().getManagedImage("perspective_define.png")); //$NON-NLS-1$ //$NON-NLS-2$
+        helpids.put(item1, "id-3"); //$NON-NLS-1$
         new LayoutDefinition(item1, controller);
         Composite item2 = root.createItem(Resources.getMessage("MainWindow.3"), controller.getResources().getManagedImage("perspective_explore.png")); //$NON-NLS-1$ //$NON-NLS-2$
+        helpids.put(item2, "id-4"); //$NON-NLS-1$
         this.layoutExplore = new LayoutExplore(item2, controller);
         Composite item3 = root.createItem(Resources.getMessage("MainWindow.1"), controller.getResources().getManagedImage("perspective_analyze.png")); //$NON-NLS-1$ //$NON-NLS-2$
+        helpids.put(item3, "help.utility.overview"); //$NON-NLS-1$
         new LayoutUtility(item3, controller);
         Composite item4 = root.createItem(Resources.getMessage("MainWindow.4"), controller.getResources().getManagedImage("perspective_risk.png")); //$NON-NLS-1$ //$NON-NLS-2$
+        helpids.put(item4, "help.risk.overview"); //$NON-NLS-1$
         new LayoutRisks(item4, controller);
 
         // Hack to update visualizations
@@ -261,10 +273,11 @@ public class MainWindow implements IView {
      * @param criteria
      * @return
      */
-    public ModelCriterion showAddCriterionDialog(List<ModelCriterion> criteria) {
+    public ModelCriterion showAddCriterionDialog(Model model,
+                                                 List<ModelCriterion> criteria) {
 
         // Dialog
-        final DialogCriterionUpdate dialog = new DialogCriterionUpdate(controller, shell, criteria, true);
+        final DialogCriterionUpdate dialog = new DialogCriterionUpdate(controller, shell, criteria, model, true);
         dialog.create();
         if (dialog.open() != Window.OK) {
             return null;
@@ -282,18 +295,55 @@ public class MainWindow implements IView {
         dialog.open();
     }
     /**
+     * Shows an input dialog for selecting a charset.
+     *
+     * @param shell
+     * @return
+     */
+    public Charset showCharsetInputDialog(final Shell shell) {
+
+        // Validator
+        final IInputValidator validator = new IInputValidator() {
+            @Override
+            public String isValid(final String arg0) {
+                return null;
+            }
+        };
+
+        // Extract list of formats
+        List<String> charsets = new ArrayList<String>();
+        for (String charset : Charsets.getNamesOfAvailableCharsets()) {
+            charsets.add(charset);
+        }
+
+        // Open dialog
+        final DialogComboSelection dlg = new DialogComboSelection(shell, Resources.getMessage("MainWindow.19"), //$NON-NLS-1$
+                                                                  Resources.getMessage("MainWindow.20"), //$NON-NLS-1$
+                                                                  charsets.toArray(new String[] {}),
+                                                                  Charsets.getNameOfDefaultCharset(),
+                                                                  validator);
+
+        // Return value
+        if (dlg.open() == Window.OK) {
+            return Charsets.getCharsetForName(dlg.getValue());
+        } else {
+            return null;
+        }
+    }
+    
+    /**
      * Shows a dialog for configuring privacy criteria.
      *
      * @param criteria
      * @param criterion 
      * @return
      */
-    public void showConfigureCriterionDialog(List<ModelCriterion> criteria, ModelCriterion criterion) {
-        DialogCriterionUpdate dialog = new DialogCriterionUpdate(controller, shell, criteria, false, criterion);
+    public void showConfigureCriterionDialog(Model model, List<ModelCriterion> criteria, ModelCriterion criterion) {
+        DialogCriterionUpdate dialog = new DialogCriterionUpdate(controller, shell, criteria, model, false, criterion);
         dialog.create();
         dialog.open();
     }
-    
+
     /**
      * Shows a debug dialog.
      */
@@ -302,7 +352,7 @@ public class MainWindow implements IView {
         dialog.create();
         dialog.open();
     }
-
+    
     /**
      * Shows an error dialog.
      *
@@ -315,7 +365,7 @@ public class MainWindow implements IView {
         dialog.create();
         dialog.open();
     }
-    
+
     /**
      * Shows an error dialog.
      *
@@ -364,7 +414,7 @@ public class MainWindow implements IView {
         dialog.open();
         return dialog.getValue();
     }
-
+    
     /**
      * Shows an input dialog for selecting formats string for data types.
      *
@@ -440,7 +490,7 @@ public class MainWindow implements IView {
             return null;
         }
     }
-
+    
     /**
      * Shows a help dialog.
      *
@@ -476,10 +526,46 @@ public class MainWindow implements IView {
      * @return
      */
     public String showInputDialog(final Shell shell, final String header, final String text, final String initial) {
+        return showInputDialog(shell, header, text, initial, null);
+    }
 
-        final InputDialog dlg = new InputDialog(shell, header, text, initial, null);
+    /**
+     * Shows an input dialog.
+     *
+     * @param shell
+     * @param header
+     * @param text
+     * @param initial
+     * @param validator
+     * @return
+     */
+    public String showInputDialog(final Shell shell, final String header, final String text, final String initial, final IInputValidator validator) {
+        final InputDialog dlg = new InputDialog(shell, header, text, initial, validator);
         if (dlg.open() == Window.OK) {
             return dlg.getValue();
+        } else {
+            return null;
+        }
+    }
+    /**
+     * Shows a dialog that allows selecting multiple elements
+     * @param shell
+     * @param title
+     * @param text
+     * @param elements
+     * @param selected
+     * @return
+     */
+    public List<String> showMultiSelectionDialog(Shell shell,
+                                                       String title,
+                                                       String text,
+                                                       List<String> elements,
+                                                       List<String> selected) {
+
+        // Open dialog
+        DialogMultiSelection dlg = new DialogMultiSelection(shell, title, text, elements, selected);
+        if (dlg.open() == Window.OK) {
+            return dlg.getSelectedItems();
         } else {
             return null;
         }
@@ -496,7 +582,15 @@ public class MainWindow implements IView {
         final FileDialog dialog = new FileDialog(shell, SWT.OPEN);
         dialog.setFilterExtensions(new String[] { filter });
         dialog.setFilterIndex(0);
-        return dialog.open();
+        String file = dialog.open();
+        if (file == null) {
+            return null;
+        } else if (!new File(file).exists()) {
+            showInfoDialog(shell, Resources.getMessage("MainWindow.5"), Resources.getMessage("MainWindow.14")); //$NON-NLS-1$ //$NON-NLS-2$
+            return null;
+        } else {
+            return file;
+        }
     }
 
     /**
@@ -598,6 +692,20 @@ public class MainWindow implements IView {
         }
     }
 
+    /**
+     * Shows a top/bottom coding dialog
+     * @param type
+     * @return A pair containing the bottom value + inclusive and the top value + inclusive.
+     *         Either bottom or top may be <code>null</code> if they have not been defined. The overall pair may be
+     *         <code>null</code> if cancel was pressed.
+     */
+    public Pair<Pair<String, Boolean>, Pair<String, Boolean>> showTopBottomCodingDialog(DataType<?> type) {
+        DialogTopBottomCoding dialog = new DialogTopBottomCoding(shell, type);
+        dialog.create();
+        dialog.open();
+        return dialog.getValue();
+    }
+    
     @Override
     public void update(final ModelEvent event) {
 
@@ -610,6 +718,7 @@ public class MainWindow implements IView {
         }
     }
     
+
     /**
      * Creates the edit menu
      * @return
@@ -621,7 +730,16 @@ public class MainWindow implements IView {
         items.add(new MainMenuItem(Resources.getMessage("MainMenu.21"), //$NON-NLS-1$
                                    controller.getResources().getManagedImage("edit_anonymize.png"), //$NON-NLS-1$
                                    true) {
-            public void action(Controller controller) { controller.actionMenuEditAnonymize(); }
+            public void action(Controller controller) { controller.actionMenuEditAnonymize(false); }
+            public boolean isEnabled(Model model) { 
+                return model != null && model.getPerspective() == Perspective.CONFIGURATION;
+            }
+        });
+
+        items.add(new MainMenuItem(Resources.getMessage("MainMenu.40"), //$NON-NLS-1$
+                                   controller.getResources().getManagedImage("edit_anonymize_heuristic.png"), //$NON-NLS-1$
+                                   true) {
+            public void action(Controller controller) { controller.actionMenuEditAnonymize(true); }
             public boolean isEnabled(Model model) { 
                 return model != null && model.getPerspective() == Perspective.CONFIGURATION;
             }
@@ -638,6 +756,24 @@ public class MainWindow implements IView {
         
         items.add(new MainMenuSeparator());
 
+        items.add(new MainMenuItem(Resources.getMessage("MainMenu.41"), //$NON-NLS-1$
+                                   controller.getResources().getManagedImage("edit_create_hierarchy.png"), //$NON-NLS-1$
+                                   false) {
+            public void action(Controller controller) { controller.actionMenuEditInitializeHierarchy(); }
+            public boolean isEnabled(Model model) { 
+                return model != null && model.getSelectedAttribute() != null && model.getPerspective() == Perspective.CONFIGURATION;
+            }
+        });
+
+        items.add(new MainMenuItem(Resources.getMessage("MainMenu.42"), //$NON-NLS-1$
+                                   controller.getResources().getManagedImage("edit_create_hierarchy.png"), //$NON-NLS-1$
+                                   false) {
+            public void action(Controller controller) { controller.actionMenuEditCreateTopBottomCodingHierarchy(); }
+            public boolean isEnabled(Model model) { 
+                return model != null && model.getSelectedAttribute() != null && model.getPerspective() == Perspective.CONFIGURATION;
+            }
+        });
+        
         items.add(new MainMenuItem(Resources.getMessage("MainMenu.23"), //$NON-NLS-1$
                                    controller.getResources().getManagedImage("edit_create_hierarchy.png"), //$NON-NLS-1$
                                    true) {
@@ -652,7 +788,7 @@ public class MainWindow implements IView {
         items.add(new MainMenuItem(Resources.getMessage("MainMenu.30"), //$NON-NLS-1$
                                    controller.getResources().getManagedImage("edit_find_replace.png"), //$NON-NLS-1$
                                    false) {
-            public void action(Controller controller) { controller.actionFindReplace(); }
+            public void action(Controller controller) { controller.actionMenuEditFindReplace(); }
             public boolean isEnabled(Model model) { 
                 return model != null && model.getSelectedAttribute() != null && model.getPerspective() == Perspective.CONFIGURATION;
             }
@@ -741,7 +877,7 @@ public class MainWindow implements IView {
             }  
         };
     }
-    
+
 
     /**
      * Creates the help menu
@@ -785,7 +921,6 @@ public class MainWindow implements IView {
             }  
         };
     }
-
 
     /**
      * Creates the global menu

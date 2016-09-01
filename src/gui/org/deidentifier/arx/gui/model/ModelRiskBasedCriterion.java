@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.deidentifier.arx.criteria.PopulationUniqueness;
 import org.deidentifier.arx.criteria.PrivacyCriterion;
 import org.deidentifier.arx.criteria.SampleUniqueness;
 import org.deidentifier.arx.gui.resources.Resources;
+import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquenessModel;
 
 /**
@@ -58,6 +59,16 @@ public class ModelRiskBasedCriterion extends ModelImplicitCriterion{
     /** The variant to use. */
     private int               variant                           = 0;
 
+    /**
+     * Creates a new instance
+     * @param variant
+     * @param threshold
+     */
+    public ModelRiskBasedCriterion(int variant,
+                                   double threshold) {
+        this.variant = variant;
+        this.threshold = threshold;
+    }
     /**
      * Creates a new instance
      * @param variant
@@ -122,7 +133,7 @@ public class ModelRiskBasedCriterion extends ModelImplicitCriterion{
 	}
 
     @Override
-    public void parse(ModelCriterion criterion) {
+    public void parse(ModelCriterion criterion, boolean _default) {
         if (!(criterion instanceof ModelRiskBasedCriterion)) {
             return;
         }
@@ -155,17 +166,17 @@ public class ModelRiskBasedCriterion extends ModelImplicitCriterion{
     public String toString() {
         switch (variant) {
         case VARIANT_AVERAGE_RISK:
-            return Resources.getMessage("Model.8a") + threshold + Resources.getMessage("Model.9a"); //$NON-NLS-1$ //$NON-NLS-2$
+            return Resources.getMessage("Model.8a") + SWTUtil.getPrettyString(threshold) + Resources.getMessage("Model.9a"); //$NON-NLS-1$ //$NON-NLS-2$
         case VARIANT_POPULATION_UNIQUES_DANKAR:
-            return Resources.getMessage("Model.10a") + threshold + Resources.getMessage("Model.11"); //$NON-NLS-1$ //$NON-NLS-2$
+            return Resources.getMessage("Model.10a") + SWTUtil.getPrettyString(threshold) + Resources.getMessage("Model.11"); //$NON-NLS-1$ //$NON-NLS-2$
         case VARIANT_POPULATION_UNIQUES_PITMAN:
-            return Resources.getMessage("Model.12") + threshold + Resources.getMessage("Model.13"); //$NON-NLS-1$ //$NON-NLS-2$
+            return Resources.getMessage("Model.12") + SWTUtil.getPrettyString(threshold) + Resources.getMessage("Model.13"); //$NON-NLS-1$ //$NON-NLS-2$
         case VARIANT_POPULATION_UNIQUES_SNB:
-            return Resources.getMessage("Model.14") + threshold + Resources.getMessage("Model.15"); //$NON-NLS-1$ //$NON-NLS-2$
+            return Resources.getMessage("Model.14") + SWTUtil.getPrettyString(threshold) + Resources.getMessage("Model.15"); //$NON-NLS-1$ //$NON-NLS-2$
         case VARIANT_POPULATION_UNIQUES_ZAYATZ:
-            return Resources.getMessage("Model.16") + threshold + Resources.getMessage("Model.17"); //$NON-NLS-1$ //$NON-NLS-2$
+            return Resources.getMessage("Model.16") + SWTUtil.getPrettyString(threshold) + Resources.getMessage("Model.17"); //$NON-NLS-1$ //$NON-NLS-2$
         case VARIANT_SAMPLE_UNIQUES:
-            return Resources.getMessage("Model.18") + threshold + Resources.getMessage("Model.19"); //$NON-NLS-1$ //$NON-NLS-2$
+            return Resources.getMessage("Model.18") + SWTUtil.getPrettyString(threshold) + Resources.getMessage("Model.19"); //$NON-NLS-1$ //$NON-NLS-2$
         default:
             throw new RuntimeException(Resources.getMessage("Model.20")); //$NON-NLS-1$
         }

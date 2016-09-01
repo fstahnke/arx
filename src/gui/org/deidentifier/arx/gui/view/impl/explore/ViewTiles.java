@@ -111,14 +111,18 @@ public class ViewTiles extends ViewSolutionSpace {
                                    asRelativeValue(o2.getMinimumInformationLoss())==0d;
                 
                 boolean unknown1 = o1.getMinimumInformationLoss().compareTo(o1.getMaximumInformationLoss())!=0 &&
-                        asRelativeValue(o1.getMinimumInformationLoss())==0d;
+                                   asRelativeValue(o1.getMinimumInformationLoss())==0d;
                 
                 if (unknown1 && unknown2) return 0;
                 else if (unknown1 && !unknown2) return +1;
                 else if (!unknown1 && unknown2) return -1;
                 else {
-                  int c1 = o1.getMinimumInformationLoss().compareTo(o2.getMinimumInformationLoss());
-                  return c1 != 0 ? c1 : o1.getMaximumInformationLoss().compareTo(o2.getMaximumInformationLoss());
+                    try {
+                        int c1 = o1.getMinimumInformationLoss().compareTo(o2.getMinimumInformationLoss());
+                        return c1 != 0 ? c1 : o1.getMaximumInformationLoss().compareTo(o2.getMaximumInformationLoss());
+                    } catch (Exception e) {
+                        return 0;
+                    }
                 }
             }
         });
@@ -130,7 +134,9 @@ public class ViewTiles extends ViewSolutionSpace {
         tiles.setDecoratorLabel(new DecoratorString<ARXNode>() {
             @Override
             public String decorate(ARXNode node) {
-                return Arrays.toString(node.getTransformation());
+                String text = Arrays.toString(node.getTransformation());
+                text = text.substring(1, text.length() - 1);
+                return trimLabel(text);
             }
         });
         tiles.setDecoratorBackgroundColor(createDecoratorBackgroundColor());

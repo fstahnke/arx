@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package org.deidentifier.arx.gui.view.impl.wizard;
 import org.deidentifier.arx.AttributeType.Hierarchy;
 import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
-import org.deidentifier.arx.gui.view.impl.common.ViewHierarchy;
+import org.deidentifier.arx.gui.view.impl.common.ComponentHierarchy;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -46,7 +46,7 @@ public class HierarchyWizardPageFinal<T> extends WizardPage{
     private List                     list;
     
     /** Var. */
-    private ViewHierarchy            view;
+    private ComponentHierarchy            view;
     
     /** Var. */
     private int[]                    groups;
@@ -93,7 +93,7 @@ public class HierarchyWizardPageFinal<T> extends WizardPage{
         right.setText(Resources.getMessage("HierarchyWizardPageFinal.4")); //$NON-NLS-1$
         right.setLayoutData(SWTUtil.createFillGridData());
         right.setLayout(SWTUtil.createGridLayout(1, false));
-        view = new ViewHierarchy(right);
+        view = new ComponentHierarchy(right);
 
         setControl(composite);
     }

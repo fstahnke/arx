@@ -25,15 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.deidentifier.arx.gui.resources.Resources;
+import org.deidentifier.arx.gui.view.impl.common.DelayedChangeListener;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -68,65 +65,64 @@ public class ImportWizardPageJDBC extends WizardPage {
     /** Reference to the wizard containing this page. */
     private ImportWizard        wizardImport;
     
-    /* SWT Widgets */
-    /** TODO */
+    /** Widget */
     private Label               lblType;
     
-    /** TODO */
+    /** Widget */
     private Combo               comboType;
     
-    /** TODO */
+    /** Widget */
     private Composite           compositeSwap;
     
-    /** TODO */
+    /** Widget */
     private Text                txtServer;
     
-    /** TODO */
+    /** Widget */
     private StackLayout         layout;
     
-    /** TODO */
+    /** Widget */
     private Composite           compositeRemote;
     
-    /** TODO */
+    /** Widget */
     private Composite           compositeLocal;
     
-    /** TODO */
+    /** Widget */
     private Text                txtPort;
     
-    /** TODO */
+    /** Widget */
     private Text                txtUsername;
     
-    /** TODO */
+    /** Widget */
     private Text                txtPassword;
     
-    /** TODO */
+    /** Widget */
     private Text                txtDatabase;
     
-    /** TODO */
+    /** Widget */
     private Label               lblLocation;
     
-    /** TODO */
+    /** Widget */
     private Combo               comboLocation;
     
-    /** TODO */
+    /** Widget */
     private Button              btnChoose;
     
-    /** TODO */
+    /** Widget */
     private Composite           container;
     
-    /** TODO */
+    /** Widget */
     private static final String ORACLE     = "Oracle";    //$NON-NLS-1$
                                                            
-    /** TODO */
+    /** Widget */
     private static final String MSSQL      = "MS SQL";    //$NON-NLS-1$
                                                            
-    /** TODO */
+    /** Widget */
     private static final String MYSQL      = "MySQL";     //$NON-NLS-1$
                                                            
-    /** TODO */
+    /** Widget */
     private static final String POSTGRESQL = "PostgreSQL"; //$NON-NLS-1$
                                                            
-    /** TODO */
+    /** Widget */
     private static final String SQLITE     = "SQLite";    //$NON-NLS-1$
                                                            
     /**
@@ -183,23 +179,20 @@ public class ImportWizardPageJDBC extends WizardPage {
                     comboLocation.removeAll();
                     layout.topControl = compositeLocal;
                     
-                    /* Display compositeRemote otherwise */
+                /* Display compositeRemote otherwise */
                 } else {
                     
                     layout.topControl = compositeRemote;
                     
-                    /* Set default ports in case text field is empty */
-                    if (txtPort.getText().isEmpty()) {
-                        
-                        if (comboType.getText().equals(MSSQL)) {
-                            txtPort.setText("1433"); //$NON-NLS-1$
-                        } else if (comboType.getText().equals(MYSQL)) {
-                            txtPort.setText("3306"); //$NON-NLS-1$
-                        } else if (comboType.getText().equals(POSTGRESQL)) {
-                            txtPort.setText("5432"); //$NON-NLS-1$
-                        } else if (comboType.getText().equals(ORACLE)) {
-                            txtPort.setText("1521"); //$NON-NLS-1$
-                        }
+                    /* Set default ports*/
+                    if (comboType.getText().equals(MSSQL)) {
+                        txtPort.setText("1433"); //$NON-NLS-1$
+                    } else if (comboType.getText().equals(MYSQL)) {
+                        txtPort.setText("3306"); //$NON-NLS-1$
+                    } else if (comboType.getText().equals(POSTGRESQL)) {
+                        txtPort.setText("5432"); //$NON-NLS-1$
+                    } else if (comboType.getText().equals(ORACLE)) {
+                        txtPort.setText("1521"); //$NON-NLS-1$
                     }
                 }
                 
@@ -310,35 +303,13 @@ public class ImportWizardPageJDBC extends WizardPage {
         compositeRemote = new Composite(compositeSwap, SWT.NONE);
         compositeRemote.setLayout(new GridLayout(2, false));
         
-        /**
-         * Tries to connect to database on traverse and focusLost events
-         *
-         * @see {@link #tryToConnect()}
-         */
-        class ConnectionListener extends FocusAdapter implements TraverseListener {
-            
-            /**
-             * Handles focusLost events
-             *
-             * @see {@link #tryToConnect()}
-             */
+        // Tries to connect to database on changes
+        DelayedChangeListener connectionTester = new DelayedChangeListener(1000) {
             @Override
-            public void focusLost(FocusEvent e) {
+            public void delayedEvent() {
                 tryToConnect();
             }
-            
-            /**
-             * Handles traverse events (enter, tab, etc.)
-             *
-             * @see {@link #tryToConnect()}
-             */
-            @Override
-            public void keyTraversed(TraverseEvent e) {
-                tryToConnect();
-            }
-        }
-        
-        ConnectionListener connectionListener = new ConnectionListener();
+        };
         
         Label lblServer = new Label(compositeRemote, SWT.NONE);
         lblServer.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -347,8 +318,7 @@ public class ImportWizardPageJDBC extends WizardPage {
         txtServer = new Text(compositeRemote, SWT.BORDER);
         txtServer.setText("localhost"); //$NON-NLS-1$
         txtServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        txtServer.addFocusListener(connectionListener);
-        txtServer.addTraverseListener(connectionListener);
+        txtServer.addModifyListener(connectionTester);
         
         Label lblPort = new Label(compositeRemote, SWT.NONE);
         lblPort.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -356,8 +326,7 @@ public class ImportWizardPageJDBC extends WizardPage {
         
         txtPort = new Text(compositeRemote, SWT.BORDER);
         txtPort.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        txtPort.addFocusListener(connectionListener);
-        txtPort.addTraverseListener(connectionListener);
+        txtPort.addModifyListener(connectionTester);
         
         Label lblUsername = new Label(compositeRemote, SWT.NONE);
         lblUsername.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -365,8 +334,7 @@ public class ImportWizardPageJDBC extends WizardPage {
         
         txtUsername = new Text(compositeRemote, SWT.BORDER);
         txtUsername.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        txtUsername.addFocusListener(connectionListener);
-        txtUsername.addTraverseListener(connectionListener);
+        txtUsername.addModifyListener(connectionTester);
         
         Label lblPassword = new Label(compositeRemote, SWT.NONE);
         lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -374,8 +342,7 @@ public class ImportWizardPageJDBC extends WizardPage {
         
         txtPassword = new Text(compositeRemote, SWT.BORDER | SWT.PASSWORD);
         txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        txtPassword.addFocusListener(connectionListener);
-        txtPassword.addTraverseListener(connectionListener);
+        txtPassword.addModifyListener(connectionTester);
         
         Label lblDatabase = new Label(compositeRemote, SWT.NONE);
         lblDatabase.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -383,8 +350,7 @@ public class ImportWizardPageJDBC extends WizardPage {
         
         txtDatabase = new Text(compositeRemote, SWT.BORDER);
         txtDatabase.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        txtDatabase.addFocusListener(connectionListener);
-        txtDatabase.addTraverseListener(connectionListener);
+        txtDatabase.addModifyListener(connectionTester);
     }
     
     /**
@@ -408,13 +374,17 @@ public class ImportWizardPageJDBC extends WizardPage {
         String database = txtDatabase.getText();
         
         if (server.isEmpty() || port.isEmpty() || username.isEmpty() || database.isEmpty()) {
+            setMessage(Resources.getMessage("ImportWizardPageJDBC.6")); //$NON-NLS-1$
+            setPageComplete(false);
             return;
         }
         
         setMessage(Resources.getMessage("ImportWizardPageJDBC.20"), INFORMATION); //$NON-NLS-1$
         if (connect()) {
             setMessage(Resources.getMessage("ImportWizardPageJDBC.21"), INFORMATION); //$NON-NLS-1$
-            readTables();
+            setPageComplete(readTables());
+        } else {
+            setPageComplete(false);
         }
     }
     
@@ -490,7 +460,7 @@ public class ImportWizardPageJDBC extends WizardPage {
      *
      * @see {@link ImportWizardModel#setJdbcTables(List)}
      */
-    protected void readTables() {
+    protected boolean readTables() {
         ResultSet rs = null;
         try {
             Connection connection = wizardImport.getData().getJdbcConnection();
@@ -503,10 +473,10 @@ public class ImportWizardPageJDBC extends WizardPage {
             }
             
             wizardImport.getData().setJdbcTables(tables);
-            setPageComplete(true);
-            
+            return true;
         } catch (SQLException e) {
             setErrorMessage(Resources.getMessage("ImportWizardPageJDBC.41")); //$NON-NLS-1$
+            return false;
         } finally {
             try {
                 if (rs != null) {

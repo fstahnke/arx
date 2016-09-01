@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,22 @@
 
 package org.deidentifier.arx.gui.view.impl.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.deidentifier.arx.gui.model.ModelCriterion;
 import org.deidentifier.arx.gui.model.ModelDPresenceCriterion;
 import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Text;
+
+import de.linearbits.swt.widgets.Knob;
 
 /**
  * A view on a d-presence criterion.
@@ -37,16 +42,16 @@ import org.eclipse.swt.widgets.Scale;
 public class EditorCriterionDPresence extends EditorCriterion<ModelDPresenceCriterion>{
 
     /** View */
-    private Scale                   sliderDMin;
+    private Knob<Double> knobDMin;
 
     /** View */
-    private Scale                   sliderDMax;
+    private Knob<Double> knobDMax;
 
     /** View */
-    private Label                   labelDMin;
+    private Text         labelDMin;
 
     /** View */
-    private Label                   labelDMax;
+    private Text         labelDMax;
 
     /**
      * Creates a new instance.
@@ -59,26 +64,6 @@ public class EditorCriterionDPresence extends EditorCriterion<ModelDPresenceCrit
         super(parent, model);
     }
 
-    /**
-     * Updates the "dMax" label and tooltip text.
-     *
-     * @param text
-     */
-    private void updateDMaxLabel(String text) {
-        labelDMax.setText(text);
-        labelDMax.setToolTipText(text);
-    }
-
-    /**
-     * Updates the "dMin" label and tooltip text.
-     *
-     * @param text
-     */
-    private void updateDMinLabel(String text) {
-        labelDMin.setText(text);
-        labelDMin.setToolTipText(text);
-    }
-    
     /**
      * Build
      * @param parent
@@ -97,32 +82,19 @@ public class EditorCriterionDPresence extends EditorCriterion<ModelDPresenceCrit
         final Label zLabel = new Label(group, SWT.NONE);
         zLabel.setText(Resources.getMessage("CriterionDefinitionView.50")); //$NON-NLS-1$
 
-        labelDMin = new Label(group, SWT.BORDER | SWT.CENTER);
-        final GridData d9 = new GridData();
-        d9.minimumWidth = LABEL_WIDTH;
-        d9.widthHint = LABEL_WIDTH;
-        labelDMin.setLayoutData(d9);
-        updateDMinLabel("0"); //$NON-NLS-1$
-
-        sliderDMin = new Scale(group, SWT.HORIZONTAL);
-        final GridData d6 = SWTUtil.createFillHorizontallyGridData();
-        d6.horizontalSpan = 1;
-        sliderDMin.setLayoutData(d6);
-        sliderDMin.setMaximum(SWTUtil.SLIDER_MAX);
-        sliderDMin.setMinimum(0);
-        sliderDMin.setSelection(0);
-        sliderDMin.addSelectionListener(new SelectionAdapter() {
+        labelDMin = createLabel(group);
+        knobDMin = createKnobDouble(group, 0d, 1d);
+        updateLabel(labelDMin, knobDMin.getValue());
+        knobDMin.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(final SelectionEvent arg0) {
-                model.setDmin(SWTUtil.sliderToDouble(0, 1, sliderDMin.getSelection()));
-                String dmin = String.valueOf(model.getDmin());
-                updateDMinLabel(dmin);
+                model.setDmin(knobDMin.getValue());
+                updateLabel(labelDMin, model.getDmin());
                 
                 if (model.getDmin() > model.getDmax()) {
                     model.setDmax(model.getDmin());
-                    String dmax = String.valueOf(model.getDmin());
-                    updateDMaxLabel(dmax);
-                    sliderDMax.setSelection(sliderDMin.getSelection());
+                    updateLabel(labelDMax, model.getDmin());
+                    knobDMax.setValue(knobDMin.getValue());
                 }
             }
         });
@@ -131,32 +103,19 @@ public class EditorCriterionDPresence extends EditorCriterion<ModelDPresenceCrit
         final Label z2Label = new Label(group, SWT.NONE);
         z2Label.setText(Resources.getMessage("CriterionDefinitionView.51")); //$NON-NLS-1$
 
-        labelDMax = new Label(group, SWT.BORDER | SWT.CENTER);
-        final GridData d91 = new GridData();
-        d91.minimumWidth = LABEL_WIDTH;
-        d91.widthHint = LABEL_WIDTH;
-        labelDMax.setLayoutData(d91);
-        updateDMaxLabel("0"); //$NON-NLS-1$
-
-        sliderDMax = new Scale(group, SWT.HORIZONTAL);
-        final GridData d62 = SWTUtil.createFillHorizontallyGridData();
-        d62.horizontalSpan = 1;
-        sliderDMax.setLayoutData(d62);
-        sliderDMax.setMaximum(SWTUtil.SLIDER_MAX);
-        sliderDMax.setMinimum(0);
-        sliderDMax.setSelection(0);
-        sliderDMax.addSelectionListener(new SelectionAdapter() {
+        labelDMax = createLabel(group);
+        knobDMax = createKnobDouble(group, 0d, 1d);
+        updateLabel(labelDMax, knobDMax.getValue());
+        knobDMax.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(final SelectionEvent arg0) {
-                model.setDmax(SWTUtil.sliderToDouble(0, 1, sliderDMax.getSelection()));
-                String dmax = String.valueOf(model.getDmax());
-                updateDMaxLabel(dmax);
+                model.setDmax(knobDMax.getValue());
+                updateLabel(labelDMax, model.getDmax());
                 
                 if (model.getDmax() < model.getDmin()) {
                     model.setDmin(model.getDmax());
-                    String dmin = String.valueOf(model.getDmax());
-                    updateDMinLabel(dmin);
-                    sliderDMin.setSelection(sliderDMax.getSelection());
+                    updateLabel(labelDMin, model.getDmax());
+                    knobDMin.setValue(knobDMax.getValue());
                 }
             }
         });
@@ -167,10 +126,29 @@ public class EditorCriterionDPresence extends EditorCriterion<ModelDPresenceCrit
     /**
      * Parses the input
      */
-    protected void parse(ModelDPresenceCriterion model) {
-        updateDMinLabel(String.valueOf(model.getDmin()));
-        sliderDMin.setSelection(SWTUtil.doubleToSlider(0, 1d, model.getDmin()));
-        updateDMaxLabel(String.valueOf(model.getDmax()));
-        sliderDMax.setSelection(SWTUtil.doubleToSlider(0, 1d, model.getDmax()));
+    protected void parse(ModelDPresenceCriterion model, boolean _default) {
+        updateLabel(labelDMin, model.getDmin());
+        knobDMin.setValue(model.getDmin());
+        updateLabel(labelDMax, model.getDmax());
+        knobDMax.setValue(model.getDmax());
+    }
+
+
+    @Override
+    protected List<ModelCriterion> getTypicalParameters() {
+
+        List<ModelCriterion> result = new ArrayList<ModelCriterion>();
+        result.add(new ModelDPresenceCriterion(0.00d, 0.05d));
+        result.add(new ModelDPresenceCriterion(0.00d, 0.06d));
+        result.add(new ModelDPresenceCriterion(0.00d, 0.07d));
+        result.add(new ModelDPresenceCriterion(0.00d, 0.08d));
+        result.add(new ModelDPresenceCriterion(0.00d, 0.09d));
+        result.add(new ModelDPresenceCriterion(0.00d, 0.10d));
+        result.add(new ModelDPresenceCriterion(0.00d, 0.20d));
+        result.add(new ModelDPresenceCriterion(0.00d, 0.50d));
+        result.add(new ModelDPresenceCriterion(0.00d, 0.70d));
+        result.add(new ModelDPresenceCriterion(0.04d, 0.05d));
+        result.add(new ModelDPresenceCriterion(0.01d, 0.05d));        
+        return result;
     }
 }

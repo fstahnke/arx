@@ -137,9 +137,8 @@ extends java.lang.Object</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#RiskModelPopulationUniqueness(org.deidentifier.arx.ARXPopulationModel, org.deidentifier.arx.risk.RiskModelHistogram, int, org.deidentifier.arx.ARXSolverConfiguration)">RiskModelPopulationUniqueness</a></strong>(<a href="../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a>&nbsp;model,
+<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#RiskModelPopulationUniqueness(org.deidentifier.arx.ARXPopulationModel,%20org.deidentifier.arx.risk.RiskModelHistogram,%20org.deidentifier.arx.ARXSolverConfiguration)">RiskModelPopulationUniqueness</a></strong>(<a href="../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a>&nbsp;model,
                              <a href="../../../../org/deidentifier/arx/risk/RiskModelHistogram.html" title="class in org.deidentifier.arx.risk">RiskModelHistogram</a>&nbsp;classes,
-                             int&nbsp;sampleSize,
                              <a href="../../../../org/deidentifier/arx/ARXSolverConfiguration.html" title="class in org.deidentifier.arx">ARXSolverConfiguration</a>&nbsp;config)</code>
 <div class="block">Creates a new instance</div>
 </td>
@@ -181,51 +180,65 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getFractionOfUniqueTuplesDankar(boolean)">getFractionOfUniqueTuplesDankar</a></strong>(boolean&nbsp;useZayatzAsFallback)</code>
+<div class="block">Estimated number of unique tuples in the population according to Dankar's
+ decision rule</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getFractionOfUniqueTuplesPitman()">getFractionOfUniqueTuplesPitman</a></strong>()</code>
 <div class="block">Estimated number of unique tuples in the population according to Pitman's
  statistical model</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>double</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getFractionOfUniqueTuplesSNB()">getFractionOfUniqueTuplesSNB</a></strong>()</code>
 <div class="block">Estimated number of unique tuples in the population according to the SNB
  statistical model</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>double</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getFractionOfUniqueTuplesZayatz()">getFractionOfUniqueTuplesZayatz</a></strong>()</code>
 <div class="block">Estimated number of unique tuples in the population according to Zayatz's
  statistical model</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>protected <a href="../../../../org/deidentifier/arx/risk/RiskModelHistogram.html" title="class in org.deidentifier.arx.risk">RiskModelHistogram</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getHistogram()">getHistogram</a></strong>()</code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>protected double</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getNumClasses()">getNumClasses</a></strong>()</code>
 <div class="block">Returns the number of classes</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>protected double</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getNumClassesOfSize(int)">getNumClassesOfSize</a></strong>(int&nbsp;size)</code>
 <div class="block">Returns the number of classes of the given size.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>double</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getNumUniqueTuples(org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquenessModel)">getNumUniqueTuples</a></strong>(<a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.PopulationUniquenessModel.html" title="enum in org.deidentifier.arx.risk">RiskModelPopulationUniqueness.PopulationUniquenessModel</a>&nbsp;model)</code>
 <div class="block">Estimated number of unique tuples in the population according to the
  given model</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>double</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getNumUniqueTuplesDankar()">getNumUniqueTuplesDankar</a></strong>()</code>
+<div class="block">Estimated number of unique tuples in the population according to Dankar's
+ decision rule.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.html#getNumUniqueTuplesDankar(boolean)">getNumUniqueTuplesDankar</a></strong>(boolean&nbsp;useZayatzAsFallback)</code>
 <div class="block">Estimated number of unique tuples in the population according to Dankar's
  decision rule</div>
 </td>
@@ -337,7 +350,7 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="RiskModelPopulationUniqueness(org.deidentifier.arx.ARXPopulationModel, org.deidentifier.arx.risk.RiskModelHistogram, int, org.deidentifier.arx.ARXSolverConfiguration)">
+<a name="RiskModelPopulationUniqueness(org.deidentifier.arx.ARXPopulationModel, org.deidentifier.arx.risk.RiskModelHistogram, org.deidentifier.arx.ARXSolverConfiguration)">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -345,10 +358,9 @@ extends java.lang.Object</pre>
 <h4>RiskModelPopulationUniqueness</h4>
 <pre>public&nbsp;RiskModelPopulationUniqueness(<a href="../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a>&nbsp;model,
                              <a href="../../../../org/deidentifier/arx/risk/RiskModelHistogram.html" title="class in org.deidentifier.arx.risk">RiskModelHistogram</a>&nbsp;classes,
-                             int&nbsp;sampleSize,
                              <a href="../../../../org/deidentifier/arx/ARXSolverConfiguration.html" title="class in org.deidentifier.arx">ARXSolverConfiguration</a>&nbsp;config)</pre>
 <div class="block">Creates a new instance</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>model</code> - </dd><dd><code>classes</code> - </dd><dd><code>sampleSize</code> - </dd><dd><code>config</code> - </dd></dl>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>model</code> - </dd><dd><code>classes</code> - </dd><dd><code>config</code> - </dd></dl>
 </li>
 </ul>
 </li>
@@ -379,6 +391,18 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;double&nbsp;getFractionOfUniqueTuplesDankar()</pre>
 <div class="block">Estimated number of unique tuples in the population according to Dankar's
  decision rule</div>
+</li>
+</ul>
+<a name="getFractionOfUniqueTuplesDankar(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getFractionOfUniqueTuplesDankar</h4>
+<pre>public&nbsp;double&nbsp;getFractionOfUniqueTuplesDankar(boolean&nbsp;useZayatzAsFallback)</pre>
+<div class="block">Estimated number of unique tuples in the population according to Dankar's
+ decision rule</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>useZayatzAsFallback</code> - </dd></dl>
 </li>
 </ul>
 <a name="getFractionOfUniqueTuplesPitman()">
@@ -433,7 +457,19 @@ extends java.lang.Object</pre>
 <h4>getNumUniqueTuplesDankar</h4>
 <pre>public&nbsp;double&nbsp;getNumUniqueTuplesDankar()</pre>
 <div class="block">Estimated number of unique tuples in the population according to Dankar's
+ decision rule.</div>
+</li>
+</ul>
+<a name="getNumUniqueTuplesDankar(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getNumUniqueTuplesDankar</h4>
+<pre>public&nbsp;double&nbsp;getNumUniqueTuplesDankar(boolean&nbsp;useZayatzAsFallback)</pre>
+<div class="block">Estimated number of unique tuples in the population according to Dankar's
  decision rule</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>useZayatzAsFallback</code> - </dd></dl>
 </li>
 </ul>
 <a name="getNumUniqueTuplesPitman()">

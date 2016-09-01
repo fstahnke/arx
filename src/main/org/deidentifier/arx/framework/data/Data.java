@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,11 @@
 
 package org.deidentifier.arx.framework.data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import org.deidentifier.arx.RowSet;
 
 /**
  * Encodes a data object consisting of a dictionary encoded two-dimensional
@@ -130,5 +134,27 @@ public class Data implements Cloneable{
      */
     public int[] getMap() {
         return map;
+    }
+
+    /**
+     * Returns a new instance that is projected onto the given subset
+     * @param rowset
+     * @return
+     */
+    public Data getSubsetInstance(RowSet rowset) {
+        int[][] array = null;
+        if (this.data != null) {
+            List<int[]> newdata = new ArrayList<int[]>();
+            for (int row = 0; row < this.data.length; row++) {
+                if (rowset.contains(row)) {
+                    newdata.add(data[row]);
+                }
+            }
+            array = new int[newdata.size()][];
+            for (int i = 0; i < newdata.size(); i++) {
+                array[i] = newdata.get(i);
+            }
+        }
+        return new Data(array, header, map, dictionary);
     }
 }

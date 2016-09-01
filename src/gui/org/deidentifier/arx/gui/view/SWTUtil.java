@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,33 @@
 
 package org.deidentifier.arx.gui.view;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import java.util.Map;
+
+import org.apache.commons.math3.analysis.function.Log;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.resources.Resources;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -35,9 +51,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -50,9 +70,15 @@ import de.linearbits.swt.table.DynamicTable;
  * @author Fabian Prasser
  */
 public class SWTUtil {
-    
-    /** Static settings. */
-    public static final int SLIDER_MAX = 1000;
+
+    /** Constant */
+    public static final int     SLIDER_MAX = 1000;
+
+    /** Constant */
+    private static final double LN2        = new Log().value(2);
+
+    /** Constant */
+    private static final double LN3        = new Log().value(3);
 
     /**
      * Centers the shell on the given monitor.
@@ -67,7 +93,6 @@ public class SWTUtil {
         int y = (displayRect.height - shellRect.height) / 2;
         shell.setLocation(displayRect.x + x, displayRect.y + y);
     }
-    
     /**
      * Centers the given shell.
      *
@@ -82,6 +107,104 @@ public class SWTUtil {
         final int top = (bounds.height - p.y) / 2;
         shell.setBounds(left + bounds.x, top + bounds.y, p.x, p.y);
     }
+    
+    /**
+     * Changes a control's font
+     * @param control
+     * @param style
+     */
+    public static void changeFont(Control control, int style) {
+        FontDescriptor boldDescriptor = FontDescriptor.createFrom(control.getFont()).setStyle(style);
+        final Font boldFont = boldDescriptor.createFont(control.getDisplay());
+        control.setFont(boldFont);
+        control.addDisposeListener(new DisposeListener() {
+            @Override
+            public void widgetDisposed(DisposeEvent arg0) {
+                if (boldFont != null && !boldFont.isDisposed()) {
+                    boldFont.dispose();
+                }
+            }
+            
+        });
+    }
+
+    /**
+     * Adds a bar chart to a column
+     * @param table
+     * @param column
+     */
+    public static void createColumnWithBarCharts(final Table table, final TableColumn column) {
+        
+        int index = -1;
+        for (int i=0; i< table.getColumnCount(); i++) {
+            if (table.getColumn(i)==column) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1) {
+            return;
+        }
+        final Display display = table.getDisplay();
+        final int columnIndex = index;
+        table.addListener(SWT.PaintItem, new Listener() {
+            @Override
+            public void handleEvent(Event event) {
+                if (event.index == columnIndex) {
+                    GC gc = event.gc;
+                    TableItem item = (TableItem) event.item;
+                    Object object = item.getData(String.valueOf(columnIndex));
+                    if (object == null || !(object instanceof Double)) {
+                        return;
+                    }
+
+                    // Store
+                    Color foreground = gc.getForeground();
+                    Color background = gc.getBackground();
+                    
+                    // Draw NaN
+                    Double percent = (Double)object;
+                    if (percent.isNaN() || percent.isInfinite()) {
+                        String text = percent.isNaN() ? "NaN" : "Infinite";
+                        gc.setForeground(display.getSystemColor(SWT.COLOR_LIST_FOREGROUND));
+                        Point size = event.gc.textExtent(text);
+                        int offset = Math.max(0, (event.height - size.y) / 2);
+                        gc.drawText(text, event.x + 2, event.y + offset, true);
+                        
+                    // Draw value
+                    } else {
+                        
+                        // Initialize
+                        String text = SWTUtil.getPrettyString((Double)object * 100d) + "%";
+                        percent = percent >= 0d ? percent : 0d;
+                        percent = percent <= 1d ? percent : 1d;
+                        
+                        // Draw bar
+                        gc.setBackground(display.getSystemColor(SWT.COLOR_GRAY));
+                        gc.setForeground(GUIHelper.getColor(240, 240, 240));
+                        int width = (int) Math.round((column.getWidth() - 1) * percent);
+                        width = width >= 1 ? width : 1;
+                        gc.fillGradientRectangle(event.x, event.y, width, event.height, true);
+                        
+                        // Draw border
+                        Rectangle rect2 = new Rectangle(event.x, event.y, width - 1, event.height - 1);
+                        gc.setForeground(GUIHelper.getColor(150, 150, 150));
+                        gc.drawRectangle(rect2);
+                        
+                        // Draw text
+                        gc.setForeground(display.getSystemColor(SWT.COLOR_LIST_FOREGROUND));
+                        Point size = event.gc.textExtent(text);
+                        int offset = Math.max(0, (event.height - size.y) / 2);
+                        gc.drawText(text, event.x + 2, event.y + offset, true);
+                    }
+
+                    // Reset
+                    gc.setForeground(background);
+                    gc.setBackground(foreground);   
+                }
+            }
+        });     
+    }
 
     /**
      * Registers an image for a tool item. Generates a version of the image
@@ -91,15 +214,33 @@ public class SWTUtil {
      * @param image
      */
     public static void createDisabledImage(ToolItem item) {
-        item.setDisabledImage(new Image(item.getDisplay(), item.getImage(), SWT.IMAGE_GRAY));
+        final Image image = new Image(item.getDisplay(), item.getImage(), SWT.IMAGE_GRAY);
+        item.setDisabledImage(image);
+        item.addDisposeListener(new DisposeListener() {
+            @Override
+            public void widgetDisposed(DisposeEvent arg0) {
+                if (image != null && !image.isDisposed()) {
+                    image.dispose();
+                }
+            }
+        });
     }
-    
+
     /**
      * Creates grid data.
      *
      * @return
      */
     public static GridData createFillGridData() {
+        return createFillGridData(1);
+    }
+
+    /**
+     * Creates grid data.
+     *
+     * @return
+     */
+    public static GridData createFillGridData(int span) {
         final GridData data = new GridData();
         data.horizontalAlignment = SWT.FILL;
         data.verticalAlignment = SWT.FILL;
@@ -107,6 +248,7 @@ public class SWTUtil {
         data.grabExcessVerticalSpace = true;
         data.horizontalIndent=0;
         data.verticalIndent=0;
+        data.horizontalSpan = span;
         return data;
     }
 
@@ -116,11 +258,29 @@ public class SWTUtil {
      * @return
      */
     public static GridData createFillHorizontallyGridData() {
+        return createFillHorizontallyGridData(true);
+    }
+    /**
+     * Creates grid data.
+     *
+     * @return
+     */
+    public static GridData createFillHorizontallyGridData(boolean fill) {
+        return createFillHorizontallyGridData(fill, 1);
+    }
+
+    /**
+     * Creates grid data.
+     *
+     * @return
+     */
+    public static GridData createFillHorizontallyGridData(boolean fill, int span) {
         final GridData data = new GridData();
         data.horizontalAlignment = SWT.FILL;
-        data.verticalAlignment = SWT.FILL;
+        data.verticalAlignment = fill ? SWT.FILL : SWT.CENTER;
         data.grabExcessHorizontalSpace = true;
         data.grabExcessVerticalSpace = false;
+        data.horizontalSpan = span;
         data.horizontalIndent=0;
         data.verticalIndent=0;
         return data;
@@ -165,6 +325,12 @@ public class SWTUtil {
                             if (i < columns - 1) {
                                 builder.append(", "); //$NON-NLS-1$
                             }
+                        } else if (item.getData(String.valueOf(i)) != null && 
+                                   item.getData(String.valueOf(i)) instanceof Double) {
+                            builder.append(getPrettyString(((Double) item.getData(String.valueOf(i))).doubleValue() * 100d) + "%"); //$NON-NLS-1$
+                            if (i < columns - 1) {
+                                builder.append(", "); //$NON-NLS-1$
+                            }
                         }
                     }
                     builder.append(")"); //$NON-NLS-1$
@@ -173,7 +339,7 @@ public class SWTUtil {
             }
         });
     }
-
+    
     /**
      * Creates grid data.
      *
@@ -219,28 +385,60 @@ public class SWTUtil {
         layout.numColumns = columns;
         return layout;
     }
+    
+
+    /**
+     * Creates a grid layout with equal-width columns
+     * @param columns
+     * @return
+     */
+    public static GridLayout createGridLayoutWithEqualWidth(int columns) {
+        GridLayout layout = createGridLayout(columns);
+        layout.makeColumnsEqualWidth = true;
+        return layout;
+    }
+
 
     /**
      * Creates a help button in the given folder.
      *
      * @param controller
-     * @param tabFolder
+     * @param folder
      * @param id
      */
-    public static void createHelpButton(final Controller controller, final CTabFolder tabFolder, final String id) {
-        ToolBar toolbar = new ToolBar(tabFolder, SWT.FLAT);
-        tabFolder.setTopRight( toolbar, SWT.RIGHT );
+    public static void createHelpButton(final Controller controller, final CTabFolder folder, final String id) {
+        createHelpButton(controller, folder, id, null);
+    }
+
+    /**
+     * Creates a help button in the given folder.
+     *
+     * @param controller
+     * @param folder
+     * @param id
+     * @param helpids
+     */
+    public static void createHelpButton(final Controller controller,
+                                        final CTabFolder folder,
+                                        final String id,
+                                        final Map<Composite, String> helpids) {
+        ToolBar toolbar = new ToolBar(folder, SWT.FLAT);
+        folder.setTopRight( toolbar, SWT.RIGHT );
         ToolItem item = new ToolItem( toolbar, SWT.PUSH );
         item.setImage(controller.getResources().getManagedImage("help.png"));  //$NON-NLS-1$
         item.setToolTipText(Resources.getMessage("General.0")); //$NON-NLS-1$
         createDisabledImage(item);
         int height = toolbar.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-        tabFolder.setTabHeight(Math.max(height, tabFolder.getTabHeight()));
+        folder.setTabHeight(Math.max(height, folder.getTabHeight()));
         item.addSelectionListener(new SelectionAdapter(){
-
             @Override
             public void widgetSelected(SelectionEvent arg0) {
-                controller.actionShowHelpDialog(id);
+                if (helpids != null && folder.getSelectionIndex() >= 0 &&
+                    helpids.get(folder.getItem(folder.getSelectionIndex()).getControl()) != null) {
+                    controller.actionShowHelpDialog(helpids.get(folder.getItem(folder.getSelectionIndex()).getControl()));
+                } else {
+                    controller.actionShowHelpDialog(id);
+                }
             }
         });
     }
@@ -258,21 +456,6 @@ public class SWTUtil {
         d.grabExcessVerticalSpace = false;
         return d;
     }
-
-    /**
-     * Creates grid data.
-     *
-     * @param i
-     * @return
-     */
-    public static Object createSpanColumnsAndFillGridData(final int i) {
-        final GridData d = new GridData();
-        d.grabExcessHorizontalSpace = true;
-        d.grabExcessVerticalSpace = true;
-        d.horizontalSpan = i;
-        return d;
-    }
-
 
     /**
      * Creates grid data.
@@ -298,29 +481,6 @@ public class SWTUtil {
         Table table = new Table(parent, style);
         fixOSXTableBug(table);
         return table;
-    }
-
-    /**
-     * Fixes bugs on OSX when scrolling in tables
-     * @param table
-     */
-    private static void fixOSXTableBug(final Table table) {
-        if (isMac()) {
-            SelectionListener bugFixer = new SelectionListener(){
-                
-                @Override
-                public void widgetSelected(SelectionEvent arg0) {
-                    table.redraw();
-                }
-
-                @Override
-                public void widgetDefaultSelected(SelectionEvent arg0) {
-                    widgetSelected(arg0);
-                }
-            };
-            table.getVerticalBar().addSelectionListener(bugFixer);
-            table.getHorizontalBar().addSelectionListener(bugFixer);
-        }
     }
 
     /**
@@ -417,6 +577,74 @@ public class SWTUtil {
     }
 
     /**
+     * Tries to fix a bug when resizing sash forms in OSX
+     * @param sash
+     */
+    public static void fixOSXSashBug(final SashForm sash) {
+        
+        // Only if on OSX
+        if (isMac()) {
+            
+            // Listen for resize event in first composite
+            for (Control c : sash.getChildren()) {
+                if (c instanceof Composite) {
+                    
+                    // In case of resize, redraw the sash form
+                    c.addControlListener(new ControlAdapter(){
+                        @Override
+                        public void controlResized(ControlEvent arg0) {
+                            sash.redraw();
+                        }
+                    });
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns a pretty string representing the given double
+     * @param value
+     * @return
+     */
+    public static String getPrettyString(double value) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        if (value == LN2) {
+            return "ln(2)";
+        } else if (value == LN3) {
+            return "ln(3)";
+        } else if (value == 0) {
+            return "0";
+        } else if (Math.abs(value) < 0.00001) {
+            return new DecimalFormat("#.#####E0", symbols).format(value).replace('E', 'e');
+        } else if (Math.abs(value) < 1) {
+            return new DecimalFormat("#.#####", symbols).format(value);
+        } else if (Math.abs(value) < 100000) {
+            return new DecimalFormat("######.#####", symbols).format(value);
+        } else {
+            return String.valueOf(value).replace('E', 'e');
+        }
+    }
+
+    /**
+     * Returns a pretty string representing the given value
+     * @param value
+     * @return
+     */
+    public static String getPrettyString(int value) {
+        return String.valueOf(value);
+    }
+
+    /**
+     * Returns a pretty string representing the given value
+     * @param value
+     * @return
+     */
+    public static String getPrettyString(long value) {
+        return String.valueOf(value);
+    }
+
+    /**
      * Converts the integer value to a slider selection.
      *
      * @param min
@@ -427,7 +655,15 @@ public class SWTUtil {
     public static int intToSlider(final int min, final int max, final int value) {
         return doubleToSlider(min, max, value);
     }
-
+    
+    /**
+     * Are we running on an OSX system
+     * @return
+     */
+    public static boolean isMac() {
+        return System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0; //$NON-NLS-1$ //$NON-NLS-2$
+    }
+    
     /**
      * Converts the slider value to a double.
      *
@@ -448,7 +684,7 @@ public class SWTUtil {
         }
         return val;
     }
-
+    
     /**
      * Converts the slider value to an integer.
      *
@@ -460,13 +696,28 @@ public class SWTUtil {
     public static int sliderToInt(final int min, final int max, final int value) {
         return (int)Math.round(sliderToDouble(min, max, value));
     }
-
+    
     /**
-     * Are we running on an OSX system
-     * @return
+     * Fixes bugs on OSX when scrolling in tables
+     * @param table
      */
-    public static boolean isMac() {
-        return System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0; //$NON-NLS-1$ //$NON-NLS-2$
+    private static void fixOSXTableBug(final Table table) {
+        if (isMac()) {
+            SelectionListener bugFixer = new SelectionListener(){
+                
+                @Override
+                public void widgetDefaultSelected(SelectionEvent arg0) {
+                    widgetSelected(arg0);
+                }
+
+                @Override
+                public void widgetSelected(SelectionEvent arg0) {
+                    table.redraw();
+                }
+            };
+            table.getVerticalBar().addSelectionListener(bugFixer);
+            table.getHorizontalBar().addSelectionListener(bugFixer);
+        }
     }
     
     /**

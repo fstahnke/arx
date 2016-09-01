@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,22 @@
 
 package org.deidentifier.arx;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.deidentifier.arx.ARXAnonymizer.Result;
 import org.deidentifier.arx.ARXLattice.ARXNode;
-import org.deidentifier.arx.aggregates.StatisticsEquivalenceClasses;
+import org.deidentifier.arx.criteria.PrivacyCriterion;
+import org.deidentifier.arx.exceptions.RollbackRequiredException;
 import org.deidentifier.arx.framework.check.NodeChecker;
 import org.deidentifier.arx.framework.check.TransformedData;
 import org.deidentifier.arx.framework.check.distribution.DistributionAggregateFunction;
+import org.deidentifier.arx.framework.data.Data;
 import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.Dictionary;
-import org.deidentifier.arx.framework.lattice.Node;
+import org.deidentifier.arx.framework.lattice.SolutionSpace;
+import org.deidentifier.arx.framework.lattice.Transformation;
 import org.deidentifier.arx.metric.Metric;
 
 /**
@@ -45,7 +50,7 @@ public class ARXResult {
     private ARXNode                bufferLockedByNode   = null;
 
     /** The node checker. */
-    private final NodeChecker     checker;
+    private final NodeChecker      checker;
 
     /** The config. */
     private final ARXConfiguration config;
@@ -68,6 +73,9 @@ public class ARXResult {
     /** The registry. */
     private final DataRegistry     registry;
 
+    /** The registry. */
+    private final SolutionSpace    solutionSpace;
+
     /**
      * Internal constructor for deserialization.
      *
@@ -81,17 +89,19 @@ public class ARXResult {
      * @param config
      * @param optimum
      * @param time
+     * @param solutionSpace
      */
-    public ARXResult(       final DataHandle handle,
-                            final DataDefinition definition,
-                            final ARXLattice lattice,
-                            final int historySize,
-                            final double snapshotSizeSnapshot,
-                            final double snapshotSizeDataset,
-                            final Metric<?> metric,
-                            final ARXConfiguration config,
-                            final ARXNode optimum,
-                            final long time) {
+    public ARXResult(final DataHandle handle,
+                     final DataDefinition definition,
+                     final ARXLattice lattice,
+                     final int historySize,
+                     final double snapshotSizeSnapshot,
+                     final double snapshotSizeDataset,
+                     final Metric<?> metric,
+                     final ARXConfiguration config,
+                     final ARXNode optimum,
+                     final long time,
+                     final SolutionSpace solutionSpace) {
 
         // Set registry and definition
         ((DataHandleInput)handle).setDefinition(definition);
@@ -123,7 +133,7 @@ public class ARXResult {
         config.initialize(manager);
 
         // Initialize the metric
-        metric.initialize(definition, manager.getDataGeneralized(), manager.getHierarchies(), config);
+        metric.initialize(manager, definition, manager.getDataGeneralized(), manager.getHierarchies(), config);
 
         // Create a node checker
         final NodeChecker checker = new NodeChecker(manager,
@@ -131,7 +141,8 @@ public class ARXResult {
                                                      config.getInternalConfiguration(),
                                                      historySize,
                                                      snapshotSizeDataset,
-                                                     snapshotSizeSnapshot);
+                                                     snapshotSizeSnapshot,
+                                                     solutionSpace);
 
         // Initialize the result
         this.registry = handle.getRegistry();
@@ -142,6 +153,7 @@ public class ARXResult {
         this.lattice = lattice;
         this.optimalNode = lattice.getOptimum();
         this.duration = time;
+        this.solutionSpace = solutionSpace;
     }
     
     /**
@@ -154,6 +166,7 @@ public class ARXResult {
      * @param config
      * @param lattice
      * @param duration
+     * @param solutionSpace
      */
     protected ARXResult(DataRegistry registry,
                         DataManager manager,
@@ -161,7 +174,8 @@ public class ARXResult {
                         DataDefinition definition,
                         ARXConfiguration config,
                         ARXLattice lattice,
-                        long duration) {
+                        long duration,
+                        SolutionSpace solutionSpace) {
 
         this.registry = registry;
         this.manager = manager;
@@ -171,6 +185,7 @@ public class ARXResult {
         this.lattice = lattice;
         this.optimalNode = lattice.getOptimum();
         this.duration = duration;
+        this.solutionSpace = solutionSpace;
     }
 
 
@@ -196,7 +211,9 @@ public class ARXResult {
     /**
      * Returns a handle to the data obtained by applying the optimal transformation. This method will not copy the buffer, 
      * i.e., only one instance can be obtained for each transformation. All previous handles for output data will be invalidated when a new handle is 
-     * obtained. Use this only if you know exactly what you are doing.
+     * obtained. Use this only if you know exactly what you are doing.<br>
+     * <br>
+     * This method is obsolete. Please use getOutput() instead.
      * 
      * @return
      */
@@ -209,7 +226,10 @@ public class ARXResult {
     /**
      * Returns a handle to data obtained by applying the given transformation. This method will not copy the buffer, 
      * i.e., only one instance can be obtained for each transformation. All previous handles for output data will be invalidated when a new handle is 
-     * obtained. Use this only if you know exactly what you are doing.
+     * obtained. Use this only if you know exactly what you are doing.<br>
+     * <br>
+     * This method is obsolete. Please use getOutput(...) instead.
+     * 
      * @param node the transformation
      * 
      * @return
@@ -273,7 +293,7 @@ public class ARXResult {
 
         // Release lock
         if (!fork && bufferLockedByHandle != null) {
-            if (bufferLockedByNode == node) {
+            if (bufferLockedByNode == node && !((DataHandleOutput)bufferLockedByHandle).isOptimized()) {
                 return bufferLockedByHandle;
             } else {
                 registry.release(bufferLockedByHandle);
@@ -283,20 +303,24 @@ public class ARXResult {
         }
         
         DataHandle handle = registry.getOutputHandle(node);
-        if (handle != null) return handle;
+        if (handle != null) {
+            if (!((DataHandleOutput)handle).isOptimized()) {
+                return handle;
+            } else {
+                registry.release(handle);
+            }
+        }
 
-        final Node transformation = new Node(0);
-        int level = 0; for (int i : node.getTransformation()) level+= i;
-        transformation.setTransformation(node.getTransformation(), level);
- 
         // Apply the transformation
+        final Transformation transformation = solutionSpace.getTransformation(node.getTransformation());
         TransformedData information = checker.applyTransformation(transformation);
+        transformation.setChecked(information.properties);
 
         // Store
         if (!node.isChecked() || node.getMaximumInformationLoss().compareTo(node.getMinimumInformationLoss()) != 0) {
             
             node.access().setChecked(true);
-            if (transformation.hasProperty(Node.PROPERTY_ANONYMOUS)) {
+            if (transformation.hasProperty(solutionSpace.getPropertyAnonymous())) {
                 node.access().setAnonymous();
             } else {
                 node.access().setNotAnonymous();
@@ -320,7 +344,6 @@ public class ARXResult {
                                                        information.bufferGeneralized,
                                                        information.bufferMicroaggregated,
                                                        node,
-                                                       new StatisticsEquivalenceClasses(information.statistics),
                                                        definition,
                                                        config);
         
@@ -359,12 +382,325 @@ public class ARXResult {
     }
 
     /**
+     * Returns whether local recoding can be applied to the given handle
+     * @param handle
+     * @return
+     */
+    public boolean isOptimizable(DataHandle handle) {
+
+        // Check, if output
+        if (!(handle instanceof DataHandleOutput)) {
+            return false;
+        }
+        
+        // Extract
+        DataHandleOutput output = (DataHandleOutput)handle;
+        
+        // Check, if input matches
+        if (output.getInputBuffer() == null || !output.getInputBuffer().equals(this.checker.getInputBuffer())) {
+            return false;
+        }
+        
+        // Check if optimizable
+        for (PrivacyCriterion c : config.getCriteria()) {
+            if (!c.isLocalRecodingSupported()) {
+                return false;
+            }
+        }
+        
+        // Check, if there are enough outliers
+        int outliers = 0;
+        for (int row = 0; row < output.getNumRows(); row++) {
+            if (output.isOutlier(row)) {
+                outliers++;
+            }
+        }
+        
+        // Check minimal group size
+        if (config.getMinimalGroupSize() != Integer.MAX_VALUE && outliers < config.getMinimalGroupSize()) {
+            return false;
+        }
+        
+        // Check, if there are any outliers
+        if (outliers == 0) {
+            return false;
+        }
+        
+        // Yes, we probably can do this
+        return true;
+    }
+    
+    /**
      * Indicates if a result is available.
      *
      * @return
      */
     public boolean isResultAvailable() {
         return optimalNode != null;
+    }
+
+    /**
+     * This method optimizes the given data output with local recoding to improve its utility
+     * @param handle
+     * @return The number of optimized records
+     * @throws RollbackRequiredException 
+     */
+    public int optimize(DataHandle handle) throws RollbackRequiredException {
+        return this.optimize(handle, 0.5d, new ARXListener(){
+            @Override
+            public void progress(double progress) {
+                // Empty by design
+            }
+        });
+    }
+
+    /**
+     * This method optimizes the given data output with local recoding to improve its utility
+     * @param handle
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @return The number of optimized records
+     * @throws RollbackRequiredException 
+     */
+    public int optimize(DataHandle handle, double gsFactor) throws RollbackRequiredException {
+        return this.optimize(handle, gsFactor, new ARXListener(){
+            @Override
+            public void progress(double progress) {
+                // Empty by design
+            }
+        });
+    }
+
+    /**
+     * This method optimizes the given data output with local recoding to improve its utility
+     * @param handle
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @param listener 
+     * @return The number of optimized records
+     */
+    public int optimize(DataHandle handle, double gsFactor, ARXListener listener) throws RollbackRequiredException {
+        
+        // Check if null
+        if (listener == null) {
+            throw new NullPointerException("Listener must not be null");
+        }
+        
+        // Check if null
+        if (handle == null) {
+            throw new NullPointerException("Handle must not be null");
+        }
+
+        // Check bounds
+        if (gsFactor < 0d || gsFactor > 1d) {
+            throw new IllegalArgumentException("Generalization/suppression factor must be in [0, 1]");
+        }
+        
+        // Check if output
+        if (!(handle instanceof DataHandleOutput)) {
+            throw new IllegalArgumentException("Local recoding can only be applied to output data");
+        }
+        
+        // Check if optimizable
+        if (!isOptimizable(handle)) {
+            return 0;
+        }
+        
+        // Extract
+        DataHandleOutput output = (DataHandleOutput)handle;
+        
+        // Check, if input matches
+        if (output.getInputBuffer() == null || !output.getInputBuffer().equals(this.checker.getInputBuffer())) {
+            throw new IllegalArgumentException("This output data is associated to the correct input data");
+        }
+        
+        // We are now ready, to go
+        // Collect input and row indices
+        RowSet rowset = RowSet.create(output.getNumRows());
+        for (int row = 0; row < output.getNumRows(); row++) {
+            if (output.isOutlier(row)) {
+                rowset.add(row);
+            }
+        }
+        
+        // Everything that is used from here on, needs to be either
+        // (a) state-less, or
+        // (b) a fresh copy of the original configuration.
+
+        // We start by creating a projected instance of the configuration
+        // - All privacy models will be cloned
+        // - Subsets in d-presence will be projected accordingly
+        // - Utility measures will be cloned
+        ARXConfiguration config = this.config.getSubsetInstance(rowset, gsFactor);
+
+        // In the data definition, only MicroAggregationFunctions maintain a state, but these 
+        // are cloned, when cloning the definition
+        // TODO: This is probably not necessary, because they are used from the data manager,
+        //       which in turn creates a clone by itself
+        DataDefinition definition = this.definition.clone();
+        
+        // Clone the data manager
+        DataManager manager = this.manager.getSubsetInstance(rowset);
+        
+        // Create an anonymizer
+        // TODO: It stores some values that should be transferred?
+        ARXAnonymizer anonymizer = new ARXAnonymizer();
+        anonymizer.setListener(listener);
+        
+        // Anonymize
+        Result result = null;
+        try {
+            result = anonymizer.anonymize(manager, definition, config);
+        } catch (IOException e) {
+            // This should not happen at this point in time, as data has already been read from the source
+            throw new RuntimeException("Internal error");
+        }
+        
+        // Break, if no solution has been found
+        if (result.optimum == null) {
+            return 0;
+        }
+        
+        // Else, merge the results back into the given handle
+        TransformedData data = result.checker.applyTransformation(result.optimum, output.getOutputBufferMicroaggregated().getDictionary());
+        int newIndex = -1;
+        int[][] oldGeneralized = output.getOutputBufferGeneralized().getArray();
+        int[][] oldMicroaggregated = output.getOutputBufferMicroaggregated().getArray();
+        int[][] newGeneralized = data.bufferGeneralized.getArray();
+        int[][] newMicroaggregated = data.bufferMicroaggregated.getArray();
+        
+        try {
+            
+            int optimized = 0;
+            for (int oldIndex = 0; oldIndex < rowset.length(); oldIndex++) {
+                if (rowset.contains(oldIndex)) {
+                    newIndex++;
+                    if (oldGeneralized != null && oldGeneralized.length != 0) {
+                        System.arraycopy(newGeneralized[newIndex], 0, oldGeneralized[oldIndex], 0, newGeneralized[newIndex].length);
+                        optimized += (newGeneralized[newIndex][0] & Data.OUTLIER_MASK) != 0 ? 0 : 1;
+                    }
+                    if (oldMicroaggregated != null && oldMicroaggregated.length != 0) {
+                        System.arraycopy(newMicroaggregated[newIndex], 0, oldMicroaggregated[oldIndex], 0, newMicroaggregated[newIndex].length);
+                    }
+                }
+            }
+            
+            // Update data types
+            output.updateDataTypes(result.optimum.getGeneralization());
+            
+            // Mark as optimized
+            if (optimized != 0) {
+                output.setOptimized(true);
+            }
+            
+            // Return
+            return optimized;
+            
+        // If anything happens in the above block, the operation needs to be rolled back, because
+        // the buffer might be in an inconsistent state
+        } catch (Exception e) {
+            throw new RollbackRequiredException("Handle must be rebuild to ensure privacy", e);
+        }
+    }
+
+    /**
+     * This method optimizes the given data output with local recoding to improve its utility
+     * @param handle
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @param maxIterations The maximal number of iterations to perform
+     * @param adaptionFactor Is added to the gsFactor when reaching a fixpoint 
+     * @param listener 
+     * @throws RollbackRequiredException 
+     */
+    public void optimizeIterative(DataHandle handle,
+                                  double gsFactor,
+                                  int maxIterations,
+                                  double adaptionFactor) throws RollbackRequiredException {
+        this.optimizeIterative(handle, gsFactor, maxIterations, adaptionFactor, new ARXListener(){
+            @Override
+            public void progress(double progress) {
+                // Empty by design
+            }
+        });
+    }
+    
+    /**
+     * This method optimizes the given data output with local recoding to improve its utility
+     * @param handle
+     * @param gsFactor A factor [0,1] weighting generalization and suppression.
+     *            The default value is 0.5, which means that generalization
+     *            and suppression will be treated equally. A factor of 0
+     *            will favor suppression, and a factor of 1 will favor
+     *            generalization. The values in between can be used for
+     *            balancing both methods.
+     * @param maxIterations The maximal number of iterations to perform
+     * @param adaptionFactor Is added to the gsFactor when reaching a fixpoint 
+     * @param listener 
+     * @throws RollbackRequiredException 
+     */
+    public void optimizeIterative(final DataHandle handle,
+                                  double gsFactor,
+                                  final int maxIterations,
+                                  final double adaptionFactor,
+                                  final ARXListener listener) throws RollbackRequiredException {
+        
+        if (gsFactor < 0d || gsFactor > 1d) {
+            throw new IllegalArgumentException("Generalization/suppression factor must be in [0, 1]");
+        }
+        if (adaptionFactor < 0d || adaptionFactor > 1d) {
+            throw new IllegalArgumentException("Adaption factor must be in [0, 1]");
+        }
+        if (maxIterations <= 0) {
+            throw new IllegalArgumentException("Max. iterations must be > zero");
+        }
+
+        // Outer loop
+        int iterations = 0;
+        int optimized = Integer.MAX_VALUE;
+        double totalAdaption = 0d;
+        final double max = maxIterations != Integer.MAX_VALUE ? maxIterations : (1d - gsFactor) / adaptionFactor;
+        while (isOptimizable(handle) && iterations < maxIterations && optimized > 0) {
+
+            // Create a wrapped listener
+            final double base = maxIterations != Integer.MAX_VALUE ? iterations : totalAdaption / adaptionFactor;
+            ARXListener wrapper = new ARXListener() {
+                @Override
+                public void progress(double progress) {
+                    double _max = (max > 1d && !Double.isInfinite(max) && !Double.isNaN(max) ? max : 1d);
+                    double _base = (base > 0d && !Double.isInfinite(base) && !Double.isNaN(base)? base : 0d);
+                    double value = (progress + _base) / _max;
+                    listener.progress(value);
+                }
+            };
+
+            // Perform individual optimization
+            optimized = optimize(handle, gsFactor, wrapper);
+            
+            // Try to adapt, if possible
+            if (optimized == 0 && adaptionFactor > 0d) {
+                gsFactor += adaptionFactor;
+                totalAdaption += adaptionFactor;
+                
+                // If valid, try again
+                if (gsFactor <= 1d) {
+                    optimized = Integer.MAX_VALUE;
+                }
+            }
+            iterations++;
+        }
     }
 
     /**
@@ -379,7 +715,7 @@ public class ARXResult {
         }
         return result;
     }
-
+    
     /**
      * Releases the buffer.
      *

@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@
 
 package org.deidentifier.arx.gui.view.impl.explore;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.deidentifier.arx.ARXLattice.ARXNode;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.Model;
@@ -30,7 +27,7 @@ import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.gui.view.def.IView;
 import org.deidentifier.arx.gui.view.impl.common.ClipboardHandlerTable;
 import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolder;
-import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButton;
+import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButtonBar;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -38,16 +35,17 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
 import cern.colt.Arrays;
+import de.linearbits.swt.table.DynamicTable;
+import de.linearbits.swt.table.DynamicTableColumn;
 
 /**
  * This class displays the clipboard.
@@ -57,29 +55,26 @@ import cern.colt.Arrays;
 public class ViewClipboard implements IView {
 
     /** Identifier for key in the nodes' attribute maps. */
-    private static final int        NODE_COMMENT = 111;
-    
+    public static final int    NODE_COMMENT = 111;
+
     /** Component. */
-    private final Table             table;
-    
+    private final DynamicTable table;
+
     /** Component. */
-    private final List<TableColumn> columns      = new ArrayList<TableColumn>();
-    
+    private final Composite    root;
+
     /** Component. */
-    private final Composite         root;
-    
+    private final Menu         menu;
+
     /** Component. */
-    private final Menu              menu;
-    
-    /** Component. */
-    private TableItem               selectedItem = null;
+    private TableItem          selectedItem = null;
 
     /** Model. */
-    private Model                   model;
-    
+    private Model              model;
+
     /** Controller. */
-    private final Controller        controller;
-    
+    private final Controller   controller;
+
     /**
      * Creates a new instance.
      *
@@ -99,7 +94,7 @@ public class ViewClipboard implements IView {
         controller.addListener(ModelPart.SELECTED_NODE, this);
         this.controller = controller;
 
-        ComponentTitledFolderButton bar = new ComponentTitledFolderButton("id-23"); //$NON-NLS-1$
+        ComponentTitledFolderButtonBar bar = new ComponentTitledFolderButtonBar("id-23"); //$NON-NLS-1$
         bar.add(Resources.getMessage("ViewClipboard.0"), imageRemove, new Runnable(){ //$NON-NLS-1$
             public void run() {
                 actionRemove();
@@ -123,20 +118,38 @@ public class ViewClipboard implements IView {
 
         // Create group
         ComponentTitledFolder border = new ComponentTitledFolder(parent, controller,  bar, null); //$NON-NLS-1$
-        border.setLayoutData(SWTUtil.createFillGridData());
+        GridData data = SWTUtil.createFillGridData();
+        data.heightHint = 70;
+        border.setLayoutData(data);
         
         // Create root
-        root = border.createItem(Resources.getMessage("NodeClipboardView.0"), //$NON-NLS-1$
-                                 null);
+        root = border.createItem(Resources.getMessage("NodeClipboardView.0"), null); //$NON-NLS-1$
         root.setLayout(new FillLayout());
         border.setSelection(0);
         border.setEnabled(true);
 
         // Create table
-        table = SWTUtil.createTable(root, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
+        table = SWTUtil.createTableDynamic(root, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
 
+        // First column
+        final DynamicTableColumn c = new DynamicTableColumn(table, SWT.LEFT);
+        c.setText(Resources.getMessage("NodeClipboardView.6")); //$NON-NLS-1$
+        c.setWidth("20%", "100px"); //$NON-NLS-1$ //$NON-NLS-2$
+
+        // Second column
+        final DynamicTableColumn c2 = new DynamicTableColumn(table, SWT.LEFT);
+        c2.setText(Resources.getMessage("NodeClipboardView.7")); //$NON-NLS-1$
+        c2.setWidth("80%", "100px"); //$NON-NLS-1$ //$NON-NLS-2$
+        
+        // Pack
+        c.pack();
+        c2.pack();
+        
+        // Tool tip
+        SWTUtil.createGenericTooltip(table);
+        
         // Selected node
         table.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -176,19 +189,6 @@ public class ViewClipboard implements IView {
                 }
             }
         });
-        
-        // First column
-        final TableColumn c = new TableColumn(table, SWT.NONE);
-        c.setText(Resources.getMessage("NodeClipboardView.6")); //$NON-NLS-1$
-        columns.add(c);
-
-        // Second column
-        final TableColumn c2 = new TableColumn(table, SWT.NONE);
-        c2.setText(Resources.getMessage("NodeClipboardView.7")); //$NON-NLS-1$
-        columns.add(c2);
-        SWTUtil.createGenericTooltip(table);
-        c.pack();
-        c2.pack();
     }
 
     @Override
@@ -375,11 +375,6 @@ public class ViewClipboard implements IView {
         for (final ARXNode node : model.getClipboard().getClipboardEntries()) {
             addItem(node, table.getItemCount());
         }
-        
-        // Pack
-        for (final TableColumn c : columns) {
-            c.pack();
-        }
     }
 
     /**
@@ -487,7 +482,7 @@ public class ViewClipboard implements IView {
         int index = table.getTopIndex();
         while (index < table.getItemCount()) {
             final TableItem item = table.getItem(index);
-            for (int i = 0; i < columns.size(); i++) {
+            for (int i = 0; i < table.getColumnCount(); i++) {
                 final Rectangle rect = item.getBounds(i);
                 if (rect.contains(pt)) { return item; }
             }

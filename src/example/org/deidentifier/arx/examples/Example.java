@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,23 +99,18 @@ public abstract class Example {
      * @param iterator
      */
     protected static void printIterator(Iterator<String[]> iterator) {
-        System.out.print("{");
         while (iterator.hasNext()) {
-            System.out.print("{");
             String[] next = iterator.next();
+            System.out.print("[");
             for (int i = 0; i < next.length; i++) {
                 String string = next[i];
-                System.out.print("\"" + string + "\"");
+                System.out.print(string);
                 if (i < next.length - 1) {
-                    System.out.print(",");
+                    System.out.print(", ");
                 }
             }
-            System.out.print("}");
-            if (iterator.hasNext()) {
-                System.out.print(",");
-            }
+            System.out.println("]");
         }
-        System.out.println("}");
     }
     
     /**

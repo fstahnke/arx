@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,74 +31,86 @@ public class ModelEvent {
      */
     public static enum ModelPart {
         
-        /**  TODO */
+        /**  SELECTED_ATTRIBUTE */
         SELECTED_ATTRIBUTE,
         
-        /**  TODO */
+        /**  INPUT */
         INPUT,
         
-        /**  TODO */
+        /**  OUTPUT */
         OUTPUT,
         
-        /**  TODO */
+        /**  ATTRIBUTE_TYPE */
         ATTRIBUTE_TYPE,
         
-        /**  TODO */
+        /**  RESULT */
         RESULT,
         
-        /**  TODO */
+        /**  DATA_TYPE */
         DATA_TYPE,
         
-        /**  TODO */
+        /**  ALGORITHM */
         ALGORITHM,
         
-        /**  TODO */
+        /**  METRIC */
         METRIC,
         
-        /**  TODO */
+        /**  MAX_OUTLIERS */
         MAX_OUTLIERS,
         
-        /**  TODO */
+        /**  FILTER */
         FILTER,
         
-        /**  TODO */
+        /**  SELECTED_NODE */
         SELECTED_NODE,
         
-        /**  TODO */
+        /**  MODEL */
         MODEL,
         
-        /**  TODO */
+        /**  CLIPBOARD */
         CLIPBOARD,
         
-        /**  TODO */
+        /**  HIERARCHY */
         HIERARCHY,
         
-        /**  TODO */
+        /**  CRITERION_DEFINITION */
         CRITERION_DEFINITION,
         
-        /**  TODO */
+        /**  RESEARCH_SUBSET */
         RESEARCH_SUBSET,
         
-        /**  TODO */
+        /**  SELECTED_VIEW_CONFIG */
         SELECTED_VIEW_CONFIG,
         
-        /**  TODO */
+        /**  SELECTED_UTILITY_VISUALIZATION */
         SELECTED_UTILITY_VISUALIZATION,
         
-        /**  TODO */
+        /**  ATTRIBUTE_VALUE */
         ATTRIBUTE_VALUE,
 
-        /**  TODO */
+        /**  SELECTED_PERSPECTIVE */
         SELECTED_PERSPECTIVE,
 
-        /**  TODO */
+        /**  POPULATION_MODEL */
         POPULATION_MODEL,
 
-        /**  TODO */
+        /**  SELECTED_RISK_VISUALIZATION */
         SELECTED_RISK_VISUALIZATION,
         
-        /**  TODO */
-        SELECTED_QUASI_IDENTIFIERS
+        /**  SELECTED_QUASI_IDENTIFIERS */
+        SELECTED_QUASI_IDENTIFIERS,
+
+        /**  EXPAND */
+        EXPAND,
+
+        /**  SELECTED_FEATURES_OR_CLASSES */
+        SELECTED_FEATURES_OR_CLASSES,
+        
+        /** RISK THRESHOLDS*/
+        RISK_THRESHOLD_MAIN,
+        
+        /** RISK THRESHOLD*/
+        RISK_THRESHOLD_DERIVED
     }
 
     /** The part of the model that has changed. */

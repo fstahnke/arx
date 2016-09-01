@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import java.util.Arrays;
 
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.DataDefinition;
-import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.check.groupify.HashGroupify;
+import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.data.Data;
+import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
-import org.deidentifier.arx.framework.lattice.Node;
+import org.deidentifier.arx.framework.lattice.Transformation;
 import org.deidentifier.arx.metric.MetricConfiguration;
 
 /**
@@ -55,7 +56,7 @@ public class MetricMDHeight extends AbstractMetricMultiDimensional {
     protected MetricMDHeight(AggregateFunction function) {
         super(true, true, function);
     }
-
+  
     /**
      * Returns the configuration of this metric.
      *
@@ -69,7 +70,7 @@ public class MetricMDHeight extends AbstractMetricMultiDimensional {
                                        this.getAggregateFunction() // aggregate function
                                        );
     }
-    
+
     /**
      * For backwards compatibility only.
      *
@@ -81,47 +82,48 @@ public class MetricMDHeight extends AbstractMetricMultiDimensional {
         setMin(new double[]{minHeight});
         setMax(new double[]{maxHeight});
     }
-
+    
     @Override
     public String toString() {
         return "Height";
     }
+
+    @Override
+    protected ILMultiDimensionalWithBound getInformationLossInternal(final Transformation node, final HashGroupify g) {
+        AbstractILMultiDimensional loss = getLowerBoundInternal(node);
+        return new ILMultiDimensionalWithBound(loss, (AbstractILMultiDimensional)loss.clone());
+    }
     
     @Override
-    protected ILMultiDimensionalWithBound getInformationLossInternal(Node node, HashGroupifyEntry entry) {
+    protected ILMultiDimensionalWithBound getInformationLossInternal(Transformation node, HashGroupifyEntry entry) {
         double[] result = new double[getDimensions()];
         Arrays.fill(result, entry.count);
         return new ILMultiDimensionalWithBound(super.createInformationLoss(result));
     }
 
     @Override
-    protected ILMultiDimensionalWithBound getInformationLossInternal(final Node node, final HashGroupify g) {
-        AbstractILMultiDimensional loss = getLowerBoundInternal(node);
-        return new ILMultiDimensionalWithBound(loss, (AbstractILMultiDimensional)loss.clone());
-    }
-    
-    @Override
-    protected AbstractILMultiDimensional getLowerBoundInternal(Node node) {
+    protected AbstractILMultiDimensional getLowerBoundInternal(Transformation node) {
         double[] result = new double[getDimensions()];
-        int[] transformation = node.getTransformation();
+        int[] transformation = node.getGeneralization();
         for (int i=0; i<result.length; i++) {
             result[i] = transformation[i];
         }
         return super.createInformationLoss(result);
     }
-
+    
     @Override
-    protected AbstractILMultiDimensional getLowerBoundInternal(Node node,
+    protected AbstractILMultiDimensional getLowerBoundInternal(Transformation node,
                                                        HashGroupify groupify) {
         return getLowerBoundInternal(node);
     }
 
     @Override
-    protected void initializeInternal(DataDefinition definition,
-                                      Data input,
-                                      GeneralizationHierarchy[] hierarchies,
-                                      ARXConfiguration config) {
-        super.initializeInternal(definition, input, hierarchies, config);
+    protected void initializeInternal(final DataManager manager,
+                                      final DataDefinition definition, 
+                                      final Data input, 
+                                      final GeneralizationHierarchy[] hierarchies, 
+                                      final ARXConfiguration config) {
+        super.initializeInternal(manager, definition, input, hierarchies, config);
         
         // Min and max
         double[] min = new double[hierarchies.length];
@@ -135,5 +137,13 @@ public class MetricMDHeight extends AbstractMetricMultiDimensional {
         
         setMin(min);
         setMax(max);
+    }
+
+    /**
+     * Does this metric handle microaggregation
+     * @return
+     */
+    protected boolean isAbleToHandleMicroaggregation() {
+        return false;
     }
 }

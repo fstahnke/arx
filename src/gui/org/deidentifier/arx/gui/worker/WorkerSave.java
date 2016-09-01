@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -196,7 +198,7 @@ public class WorkerSave extends Worker<Model> {
         writer.unindent();
         b.flush();
     }
-    
+
     /**
      * Returns an XML representation of the clipboard.
      *
@@ -216,7 +218,7 @@ public class WorkerSave extends Worker<Model> {
         writer.unindent();
         return writer.toString();
     }
-
+    
     /**
      * Converts a model to XML.
      *
@@ -249,7 +251,6 @@ public class WorkerSave extends Worker<Model> {
         writer.write(vocabulary.getSnapshotSizeDataset(), model.getSnapshotSizeDataset());
         writer.write(vocabulary.getSnapshotSizeSnapshot(), model.getSnapshotSizeSnapshot());
         writer.write(vocabulary.getInitialNodesInViewer(), model.getInitialNodesInViewer());
-        writer.write(vocabulary.getMaxNodesInLattice(), model.getMaxNodesInLattice());
         writer.write(vocabulary.getMaxNodesInViewer(), model.getMaxNodesInViewer());
         writer.write(vocabulary.getSelectedAttribute(), model.getSelectedAttribute());
         writer.write(vocabulary.getInputBytes(), model.getInputBytes());
@@ -269,7 +270,6 @@ public class WorkerSave extends Worker<Model> {
     	XMLWriter writer = new XMLWriter(); 
         writer.indent(vocabulary.getConfig());
         writer.write(vocabulary.getSuppressionAlwaysEnabled(), config.isSuppressionAlwaysEnabled());
-        writer.write(vocabulary.getSuppressionString(), config.getSuppressionString());
         
         // Write suppressed attribute types
         writer.indent(vocabulary.getSuppressedAttributeTypes());
@@ -283,7 +283,6 @@ public class WorkerSave extends Worker<Model> {
         writer.unindent();
         
         writer.write(vocabulary.getPracticalMonotonicity(), config.isPracticalMonotonicity());
-        writer.write(vocabulary.getProtectSensitiveAssociations(), config.isProtectSensitiveAssociations());
         writer.write(vocabulary.getRelativeMaxOutliers(), config.getAllowedOutliers());
         writer.write(vocabulary.getMetric(), config.getMetric().toString());
 
@@ -469,7 +468,7 @@ public class WorkerSave extends Worker<Model> {
         oos.writeObject(model.getNodeFilter());
         oos.flush();
     }
-    
+
     /**
      * Writes the hierarchies to the file.
      *
@@ -482,13 +481,47 @@ public class WorkerSave extends Worker<Model> {
                                   final String prefix,
                                   final ZipOutputStream zip) throws IOException {
 
+        // Store all from config
+        Set<String> saved = new HashSet<>();
         for (Entry<String, Hierarchy> entry : config.getHierarchies().entrySet()) {
+
+            // Store this hierarchy
             zip.putNextEntry(new ZipEntry(prefix + "hierarchies/" + toFileName(entry.getKey()) + ".csv")); //$NON-NLS-1$ //$NON-NLS-2$
-            final CSVDataOutput out = new CSVDataOutput(zip, model.getCSVSyntax().getDelimiter());
+            CSVDataOutput out = new CSVDataOutput(zip, model.getCSVSyntax().getDelimiter());
             out.write(entry.getValue().getHierarchy());
+            saved.add(entry.getKey());
+        }
+
+        // This additional code implements a bugfix. ARX automatically creates hierarchies
+        // implementing the identity function when the user does not specify one but defines the attribute
+        // to be a quasi-identifier. These hierarchies were not serialized into project files in ARX 3.4.1,
+        // leading to inconsistent files which could not be loaded any more. We now do our best to save
+        // every relevant hierarchy:
+
+        // Obtain definition
+        DataDefinition definition = null;
+        if (config == model.getInputConfig()) definition = model.getInputDefinition();
+        else definition = model.getOutputDefinition();
+        
+        // Store all from definition that have not yet been stored
+        DataHandle handle = config.getInput().getHandle();
+        for (int i = 0; i < handle.getNumColumns(); i++) {
+            final String attr = handle.getAttributeName(i);
+            
+            // Do we have a hierarchy
+            if (!saved.contains(attr) && definition.getHierarchy(attr) != null && 
+                definition.getHierarchy(attr).length != 0 &&
+                definition.getHierarchy(attr)[0].length != 0) {
+                
+                // Store this hierarchy
+                zip.putNextEntry(new ZipEntry(prefix + "hierarchies/" + toFileName(attr) + ".csv")); //$NON-NLS-1$ //$NON-NLS-2$
+                CSVDataOutput out = new CSVDataOutput(zip, model.getCSVSyntax().getDelimiter());
+                out.write(definition.getHierarchy(attr));
+                saved.add(attr);
+            }
         }
     }
-
+    
     /**
      * Writes the input to the file.
      *
@@ -508,7 +541,6 @@ public class WorkerSave extends Worker<Model> {
             }
         }
     }
-    
 
     /**
      * Writes the input subset to the file.
@@ -527,6 +559,7 @@ public class WorkerSave extends Worker<Model> {
         }
     }
     
+
     /**
      * Writes the lattice to the file.
      *
@@ -591,7 +624,7 @@ public class WorkerSave extends Worker<Model> {
         // Return mapping
         return map;
     }
-
+    
     /**
      * Writes the meta data to the file.
      *

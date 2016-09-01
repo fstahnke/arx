@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
  */
 package org.deidentifier.arx.gui.view.impl.utility;
 
-import java.text.DecimalFormat;
-
 import org.deidentifier.arx.AttributeType.Hierarchy;
 import org.deidentifier.arx.DataHandle;
 import org.deidentifier.arx.aggregates.StatisticsBuilderInterruptible;
@@ -25,6 +23,7 @@ import org.deidentifier.arx.aggregates.StatisticsFrequencyDistribution;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
 import org.deidentifier.arx.gui.resources.Resources;
+import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.gui.view.impl.common.ComponentTable;
 import org.deidentifier.arx.gui.view.impl.common.async.Analysis;
 import org.deidentifier.arx.gui.view.impl.common.async.AnalysisContext;
@@ -40,7 +39,7 @@ import org.eclipse.swt.widgets.Control;
  *
  * @author Fabian Prasser
  */
-public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisContextVisualizationDistribution> {
+public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisContextDistribution> {
 
     /** Internal stuff. */
     private ComponentTable  table;
@@ -61,10 +60,15 @@ public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisCont
                                      final ModelPart target,
                                      final ModelPart reset) {
         
-        super(parent, controller, target, reset);
+        super(parent, controller, target, reset, true);
         this.manager = new AnalysisManager(parent.getDisplay());
     }
     
+    @Override
+    public LayoutUtility.ViewUtilityType getType() {
+        return LayoutUtility.ViewUtilityType.HISTOGRAM_TABLE;
+    }
+
     @Override
     protected Control createControl(Composite parent) {
 
@@ -82,8 +86,8 @@ public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisCont
     }
 
     @Override
-    protected AnalysisContextVisualizationDistribution createViewConfig(AnalysisContext context) {
-        return new AnalysisContextVisualizationDistribution(context);
+    protected AnalysisContextDistribution createViewConfig(AnalysisContext context) {
+        return new AnalysisContextDistribution(context);
     }
 
     @Override
@@ -92,10 +96,11 @@ public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisCont
             this.manager.stop();
         }
         this.table.clear();
+        setStatusEmpty();
     }
 
     @Override
-    protected void doUpdate(AnalysisContextVisualizationDistribution context) {
+    protected void doUpdate(AnalysisContextDistribution context) {
 
         // The statistics builder
         final StatisticsBuilderInterruptible builder = context.handle.getStatistics().getInterruptibleInstance();
@@ -122,12 +127,10 @@ public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisCont
             @Override
             public void onFinish() {
 
-                if (stopped) {
+                // Check
+                if (stopped || !isEnabled()) {
                     return;
                 }
-
-                // Retrieve
-                final DecimalFormat format = new DecimalFormat("##0.00000"); //$NON-NLS-1$
 
                 // Now update the table
                 table.setData(new IDataProvider() {
@@ -135,7 +138,7 @@ public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisCont
                         return 2;
                     }
                     public Object getDataValue(int arg0, int arg1) {
-                        return arg0 == 0 ? distribution.values[arg1] : format.format(distribution.frequency[arg1]*100d)+"%"; //$NON-NLS-1$
+                        return arg0 == 0 ? distribution.values[arg1] : SWTUtil.getPrettyString(distribution.frequency[arg1]*100d)+"%"; //$NON-NLS-1$
                     }
                     public int getRowCount() {
                         return distribution.values.length;
@@ -149,7 +152,11 @@ public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisCont
 
             @Override
             public void onInterrupt() {
-                setStatusWorking();
+                if (!isEnabled()) {
+                    setStatusEmpty();
+                } else {
+                    setStatusWorking();
+                }
             }
 
             @Override
@@ -160,7 +167,6 @@ public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisCont
                 
                 // Perform work
                 this.distribution = builder.getFrequencyDistribution(column, hierarchy);
-
 
                 // Our users are patient
                 while (System.currentTimeMillis() - time < MINIMAL_WORKING_TIME && !stopped){
@@ -176,5 +182,12 @@ public class ViewStatisticsDistributionTable extends ViewStatistics<AnalysisCont
         };
         
         this.manager.start(analysis);
+    }
+    
+    /**
+     * Is an analysis running
+     */
+    protected boolean isRunning() {
+        return manager != null && manager.isRunning();
     }
 }

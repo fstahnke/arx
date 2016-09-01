@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.deidentifier.arx.DataHandleStatistics.InterruptHandler;
+import org.deidentifier.arx.DataHandleInternal.InterruptHandler;
 import org.deidentifier.arx.aggregates.StatisticsBuilder;
-import org.deidentifier.arx.aggregates.StatisticsEquivalenceClasses;
 
 
 /**
@@ -43,15 +42,14 @@ public class DataHandleSubset extends DataHandle {
      *
      * @param source
      * @param subset
-     * @param eqStatistics
      */
-    public DataHandleSubset(DataHandle source, DataSubset subset, StatisticsEquivalenceClasses eqStatistics) {
+    public DataHandleSubset(DataHandle source, DataSubset subset) {
         this.source = source;
         this.dataTypes = source.dataTypes;
         this.definition = source.definition;
         this.header = source.header;
         this.subset = subset;
-        this.statistics = new StatisticsBuilder(new DataHandleStatistics(this), eqStatistics);
+        this.statistics = new StatisticsBuilder(new DataHandleInternal(this));
     }
 
     @Override
@@ -62,6 +60,7 @@ public class DataHandleSubset extends DataHandle {
     
     @Override
     public DataType<?> getDataType(String attribute) {
+        checkRegistry();
         return source.getDataType(attribute);
     }
 
@@ -103,6 +102,12 @@ public class DataHandleSubset extends DataHandle {
     public DataHandle getView(){
         checkRegistry();
         return this;
+    }
+
+    @Override
+    public boolean isOptimized() {
+        checkRegistry();
+        return source.isOptimized();
     }
 
     @Override
@@ -156,12 +161,17 @@ public class DataHandleSubset extends DataHandle {
     }
 
     @Override
-    protected DataType<?>[][] getDataTypeArray() {
-        return source.dataTypes;
+    protected ARXConfiguration getConfiguration() {
+        return source.getConfiguration();
     }
 
     @Override
-    protected String[] getDistinctValues(int column, InterruptHandler handler) {
+    protected DataType<?>[][] getDataTypeArray() {
+        return source.dataTypes;
+    }    
+
+    @Override
+    protected String[] getDistinctValues(int column, boolean ignoreSuppression, InterruptHandler handler) {
 
         // Check
         checkRegistry();
@@ -170,7 +180,7 @@ public class DataHandleSubset extends DataHandle {
         final Set<String> vals = new HashSet<String>();
         for (int i = 0; i < getNumRows(); i++) {
             handler.checkInterrupt();
-            vals.add(getValue(i, column));
+            vals.add(internalGetValue(i, column, ignoreSuppression));
         }
         handler.checkInterrupt();
         return vals.toArray(new String[vals.size()]);
@@ -186,18 +196,13 @@ public class DataHandleSubset extends DataHandle {
     }
 
     @Override
-    protected String getSuppressionString(){
-        return source.getSuppressionString();
-    }
-
-    @Override
     protected int internalCompare(int row1, int row2, int[] columns, boolean ascending) {
         return source.internalCompare(this.subset.getArray()[row1], this.subset.getArray()[row2], columns, ascending);
     }
     
     @Override
-    protected String internalGetValue(int row, int col) {
-        return source.internalGetValue(this.subset.getArray()[row], col);
+    protected String internalGetValue(int row, int col, boolean ignoreSuppression) {
+        return source.internalGetValue(this.subset.getArray()[row], col, ignoreSuppression);
     }
 
     /**
@@ -237,5 +242,10 @@ public class DataHandleSubset extends DataHandle {
      */
     protected int internalTranslate(int row) {
         return this.subset.getArray()[row];
+    }
+
+    @Override
+    protected boolean isAnonymous() {
+        return source.isAnonymous();
     }
 }

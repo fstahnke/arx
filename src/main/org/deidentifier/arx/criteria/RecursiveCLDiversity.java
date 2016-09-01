@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,15 @@ public class RecursiveCLDiversity extends LDiversity{
      * @param l
      */
     public RecursiveCLDiversity(String attribute, double c, int l){
-        super(attribute, l, false);
+        super(attribute, l, false, true);
         this.c = c;
+    }
+    
+    @Override
+    public RecursiveCLDiversity clone() {
+        return new RecursiveCLDiversity(this.getAttribute(),
+                                        this.getC(),
+                                        (int)this.getL());
     }
 
     /**
@@ -93,6 +100,11 @@ public class RecursiveCLDiversity extends LDiversity{
     }
     
 	@Override
+    public boolean isLocalRecodingSupported() {
+        return true;
+    }
+
+    @Override
 	public String toString() {
 		return "recursive-("+c+","+minSize+")-diversity for attribute '"+attribute+"'";
 	}

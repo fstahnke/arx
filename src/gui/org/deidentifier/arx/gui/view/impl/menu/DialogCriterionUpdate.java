@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,31 +20,36 @@ package org.deidentifier.arx.gui.view.impl.menu;
 import java.util.List;
 
 import org.deidentifier.arx.gui.Controller;
+import org.deidentifier.arx.gui.model.Model;
 import org.deidentifier.arx.gui.model.ModelCriterion;
+import org.deidentifier.arx.gui.model.ModelDDisclosurePrivacyCriterion;
 import org.deidentifier.arx.gui.model.ModelDPresenceCriterion;
+import org.deidentifier.arx.gui.model.ModelDifferentialPrivacyCriterion;
 import org.deidentifier.arx.gui.model.ModelKAnonymityCriterion;
+import org.deidentifier.arx.gui.model.ModelKMapCriterion;
 import org.deidentifier.arx.gui.model.ModelLDiversityCriterion;
 import org.deidentifier.arx.gui.model.ModelRiskBasedCriterion;
 import org.deidentifier.arx.gui.model.ModelTClosenessCriterion;
 import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.gui.view.def.IDialog;
+import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolder;
+import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButtonBar;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -82,6 +87,9 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
     /** Is cancel operation supported */
     private final boolean        edit;
 
+    /** The model */
+    private final Model          model;
+
     /**
      * Constructor.
      *
@@ -93,12 +101,14 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
     public DialogCriterionUpdate(final Controller controller,
                                  final Shell parent,
                                  List<ModelCriterion> elements,
+                                 Model model,
                                  boolean edit) {
         super(parent);
         super.setShellStyle(super.getShellStyle() | SWT.RESIZE | SWT.MAX); 
         this.elements = elements;
         this.controller = controller;
         this.edit = edit;
+        this.model = model;
     }
 
     /**
@@ -111,11 +121,12 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
      * @param selection
      */
     public DialogCriterionUpdate(final Controller controller,
-                                   final Shell parent,
-                                   List<ModelCriterion> elements,
-                                   boolean cancel,
-                                   ModelCriterion selection) {
-        this(controller, parent, elements, cancel);
+                                 final Shell parent,
+                                 List<ModelCriterion> elements,
+                                 Model model,
+                                 boolean cancel,
+                                 ModelCriterion selection) {
+        this(controller, parent, elements, model, cancel);
         this.selection = selection;
     }
 
@@ -149,12 +160,18 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
                 editor = new EditorCriterionLDiversity(root, (ModelLDiversityCriterion)selection);
             } else if (selection instanceof ModelTClosenessCriterion) {
                 editor = new EditorCriterionTCloseness(root, (ModelTClosenessCriterion)selection);
+            } else if (selection instanceof ModelDDisclosurePrivacyCriterion) {
+                editor = new EditorCriterionDDisclosurePrivacy(root, (ModelDDisclosurePrivacyCriterion)selection);
             } else if (selection instanceof ModelKAnonymityCriterion) {
                 editor = new EditorCriterionKAnonymity(root, (ModelKAnonymityCriterion)selection);
+            } else if (selection instanceof ModelKMapCriterion) {
+                editor = new EditorCriterionKMap(root, (ModelKMapCriterion)selection);
             } else if (selection instanceof ModelDPresenceCriterion) {
                 editor = new EditorCriterionDPresence(root, (ModelDPresenceCriterion)selection);
             } else if (selection instanceof ModelRiskBasedCriterion) {
                 editor = new EditorCriterionRiskBased(root, (ModelRiskBasedCriterion)selection);
+            } else if (selection instanceof ModelDifferentialPrivacyCriterion) {
+                editor = new EditorCriterionDifferentialPrivacy(root, (ModelDifferentialPrivacyCriterion)selection, controller, model);
             }
         } else {
             if (edit && ok != null) {
@@ -246,6 +263,7 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
         Image symbolK = controller.getResources().getManagedImage("symbol_k.png"); //$NON-NLS-1$
         Image symbolD = controller.getResources().getManagedImage("symbol_d.png"); //$NON-NLS-1$
         Image symbolR = controller.getResources().getManagedImage("symbol_r.png"); //$NON-NLS-1$
+        Image symbolDP = controller.getResources().getManagedImage("symbol_dp.png"); //$NON-NLS-1$
         
         for (ModelCriterion c : elements) {
 
@@ -257,15 +275,24 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
             } else if (c instanceof ModelTClosenessCriterion) {
                 item.setText(new String[] { "", c.getLabel(), ((ModelTClosenessCriterion)c).getAttribute() }); //$NON-NLS-1$
                 item.setImage(0, symbolT);
+            } else if (c instanceof ModelDDisclosurePrivacyCriterion) {
+                item.setText(new String[] { "", c.getLabel(), ((ModelDDisclosurePrivacyCriterion)c).getAttribute() }); //$NON-NLS-1$
+                item.setImage(0, symbolD);
             } else if (c instanceof ModelKAnonymityCriterion) {
                 item.setText(new String[] { "", c.getLabel(), "" }); //$NON-NLS-1$ //$NON-NLS-2$
                 item.setImage(0, symbolK);
             } else if (c instanceof ModelDPresenceCriterion) {
                 item.setText(new String[] { "", c.getLabel(), "" }); //$NON-NLS-1$ //$NON-NLS-2$
                 item.setImage(0, symbolD);
+            } else if (c instanceof ModelKMapCriterion) {
+                item.setText(new String[] { "", c.getLabel(), "" }); //$NON-NLS-1$ //$NON-NLS-2$
+                item.setImage(0, symbolK);
             } else if (c instanceof ModelRiskBasedCriterion) {
                 item.setText(new String[] { "", c.getLabel(), "" }); //$NON-NLS-1$ //$NON-NLS-2$
                 item.setImage(0, symbolR);
+            } else if (c instanceof ModelDifferentialPrivacyCriterion) {
+                item.setText(new String[] { "", c.getLabel(), "" }); //$NON-NLS-1$ //$NON-NLS-2$
+                item.setImage(0, symbolDP);
             }
         }
 
@@ -283,18 +310,33 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
                 }
             }
         });
-
-        Group border = new Group(parent, SWT.SHADOW_ETCHED_IN);
-        border.setText(Resources.getMessage("DialogCriterionUpdate.15")); //$NON-NLS-1$
-        GridData data = SWTUtil.createFillGridData();
-        data.grabExcessVerticalSpace = false;
-        border.setLayoutData(data);
-        border.setLayout(new FillLayout());
         
-        this.root = new Composite(border, SWT.NONE);
+        
+
+        ComponentTitledFolderButtonBar bar = new ComponentTitledFolderButtonBar("id-80"); //$NON-NLS-1$
+        bar.add(Resources.getMessage("DialogCriterionUpdate.16"),  //$NON-NLS-1$
+                controller.getResources().getManagedImage("bullet_arrow_down.png"), //$NON-NLS-1$
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        if (editor != null) {
+                            DialogDefaultParameters dialog = new DialogDefaultParameters(DialogCriterionUpdate.this.getShell(),
+                                                                                         controller,
+                                                                                         editor.getTypicalParameters());
+                            dialog.create();
+                            if (dialog.open() == Window.OK) {
+                                editor.parseDefault(dialog.getSelection());
+                            } 
+                        }
+                    }
+                });
+        
+        ComponentTitledFolder folder = new ComponentTitledFolder(parent, controller, bar, null);
+        folder.setLayoutData(SWTUtil.createFillHorizontallyGridData());
+        this.root = folder.createItem(Resources.getMessage("DialogCriterionUpdate.15"), null); //$NON-NLS-1$
         this.root.setLayout(SWTUtil.createGridLayout(1));
-
-
+        folder.setSelection(0);
+        
         if (selection != null) {
             table.setSelection(elements.indexOf(selection));
         } else if (table.getItemCount() != 0){
@@ -302,7 +344,13 @@ public class DialogCriterionUpdate extends TitleAreaDialog implements IDialog {
             selection = elements.get(0);
         }
         update();
-        
+
+        CLabel label = new CLabel(parent, SWT.CENTER);
+        GridData data = SWTUtil.createFillGridData();
+        data.minimumHeight = 10;
+        label.setLayoutData(data);
+        label.setText(Resources.getMessage("DialogCriterionUpdate.20")); //$NON-NLS-1$
+
         return parent;
     }
 

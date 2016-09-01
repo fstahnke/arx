@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,14 @@ public abstract class RiskBasedCriterion extends SampleBasedCriterion{
     /**
      * Creates a new instance of this criterion.
      *  
-     * @param monotonic
+     * @param monotonicWithSuppression
+     * @param monotonicWithGeneralization
      * @param riskThreshold
      */
-    public RiskBasedCriterion(boolean monotonic, double riskThreshold){
-        super(monotonic);
+    public RiskBasedCriterion(boolean monotonicWithSuppression, 
+                              boolean monotonicWithGeneralization,
+                              double riskThreshold){
+        super(monotonicWithSuppression, monotonicWithGeneralization);
         this.threshold = riskThreshold;
         if (this.threshold < 0d || this.threshold >= 1d) {
             throw new IllegalArgumentException("Threshold out of range. Must be in [0, 1[");
@@ -62,7 +65,7 @@ public abstract class RiskBasedCriterion extends SampleBasedCriterion{
                 boolean fulfilled = RiskBasedCriterion.this.isFulfilled(distribution);
                 
                 // Early abort
-                if (!fulfilled && distribution.getNumOfSuppressedTuples() > numMaxSuppressedOutliers) {
+                if (!fulfilled && distribution.getNumSuppressedRecords() > numMaxSuppressedOutliers) {
                     return State.ABORT;
                     
                 // Go on

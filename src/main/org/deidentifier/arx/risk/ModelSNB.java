@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 package org.deidentifier.arx.risk;
 
 import org.deidentifier.arx.ARXPopulationModel;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedBoolean;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedInteger;
+import org.deidentifier.arx.common.WrappedBoolean;
+import org.deidentifier.arx.common.WrappedInteger;
 
 import de.linearbits.newtonraphson.Function;
 import de.linearbits.newtonraphson.NewtonRaphson2D;
@@ -45,17 +45,15 @@ class ModelSNB extends RiskModelPopulation {
      * 
      * @param model
      * @param histogram
-     * @param sampleSize
      * @param config
      * @param stop
      */
     ModelSNB(final ARXPopulationModel model,
              final RiskModelHistogram histogram,
-             final int sampleSize,
              final NewtonRaphsonConfiguration<?> config,
              final WrappedBoolean stop) {
 
-        super(histogram, model, sampleSize, stop, new WrappedInteger());
+        super(histogram, model, stop, new WrappedInteger());
 
         // Prepare
         int[] _histogram = super.getHistogram().getHistogram();
@@ -65,7 +63,7 @@ class ModelSNB extends RiskModelPopulation {
                                                       c1, super.getSamplingFraction());
         double f = getSamplingFraction();
 
-        // Solve the Maximum Likelihood Estimates
+        // Solve the maximum likelihood estimates
         Vector2D result = new NewtonRaphson2D(getObjectFunction(k, f, c1, c2),
                                               getDerivatives(k, f, c1, c2))
                                              .configure(config)

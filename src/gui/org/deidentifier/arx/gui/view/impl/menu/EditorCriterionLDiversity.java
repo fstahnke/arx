@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@
 
 package org.deidentifier.arx.gui.view.impl.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.deidentifier.arx.gui.model.ModelCriterion;
 import org.deidentifier.arx.gui.model.ModelLDiversityCriterion;
 import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
@@ -28,7 +32,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Text;
+
+import de.linearbits.swt.widgets.Knob;
 
 /**
  * A view on an l-diversity criterion.
@@ -38,22 +44,24 @@ import org.eclipse.swt.widgets.Scale;
 public class EditorCriterionLDiversity extends EditorCriterion<ModelLDiversityCriterion> {
 
     /**  View */
-    private static final String VARIANTS[] = { Resources.getMessage("CriterionDefinitionView.6"), Resources.getMessage("CriterionDefinitionView.7"), Resources.getMessage("CriterionDefinitionView.8") }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    private static final String VARIANTS[] = { Resources.getMessage("CriterionDefinitionView.6"), //$NON-NLS-1$ 
+                                               Resources.getMessage("CriterionDefinitionView.7"), //$NON-NLS-1$ 
+                                               Resources.getMessage("CriterionDefinitionView.8") };  //$NON-NLS-1$ 
 
-    /**  View */
-    private Scale               sliderL;
-    
-    /**  View */
-    private Scale               sliderC;
-    
-    /**  View */
+    /** View */
+    private Knob<Integer>       knobL;
+
+    /** View */
+    private Knob<Double>        knobC;
+
+    /** View */
     private Combo               comboVariant;
-    
-    /**  View */
-    private Label               labelC;
-    
-    /**  View */
-    private Label               labelL;
+
+    /** View */
+    private Text                labelC;
+
+    /** View */
+    private Text                labelL;
 
     /**
      * Creates a new instance.
@@ -64,26 +72,6 @@ public class EditorCriterionLDiversity extends EditorCriterion<ModelLDiversityCr
     public EditorCriterionLDiversity(final Composite parent,
                                    final ModelLDiversityCriterion model) {
         super(parent, model);
-    }
-
-    /**
-     * Updates the "c" label and tool tip text.
-     *
-     * @param text
-     */
-    private void updateCLabel(String text) {
-        labelC.setText(text);
-        labelC.setToolTipText(text);
-    }
-
-    /**
-     * Updates the "l" label and tool tip text.
-     *
-     * @param text
-     */
-    private void updateLLabel(String text) {
-        labelL.setText(text);
-        labelL.setToolTipText(text);
     }
 
     @Override
@@ -100,25 +88,14 @@ public class EditorCriterionLDiversity extends EditorCriterion<ModelLDiversityCr
         final Label lLabel = new Label(group, SWT.NONE);
         lLabel.setText(Resources.getMessage("CriterionDefinitionView.27")); //$NON-NLS-1$
 
-        labelL = new Label(group, SWT.BORDER | SWT.CENTER);
-        final GridData d = new GridData();
-        d.minimumWidth = LABEL_WIDTH;
-        d.widthHint = LABEL_WIDTH;
-        labelL.setLayoutData(d);
-        updateLLabel("2"); //$NON-NLS-1$
-
-        sliderL = new Scale(group, SWT.HORIZONTAL);
-        final GridData d4 = SWTUtil.createFillHorizontallyGridData();
-        d4.horizontalSpan = 1;
-        sliderL.setLayoutData(d4);
-        sliderL.setMaximum(SWTUtil.SLIDER_MAX);
-        sliderL.setMinimum(0);
-        sliderL.setSelection(0);
-        sliderL.addSelectionListener(new SelectionAdapter() {
+        labelL = createLabel(group);
+        knobL = createKnobInteger(group, 2, 1000);
+        updateLabel(labelL, knobL.getValue());
+        knobL.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(final SelectionEvent arg0) {
-                model.setL(SWTUtil.sliderToInt(2, 100, sliderL.getSelection()));
-                updateLLabel(String.valueOf(model.getL()));
+                model.setL(knobL.getValue());
+                updateLabel(labelL, model.getL());
             }
         });
 
@@ -138,26 +115,14 @@ public class EditorCriterionLDiversity extends EditorCriterion<ModelLDiversityCr
         final Label zLabel = new Label(group, SWT.NONE);
         zLabel.setText(Resources.getMessage("CriterionDefinitionView.34")); //$NON-NLS-1$
 
-        labelC = new Label(group, SWT.BORDER | SWT.CENTER);
-        final GridData d9 = new GridData();
-        d9.minimumWidth = LABEL_WIDTH;
-        d9.widthHint = LABEL_WIDTH;
-        labelC.setLayoutData(d9);
-        updateCLabel("0.001"); //$NON-NLS-1$
-
-        sliderC = new Scale(group, SWT.HORIZONTAL);
-        final GridData d6 = SWTUtil.createFillHorizontallyGridData();
-        d6.horizontalSpan = 1;
-        sliderC.setLayoutData(d6);
-        sliderC.setMaximum(SWTUtil.SLIDER_MAX);
-        sliderC.setMinimum(0);
-        sliderC.setSelection(0);
-        sliderC.setEnabled(false);
-        sliderC.addSelectionListener(new SelectionAdapter() {
+        labelC = createLabel(group);
+        knobC = createKnobDouble(group, 0.00001d, 1000d);
+        updateLabel(labelC, knobC.getValue());
+        knobC.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(final SelectionEvent arg0) {
-                model.setC(SWTUtil.sliderToDouble(0.001d, 100d, sliderC.getSelection()));
-                updateCLabel(String.valueOf(model.getC()));
+                model.setC(knobC.getValue());
+                updateLabel(labelC, model.getC());
             }
         });
 
@@ -166,9 +131,9 @@ public class EditorCriterionLDiversity extends EditorCriterion<ModelLDiversityCr
             public void widgetSelected(final SelectionEvent arg0) {
                 model.setVariant(comboVariant.getSelectionIndex());
                 if (model.getVariant() == 2) {
-                    sliderC.setEnabled(true);
+                    knobC.setEnabled(true);
                 } else {
-                    sliderC.setEnabled(false);
+                    knobC.setEnabled(false);
                 }
             }
         });
@@ -177,19 +142,51 @@ public class EditorCriterionLDiversity extends EditorCriterion<ModelLDiversityCr
     }
 
     @Override
-    protected void parse(ModelLDiversityCriterion model) {
+    protected void parse(ModelLDiversityCriterion model, boolean _default) {
         
-        updateCLabel(String.valueOf(model.getC()));
-        updateLLabel(String.valueOf(model.getL()));
-        sliderL.setSelection(SWTUtil.intToSlider(2, 100, model.getL()));
-        sliderC.setSelection(SWTUtil.doubleToSlider(0.001d, 100d, model.getC()));
+        updateLabel(labelC, model.getC());
+        updateLabel(labelL, model.getL());
+        knobL.setValue(model.getL());
+        knobC.setValue(model.getC());
 
         comboVariant.select(model.getVariant());
         
         if (model.getVariant() == 2) {
-            sliderC.setEnabled(true);
+            knobC.setEnabled(true);
         } else {
-            sliderC.setEnabled(false);
+            knobC.setEnabled(false);
         }
+    }
+
+
+    @Override
+    protected List<ModelCriterion> getTypicalParameters() {
+
+        List<ModelCriterion> result = new ArrayList<ModelCriterion>();
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_DISTINCT, 2, 1.0E-5));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_DISTINCT, 4, 1.0E-5));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_DISTINCT, 6, 1.0E-5));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_DISTINCT, 8, 1.0E-5));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_DISTINCT, 10, 1.0E-5));
+        
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_ENTROPY, 2, 1.0E-5));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_ENTROPY, 4, 1.0E-5));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_ENTROPY, 6, 1.0E-5));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_ENTROPY, 8, 1.0E-5));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_ENTROPY, 10, 1.0E-5));
+
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 2, 3));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 4, 3));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 6, 3));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 8, 3));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 10, 3));
+
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 2, 4));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 4, 4));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 6, 4));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 8, 4));
+        result.add(new ModelLDiversityCriterion(this.model.getAttribute(), ModelLDiversityCriterion.VARIANT_RECURSIVE, 10, 4));
+        
+        return result;
     }
 }

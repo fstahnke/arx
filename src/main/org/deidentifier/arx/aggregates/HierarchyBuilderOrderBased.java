@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -370,7 +370,7 @@ public class HierarchyBuilderOrderBased<T> extends HierarchyBuilderGroupingBased
         // Add one last column if more than one group left
         if (groupCount>1) {
             AbstractGroup[] column = new AbstractGroup[data.length];
-            CloseElements<T> element = new CloseElements<T>(new String[]{}, AggregateFunction.forType(getDataType()).createConstantFunction("*"));
+            CloseElements<T> element = new CloseElements<T>(new String[]{}, AggregateFunction.forType(getDataType()).createConstantFunction(DataType.ANY_VALUE));
             for (int i=0; i<column.length; i++){
                 column[i] = element;
             }
