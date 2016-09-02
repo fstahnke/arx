@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1508,6 +1508,9 @@ public abstract class DataType<T> implements Serializable, Comparator<T> {
 
     /** The string representing the NULL value */
     public static final String NULL_VALUE = "NULL";
+
+    /** The string representing the ANY value */
+    public static final String ANY_VALUE = "*";
     
     /**  SVUID */
     private static final long serialVersionUID = -4380267779210935078L;
@@ -1626,6 +1629,15 @@ public abstract class DataType<T> implements Serializable, Comparator<T> {
     }
     
     /**
+     * Returns whether the value represents any value
+     * @param value
+     * @return
+     */
+    public static final boolean isAny(String value) {
+        return value != null && value.equals(ANY_VALUE);
+    }
+
+    /**
      * Returns whether the value represents null
      * @param value
      * @return
@@ -1705,6 +1717,12 @@ public abstract class DataType<T> implements Serializable, Comparator<T> {
         result.add("dd.MM.yyyy'T'HH:mm:ssz");
         result.add("dd.MM.yyyy'T'HH:mm:ss");
         result.add("dd.MM.yyyy'T'HH:mm:ssZZ");
+        result.add("dd/MM/yyyy");
+        result.add("dd/MM/yy");
+        result.add("MM/dd/yyyy");
+        result.add("MM/dd/yy");
+        result.add("MM/dd/yyyy hh:mm:ss");
+        result.add("MM/dd/yy hh:mm:ss");
         return result;
     }
 

@@ -35,7 +35,7 @@
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../org/deidentifier/arx/ARXConfiguration.html" title="class in org.deidentifier.arx"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/deidentifier/arx/ARXLattice.html" title="class in org.deidentifier.arx"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/deidentifier/arx/ARXConfiguration.Monotonicity.html" title="enum in org.deidentifier.arx"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/deidentifier/arx/ARXConfiguration.ARXConfigurationInternal.html" target="_top">Frames</a></li>
@@ -165,6 +165,18 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code><a href="../../../org/deidentifier/arx/ARXConfiguration.Monotonicity.html" title="enum in org.deidentifier.arx">ARXConfiguration.Monotonicity</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/deidentifier/arx/ARXConfiguration.ARXConfigurationInternal.html#getMonotonicityOfPrivacy()">getMonotonicityOfPrivacy</a></strong>()</code>
+<div class="block">Returns a monotonicity property</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../org/deidentifier/arx/ARXConfiguration.Monotonicity.html" title="enum in org.deidentifier.arx">ARXConfiguration.Monotonicity</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/deidentifier/arx/ARXConfiguration.ARXConfigurationInternal.html#getMonotonicityOfUtility()">getMonotonicityOfUtility</a></strong>()</code>
+<div class="block">Returns a monotonicity property</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../org/deidentifier/arx/ARXConfiguration.ARXConfigurationInternal.html#getRequirements()">getRequirements</a></strong>()</code>
 <div class="block">Returns the criteria's requirements.</div>
@@ -183,15 +195,15 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><strong><a href="../../../org/deidentifier/arx/ARXConfiguration.ARXConfigurationInternal.html#getSuppressedAttributeTypes()">getSuppressedAttributeTypes</a></strong>()</code>
-<div class="block">Returns an integer representing all attribute types that must be suppressed.</div>
+<td class="colFirst"><code><a href="../../../org/deidentifier/arx/DataSubset.html" title="class in org.deidentifier.arx">DataSubset</a></code></td>
+<td class="colLast"><code><strong><a href="../../../org/deidentifier/arx/ARXConfiguration.ARXConfigurationInternal.html#getSubset()">getSubset</a></strong>()</code>
+<div class="block">Returns the data subset, if any</div>
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><strong><a href="../../../org/deidentifier/arx/ARXConfiguration.ARXConfigurationInternal.html#isCriterionMonotonic()">isCriterionMonotonic</a></strong>()</code>
-<div class="block">Determines whether the anonymity criterion is montonic.</div>
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><strong><a href="../../../org/deidentifier/arx/ARXConfiguration.ARXConfigurationInternal.html#getSuppressedAttributeTypes()">getSuppressedAttributeTypes</a></strong>()</code>
+<div class="block">Returns an integer representing all attribute types that must be suppressed.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -332,6 +344,28 @@ extends java.lang.Object</pre>
  If both are contained max(k,l) is returned. Otherwise, Integer.MAX_VALUE is returned.</dd></dl>
 </li>
 </ul>
+<a name="getMonotonicityOfPrivacy()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMonotonicityOfPrivacy</h4>
+<pre>public&nbsp;<a href="../../../org/deidentifier/arx/ARXConfiguration.Monotonicity.html" title="enum in org.deidentifier.arx">ARXConfiguration.Monotonicity</a>&nbsp;getMonotonicityOfPrivacy()</pre>
+<div class="block">Returns a monotonicity property</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="getMonotonicityOfUtility()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getMonotonicityOfUtility</h4>
+<pre>public&nbsp;<a href="../../../org/deidentifier/arx/ARXConfiguration.Monotonicity.html" title="enum in org.deidentifier.arx">ARXConfiguration.Monotonicity</a>&nbsp;getMonotonicityOfUtility()</pre>
+<div class="block">Returns a monotonicity property</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
 <a name="getRequirements()">
 <!--   -->
 </a>
@@ -365,6 +399,17 @@ extends java.lang.Object</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
+<a name="getSubset()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSubset</h4>
+<pre>public&nbsp;<a href="../../../org/deidentifier/arx/DataSubset.html" title="class in org.deidentifier.arx">DataSubset</a>&nbsp;getSubset()</pre>
+<div class="block">Returns the data subset, if any</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
 <a name="getSuppressedAttributeTypes()">
 <!--   -->
 </a>
@@ -373,17 +418,6 @@ extends java.lang.Object</pre>
 <h4>getSuppressedAttributeTypes</h4>
 <pre>public&nbsp;int&nbsp;getSuppressedAttributeTypes()</pre>
 <div class="block">Returns an integer representing all attribute types that must be suppressed.</div>
-<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
-</li>
-</ul>
-<a name="isCriterionMonotonic()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>isCriterionMonotonic</h4>
-<pre>public&nbsp;boolean&nbsp;isCriterionMonotonic()</pre>
-<div class="block">Determines whether the anonymity criterion is montonic.</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
@@ -461,7 +495,7 @@ extends java.lang.Object</pre>
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../org/deidentifier/arx/ARXConfiguration.html" title="class in org.deidentifier.arx"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../org/deidentifier/arx/ARXLattice.html" title="class in org.deidentifier.arx"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../org/deidentifier/arx/ARXConfiguration.Monotonicity.html" title="enum in org.deidentifier.arx"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?org/deidentifier/arx/ARXConfiguration.ARXConfigurationInternal.html" target="_top">Frames</a></li>

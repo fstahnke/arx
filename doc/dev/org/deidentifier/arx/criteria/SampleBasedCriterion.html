@@ -129,7 +129,8 @@ extends <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html#SampleBasedCriterion(boolean)">SampleBasedCriterion</a></strong>(boolean&nbsp;monotonic)</code>
+<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html#SampleBasedCriterion(boolean,%20boolean)">SampleBasedCriterion</a></strong>(boolean&nbsp;monotonicWithSuppression,
+                    boolean&nbsp;monotonicWithGeneralization)</code>
 <div class="block">Instantiates a new criterion.</div>
 </td>
 </tr>
@@ -150,7 +151,7 @@ extends <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>abstract void</code></td>
-<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution, int)">enforce</a></strong>(<a href="../../../../org/deidentifier/arx/framework/check/groupify/HashGroupifyDistribution.html" title="class in org.deidentifier.arx.framework.check.groupify">HashGroupifyDistribution</a>&nbsp;distribution,
+<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/SampleBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution,%20int)">enforce</a></strong>(<a href="../../../../org/deidentifier/arx/framework/check/groupify/HashGroupifyDistribution.html" title="class in org.deidentifier.arx.framework.check.groupify">HashGroupifyDistribution</a>&nbsp;distribution,
        int&nbsp;numMaxSuppressedOutliers)</code>
 <div class="block">This method enforces the criterion on the current hash table.</div>
 </td>
@@ -173,14 +174,14 @@ extends <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;org.deidentifier.arx.criteria.<a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html" title="class in org.deidentifier.arx.criteria">PrivacyCriterion</a></h3>
-<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRequirements()">getRequirements</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#initialize(org.deidentifier.arx.framework.data.DataManager)">initialize</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isMonotonic()">isMonotonic</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#toString()">toString</a></code></li>
+<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#clone()">clone</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getPopulationModel()">getPopulationModel</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRequirements()">getRequirements</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRiskThresholdJournalist()">getRiskThresholdJournalist</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRiskThresholdMarketer()">getRiskThresholdMarketer</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRiskThresholdProsecutor()">getRiskThresholdProsecutor</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getSubset()">getSubset</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#initialize(org.deidentifier.arx.framework.data.DataManager)">initialize</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isLocalRecodingSupported()">isLocalRecodingSupported</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isMonotonicWithGeneralization()">isMonotonicWithGeneralization</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isMonotonicWithSuppression()">isMonotonicWithSuppression</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#toString()">toString</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
-<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
+<code>equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -196,15 +197,16 @@ extends <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="SampleBasedCriterion(boolean)">
+<a name="SampleBasedCriterion(boolean, boolean)">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>SampleBasedCriterion</h4>
-<pre>public&nbsp;SampleBasedCriterion(boolean&nbsp;monotonic)</pre>
+<pre>public&nbsp;SampleBasedCriterion(boolean&nbsp;monotonicWithSuppression,
+                    boolean&nbsp;monotonicWithGeneralization)</pre>
 <div class="block">Instantiates a new criterion.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>monotonic</code> - </dd></dl>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>monotonicWithSuppression</code> - </dd><dd><code>monotonicWithGeneralization</code> - </dd></dl>
 </li>
 </ul>
 </li>

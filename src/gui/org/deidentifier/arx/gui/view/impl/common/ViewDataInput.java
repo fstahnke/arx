@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,9 @@ public class ViewDataInput extends ViewData {
      * @param controller
      */
     public ViewDataInput(final Composite parent,
-                         final Controller controller) {
-        this (parent, controller, false);
+                         final Controller controller,
+                         final String helpid) {
+        this (parent, controller, helpid, false);
     }
     
     /**
@@ -66,9 +67,10 @@ public class ViewDataInput extends ViewData {
      */
     public ViewDataInput(final Composite parent,
                          final Controller controller,
-                         boolean editable) {
+                         final String helpid,
+                         final boolean editable) {
         
-        super(parent, controller, Resources.getMessage("AnalyzeView.1")); //$NON-NLS-1$
+        super(parent, controller, helpid, Resources.getMessage("AnalyzeView.1")); //$NON-NLS-1$
         
         // Register
         controller.addListener(ModelPart.RESEARCH_SUBSET, this);
@@ -84,7 +86,7 @@ public class ViewDataInput extends ViewData {
             item1.addSelectionListener(new SelectionAdapter() {
                 @Override
                 public void widgetSelected(final SelectionEvent arg0) {
-                    controller.actionFindReplace();
+                    controller.actionMenuEditFindReplace();
                 }
             });
 

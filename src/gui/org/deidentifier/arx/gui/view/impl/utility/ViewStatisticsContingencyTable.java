@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 package org.deidentifier.arx.gui.view.impl.utility;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +26,7 @@ import org.deidentifier.arx.aggregates.StatisticsContingencyTable;
 import org.deidentifier.arx.aggregates.StatisticsContingencyTable.Entry;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
+import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.gui.view.impl.common.ComponentTable;
 import org.deidentifier.arx.gui.view.impl.common.async.Analysis;
 import org.deidentifier.arx.gui.view.impl.common.async.AnalysisContext;
@@ -47,7 +47,7 @@ import cern.colt.function.IntComparator;
  *
  * @author Fabian Prasser
  */
-public class ViewStatisticsContingencyTable extends ViewStatistics<AnalysisContextVisualizationContingency> {
+public class ViewStatisticsContingencyTable extends ViewStatistics<AnalysisContextContingency> {
 
     /** Internal stuff. */
     private ComponentTable  table;
@@ -68,10 +68,15 @@ public class ViewStatisticsContingencyTable extends ViewStatistics<AnalysisConte
                        final ModelPart target,
                        final ModelPart reset) {
         
-        super(parent, controller, target, reset);
+        super(parent, controller, target, reset, true);
         this.manager = new AnalysisManager(parent.getDisplay());
     }
     
+    @Override
+    public LayoutUtility.ViewUtilityType getType() {
+        return LayoutUtility.ViewUtilityType.CONTINGENCY_TABLE;
+    }
+
     @Override
     protected Control createControl(Composite parent) {
         
@@ -89,8 +94,8 @@ public class ViewStatisticsContingencyTable extends ViewStatistics<AnalysisConte
     }
 
     @Override
-    protected AnalysisContextVisualizationContingency createViewConfig(AnalysisContext context) {
-        return new AnalysisContextVisualizationContingency(context);
+    protected AnalysisContextContingency createViewConfig(AnalysisContext context) {
+        return new AnalysisContextContingency(context);
     }
 
     @Override
@@ -99,10 +104,11 @@ public class ViewStatisticsContingencyTable extends ViewStatistics<AnalysisConte
             this.manager.stop();
         }
         this.table.clear();
+        setStatusEmpty();
     }
 
     @Override
-    protected void doUpdate(AnalysisContextVisualizationContingency context) {
+    protected void doUpdate(AnalysisContextContingency context) {
 
         final int column1 = context.handle.getColumnIndexOf(context.attribute1);
         final int column2 = context.handle.getColumnIndexOf(context.attribute2);
@@ -129,11 +135,10 @@ public class ViewStatisticsContingencyTable extends ViewStatistics<AnalysisConte
             @Override
             public void onFinish() {
                 
-                if (stopped) {
+                // Check
+                if (stopped || !isEnabled()) {
                     return;
                 }
-
-                final DecimalFormat format = new DecimalFormat("##0.00000"); //$NON-NLS-1$
 
                 // Set data
                 table.setData(new IDataProvider(){
@@ -146,7 +151,7 @@ public class ViewStatisticsContingencyTable extends ViewStatistics<AnalysisConte
                     @Override
                     public Object getDataValue(int arg0, int arg1) {
                         int index = Sorting.binarySearchFromTo(outputValues[arg0], arg1, 0, outputValues[arg0].length - 1);
-                        return format.format((index >= 0 ? outputFrequencies[arg0][index] : 0)*100d)+"%"; //$NON-NLS-1$
+                        return SWTUtil.getPrettyString((index >= 0 ? outputFrequencies[arg0][index] : 0)*100d)+"%"; //$NON-NLS-1$
                     }
 
                     @Override
@@ -165,7 +170,11 @@ public class ViewStatisticsContingencyTable extends ViewStatistics<AnalysisConte
 
             @Override
             public void onInterrupt() {
-                setStatusWorking();
+                if (!isEnabled()) {
+                    setStatusEmpty();
+                } else {
+                    setStatusWorking();
+                }
             }
 
             @Override
@@ -258,5 +267,12 @@ public class ViewStatisticsContingencyTable extends ViewStatistics<AnalysisConte
         };
         
         this.manager.start(analysis);
+    }
+    
+    /**
+     * Is an analysis running
+     */
+    protected boolean isRunning() {
+        return manager != null && manager.isRunning();
     }
 }

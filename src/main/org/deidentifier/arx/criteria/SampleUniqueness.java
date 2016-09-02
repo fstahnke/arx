@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,16 +36,35 @@ public class SampleUniqueness extends RiskBasedCriterion{
      * @param riskThreshold
      */
     public SampleUniqueness(double riskThreshold){
-        super(true, riskThreshold);
+        super(true, true, riskThreshold);
+    }
+    
+    @Override
+    public SampleUniqueness clone() {
+        return new SampleUniqueness(this.getRiskThreshold());
+    }
+
+    /**
+     * Return marketer risk threshold, 1 if there is none
+     * @return
+     */
+    public double getRiskThresholdMarketer() {
+        // TODO: Risk is estimated differently than in the other models, here
+        return getRiskThreshold();
+    }
+
+    @Override
+    public boolean isLocalRecodingSupported() {
+        return false;
     }
 
     @Override
     public String toString() {
-        return "(<"+getRiskThreshold()+")-sample-uniques";
+        return "("+getRiskThreshold()+")-sample-uniques";
     }
 
     @Override
     protected boolean isFulfilled(HashGroupifyDistribution distribution) {
-        return distribution.getFractionOfTuplesInClassesOfSize(1) <= getRiskThreshold();
+        return distribution.getFractionOfRecordsInClassesOfSize(1) <= getRiskThreshold();
     }
 }

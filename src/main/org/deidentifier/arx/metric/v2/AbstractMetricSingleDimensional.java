@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,10 @@
 
 package org.deidentifier.arx.metric.v2;
 
-import java.util.Set;
-
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.DataDefinition;
-import org.deidentifier.arx.criteria.DPresence;
 import org.deidentifier.arx.framework.data.Data;
+import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
 import org.deidentifier.arx.metric.InformationLoss;
 import org.deidentifier.arx.metric.Metric;
@@ -46,9 +44,20 @@ public abstract class AbstractMetricSingleDimensional extends Metric<ILSingleDim
      *
      * @param monotonic
      * @param independent
+     * @param gsFactor
+     */
+    protected AbstractMetricSingleDimensional(final boolean monotonic, final boolean independent, final double gsFactor) {
+        super(monotonic, independent, gsFactor);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param monotonic
+     * @param independent
      */
     protected AbstractMetricSingleDimensional(final boolean monotonic, final boolean independent) {
-        super(monotonic, independent);
+        super(monotonic, independent, 0.5d);
     }
     
     @Override
@@ -71,20 +80,15 @@ public abstract class AbstractMetricSingleDimensional extends Metric<ILSingleDim
     }
 
     @Override
-    protected void initializeInternal(final DataDefinition definition,
+    protected void initializeInternal(final DataManager manager,
+                                      final DataDefinition definition, 
                                       final Data input, 
                                       final GeneralizationHierarchy[] hierarchies, 
                                       final ARXConfiguration config) {
         
-        // Store row count
-        if (config.containsCriterion(DPresence.class)) {
-            Set<DPresence> criterion = config.getCriteria(DPresence.class);
-            if (criterion.size() > 1) { throw new IllegalArgumentException("Only one d-presence criterion supported"); }
-            tuples = (double)criterion.iterator().next().getSubset().getArray().length;
-        } else {
-            tuples = (double)input.getDataLength();
-        }
+        this.tuples = (double) getNumRecords(config, input);
     }
+
 
     /**
      * Returns the number of rows in the dataset or subset.

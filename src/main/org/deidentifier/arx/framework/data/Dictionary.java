@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,34 @@ public class Dictionary {
     }
 
     /**
-     * Finalizes all dimensions. @see finalize()
+     * Definalizes the dictionary
+     */
+    @SuppressWarnings("unchecked")
+    public void definalizeAll() {
+        
+        // Re-instantiate maps
+        maps = new ObjectIntOpenHashMap[mapping.length];
+        for (int i = 0; i < maps.length; i++) {
+            maps[i] = new ObjectIntOpenHashMap<String>();
+        }
+        
+        // Add from mapping
+        for (int i = 0; i < mapping.length; i++) {
+            if (mapping[i] != null) {
+                for (int j = 0; j < mapping[i].length; j++) {
+                    maps[i].put(mapping[i][j], j);
+                }
+            }
+        }
+        
+        // Remove mapping
+        for (int i = 0; i < mapping.length; i++) {
+            mapping[i] = null;
+        }
+    }
+
+    /**
+     * Finalizes all dimensions.
      */
     public void finalizeAll() {
         for (int i = 0; i < maps.length; i++) {

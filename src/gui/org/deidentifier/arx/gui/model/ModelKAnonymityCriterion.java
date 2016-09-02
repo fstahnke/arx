@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package org.deidentifier.arx.gui.model;
 import org.deidentifier.arx.criteria.KAnonymity;
 import org.deidentifier.arx.criteria.PrivacyCriterion;
 import org.deidentifier.arx.gui.resources.Resources;
+import org.deidentifier.arx.gui.view.SWTUtil;
 
 /**
  * This class implements a model for the k-anonymity criterion.
@@ -33,8 +34,22 @@ public class ModelKAnonymityCriterion extends ModelImplicitCriterion{
 	
 	/** K. */
 	private int k = 2;
-	
-	@Override
+	/**
+     * Creates a new instance
+     */
+    public ModelKAnonymityCriterion() {
+        // Empty by design
+    }
+    
+	/**
+	 * Creates a new instance
+	 * @param k
+	 */
+	public ModelKAnonymityCriterion(int k) {
+        this.k = k;
+    }
+
+    @Override
     public ModelKAnonymityCriterion clone() {
         ModelKAnonymityCriterion result = new ModelKAnonymityCriterion();
         result.k = this.k;
@@ -62,7 +77,7 @@ public class ModelKAnonymityCriterion extends ModelImplicitCriterion{
     }
 
     @Override
-    public void parse(ModelCriterion criterion) {
+    public void parse(ModelCriterion criterion, boolean _default) {
         if (!(criterion instanceof ModelKAnonymityCriterion)) {
             return;
         }
@@ -82,6 +97,6 @@ public class ModelKAnonymityCriterion extends ModelImplicitCriterion{
     
     @Override
     public String toString() {
-        return k + Resources.getMessage("ModelCriterion.1"); //$NON-NLS-1$
+        return SWTUtil.getPrettyString(k) + Resources.getMessage("ModelCriterion.1"); //$NON-NLS-1$
     }
 }

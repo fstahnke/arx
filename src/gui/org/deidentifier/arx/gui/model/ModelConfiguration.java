@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.deidentifier.arx.Data;
 import org.deidentifier.arx.RowSet;
 import org.deidentifier.arx.aggregates.HierarchyBuilder;
 import org.deidentifier.arx.criteria.DPresence;
+import org.deidentifier.arx.criteria.KMap;
 import org.deidentifier.arx.criteria.PrivacyCriterion;
 import org.deidentifier.arx.metric.Metric;
 
@@ -101,6 +102,8 @@ public class ModelConfiguration implements Serializable, Cloneable {
         c.hierarchies = new HashMap<String, Hierarchy>(hierarchies);
         if (this.containsCriterion(DPresence.class)) {
             c.researchSubset = this.getCriterion(DPresence.class).getSubset().getSet();
+        } else if (this.containsCriterion(KMap.class) && this.getCriterion(KMap.class).isAccurate()) {
+            c.researchSubset = this.getCriterion(KMap.class).getSubset().getSet();
         } else {
             c.researchSubset = this.researchSubset.clone();
         }
@@ -190,6 +193,22 @@ public class ModelConfiguration implements Serializable, Cloneable {
     }
     
     /**
+     * @return
+     * @see org.deidentifier.arx.ARXConfiguration#getHeuristicSearchThreshold()
+     */
+    public int getHeuristicSearchThreshold() {
+        return config.getHeuristicSearchThreshold();
+    }
+    
+    /**
+     * @return
+     * @see org.deidentifier.arx.ARXConfiguration#getHeuristicSearchTimeLimit()
+     */
+    public int getHeuristicSearchTimeLimit() {
+        return config.getHeuristicSearchTimeLimit();
+    }
+    
+    /**
      * Returns the set of all assigned hierarchies.
      *
      * @return
@@ -198,6 +217,7 @@ public class ModelConfiguration implements Serializable, Cloneable {
         return this.hierarchies;
     }
     
+
     /**
      * Returns the assigned hierarchy, if any. Else null.
      *
@@ -218,14 +238,14 @@ public class ModelConfiguration implements Serializable, Cloneable {
         if (hierarchyBuilders == null) return null;
         else return hierarchyBuilders.get(attr);
     }
-    
+
     /**
      * @return the input
      */
     public Data getInput() {
         return input;
     }
-    
+
     /**
      * Maximum generalization.
      *
@@ -238,7 +258,7 @@ public class ModelConfiguration implements Serializable, Cloneable {
         }
         return this.max.get(attribute);
     }
-    
+
     /**
      * Delegates to an instance of ARXConfiguration.
      *
@@ -247,7 +267,7 @@ public class ModelConfiguration implements Serializable, Cloneable {
     public Metric<?> getMetric() {
         return config.getMetric();
     }
-    
+
     /**
      * Returns the microaggregation function.
      *
@@ -260,7 +280,7 @@ public class ModelConfiguration implements Serializable, Cloneable {
         }
         return this.microAggregationFunctions.get(attribute);
     }
-    
+
     /**
      * Returns the associated handling of missing data
      * @param attribute
@@ -277,7 +297,7 @@ public class ModelConfiguration implements Serializable, Cloneable {
             return ignore;
         }
     }
-    
+
     /**
      * Minimum generalization.
      *
@@ -298,14 +318,6 @@ public class ModelConfiguration implements Serializable, Cloneable {
      */
     public RowSet getResearchSubset() {
         return researchSubset;
-    }
-    
-    /**
-     * @return
-     * @see org.deidentifier.arx.ARXConfiguration#getSuppressionString()
-     */
-    public String getSuppressionString() {
-        return config.getSuppressionString();
     }
     
     /**
@@ -351,20 +363,19 @@ public class ModelConfiguration implements Serializable, Cloneable {
     }
     
     /**
-     * Delegates to an instance of ARXConfiguration.
-     *
-     * @return
-     */
-    public boolean isCriterionMonotonic() {
-        return config.isCriterionMonotonic();
-    }
-    
-    /**
      * @return
      * @see org.deidentifier.arx.ARXConfiguration#isUseHeuristicSearchForSampleBasedCriteria()
      */
     public boolean isHeuristicForSampleBasedCriteria() {
         return config.isUseHeuristicSearchForSampleBasedCriteria();
+    }
+    
+    /**
+     * @return
+     * @see org.deidentifier.arx.ARXConfiguration#isHeuristicSearchEnabled()
+     */
+    public boolean isHeuristicSearchEnabled() {
+        return config.isHeuristicSearchEnabled();
     }
     
     /**
@@ -386,20 +397,19 @@ public class ModelConfiguration implements Serializable, Cloneable {
     }
     
     /**
-     * Protect sensitive associations.
-     *
-     * @return
-     */
-    public boolean isProtectSensitiveAssociations() {
-        return config.isProtectSensitiveAssociations();
-    }
-    
-    /**
      * @return
      * @see org.deidentifier.arx.ARXConfiguration#isSuppressionAlwaysEnabled()
      */
     public boolean isSuppressionAlwaysEnabled() {
         return config.isSuppressionAlwaysEnabled();
+    }
+    
+    /**
+     * Returns whether microaggregation will be considered by utility measures
+     * @return
+     */
+    public boolean isUtilityBasedMicroaggregation() {
+        return config.isUtilityBasedMicroaggregation();
     }
     
     /**
@@ -451,7 +461,7 @@ public class ModelConfiguration implements Serializable, Cloneable {
         setModified();
         config.setMaxOutliers(supp);
     }
-    
+
     /**
      * @param type
      * @param enabled
@@ -479,6 +489,30 @@ public class ModelConfiguration implements Serializable, Cloneable {
      */
     public void setHeuristicForSampleBasedCriteria(boolean value) {
         config.setUseHeuristicSearchForSampleBasedCriteria(value);
+    }
+    
+    /**
+     * @param heuristicSearchEnabled
+     * @see org.deidentifier.arx.ARXConfiguration#setHeuristicSearchEnabled(boolean)
+     */
+    public void setHeuristicSearchEnabled(boolean heuristicSearchEnabled) {
+        config.setHeuristicSearchEnabled(heuristicSearchEnabled);
+    }
+    
+    /**
+     * @param numberOfTransformations
+     * @see org.deidentifier.arx.ARXConfiguration#setHeuristicSearchThreshold(int)
+     */
+    public void setHeuristicSearchThreshold(int numberOfTransformations) {
+        config.setHeuristicSearchThreshold(numberOfTransformations);
+    }
+    
+    /**
+     * @param timeInMillis
+     * @see org.deidentifier.arx.ARXConfiguration#setHeuristicSearchTimeLimit(int)
+     */
+    public void setHeuristicSearchTimeLimit(int timeInMillis) {
+        config.setHeuristicSearchTimeLimit(timeInMillis);
     }
     
     /**
@@ -592,16 +626,6 @@ public class ModelConfiguration implements Serializable, Cloneable {
     }
     
     /**
-     * Protect sensitive associations.
-     *
-     * @param selection
-     */
-    public void setProtectSensitiveAssociations(boolean selection) {
-        setModified();
-        config.setProtectSensitiveAssociations(selection);
-    }
-    
-    /**
      * Sets the current research subset.
      *
      * @param subset
@@ -618,15 +642,6 @@ public class ModelConfiguration implements Serializable, Cloneable {
     public void setSuppressionAlwaysEnabled(boolean enabled) {
         setModified();
         config.setSuppressionAlwaysEnabled(enabled);
-    }
-    
-    /**
-     * @param suppressionString
-     * @see org.deidentifier.arx.ARXConfiguration#setSuppressionString(java.lang.String)
-     */
-    public void setSuppressionString(String suppressionString) {
-        setModified();
-        config.setSuppressionString(suppressionString);
     }
     
     /**
@@ -658,6 +673,15 @@ public class ModelConfiguration implements Serializable, Cloneable {
      */
     public void setUnmodified() {
         modified = false;
+    }
+    
+    /**
+     * Returns whether microaggregation will be considered by utility measures
+     * @return
+     */
+    public void setUseUtilityBasedMicroaggregation(boolean value) {
+        setModified();
+        config.setUtilityBasedMicroaggregation(value);
     }
     
     /**

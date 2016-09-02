@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class DPresence extends ImplicitPrivacyCriterion{
      * @param subset Research subset
      */
     public DPresence(double dMin, double dMax, DataSubset subset) {
-        super(false);
+        super(false, true);
         this.dMin = dMin;
         this.dMax = dMax;
         this.subset = subset;
@@ -68,12 +68,17 @@ public class DPresence extends ImplicitPrivacyCriterion{
      * @param subset
      */
     protected DPresence(DataSubset subset) {
-        super(true);
+        super(true, true);
         this.dMin = 0d;
         this.dMax = 1d;
         this.subset = subset;
     }
         
+    @Override
+    public DPresence clone() {
+        return new DPresence(this.getDMin(), this.getDMax(), this.getSubset().clone());
+    }
+    
     /**
      * Returns dMax.
      *
@@ -99,11 +104,7 @@ public class DPresence extends ImplicitPrivacyCriterion{
                ARXConfiguration.REQUIREMENT_SECONDARY_COUNTER;
     }
 
-    /**
-     * Returns the research subset.
-     *
-     * @return
-     */
+    @Override
     public DataSubset getSubset() {
         return this.subset;
     }
@@ -120,6 +121,11 @@ public class DPresence extends ImplicitPrivacyCriterion{
     }
     
 	@Override
+    public boolean isLocalRecodingSupported() {
+        return false;
+    }
+
+    @Override
 	public String toString() {
 		return "("+dMin+","+dMax+")-presence";
 	}

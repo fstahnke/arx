@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,15 +40,25 @@ public class DistinctLDiversity extends LDiversity{
      * @param l
      */
     public DistinctLDiversity(String attribute, int l){
-        super(attribute, l, true);
+        super(attribute, l, true, true);
     }
 
     @Override
+    public DistinctLDiversity clone() {
+        return new DistinctLDiversity(this.getAttribute(), (int)this.getL());
+    }
+
+	@Override
     public boolean isAnonymous(HashGroupifyEntry entry) {
         return entry.distributions[index].size() >= minSize; // minSize=(int)l;
     }
 
-	@Override
+    @Override
+    public boolean isLocalRecodingSupported() {
+        return true;
+    }
+
+    @Override
 	public String toString() {
 		return "distinct-"+minSize+"-diversity for attribute '"+attribute+"'";
 	}

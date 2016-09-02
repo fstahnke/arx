@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,10 @@ public class Example25 extends Example {
      *            The arguments
      * @throws IOException
      */
-    public static void main(final String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
 
         // Define data
-        final DefaultData data = Data.create();
+        DefaultData data = Data.create();
         data.add("age", "gender", "zipcode");
         data.add("34", "male", "81667");
         data.add("45", "female", "81675");
@@ -96,13 +96,13 @@ public class Example25 extends Example {
         data.getDefinition().setAttributeType("zipcode", builder2);
 
         // Create an instance of the anonymizer
-        final ARXAnonymizer anonymizer = new ARXAnonymizer();
-        final ARXConfiguration config = ARXConfiguration.create();
+        ARXAnonymizer anonymizer = new ARXAnonymizer();
+        ARXConfiguration config = ARXConfiguration.create();
         config.addCriterion(new KAnonymity(3));
         config.setMaxOutliers(0d);
         config.setMetric(__MetricV2.createLossMetric());
         config.setSuppressionAlwaysEnabled(false);
-        final ARXResult result = anonymizer.anonymize(data, config);
+        ARXResult result = anonymizer.anonymize(data, config);
 
         // Process results
         for (ARXNode[] level : result.getLattice().getLevels()) {

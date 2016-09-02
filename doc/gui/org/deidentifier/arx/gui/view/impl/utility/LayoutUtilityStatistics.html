@@ -34,8 +34,8 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.ViewUtilityType.html" title="enum in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewClassificationAttributes.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../../../index.html?org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html" target="_top">Frames</a></li>
@@ -120,7 +120,7 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/ILayo
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#LayoutUtilityStatistics(org.eclipse.swt.widgets.Composite, org.deidentifier.arx.gui.Controller, org.deidentifier.arx.gui.model.ModelEvent.ModelPart, org.deidentifier.arx.gui.model.ModelEvent.ModelPart)">LayoutUtilityStatistics</a></strong>(org.eclipse.swt.widgets.Composite&nbsp;parent,
+<td class="colOne"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#LayoutUtilityStatistics(org.eclipse.swt.widgets.Composite,%20org.deidentifier.arx.gui.Controller,%20org.deidentifier.arx.gui.model.ModelEvent.ModelPart,%20org.deidentifier.arx.gui.model.ModelEvent.ModelPart)">LayoutUtilityStatistics</a></strong>(org.eclipse.swt.widgets.Composite&nbsp;parent,
                        <a href="../../../../../../../org/deidentifier/arx/gui/Controller.html" title="class in org.deidentifier.arx.gui">Controller</a>&nbsp;controller,
                        <a href="../../../../../../../org/deidentifier/arx/gui/model/ModelEvent.ModelPart.html" title="enum in org.deidentifier.arx.gui.model">ModelEvent.ModelPart</a>&nbsp;target,
                        <a href="../../../../../../../org/deidentifier/arx/gui/model/ModelEvent.ModelPart.html" title="enum in org.deidentifier.arx.gui.model">ModelEvent.ModelPart</a>&nbsp;reset)</code>
@@ -155,24 +155,42 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/ILayo
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#getSelectionIndex()">getSelectionIndex</a></strong>()</code>
+<td class="colFirst"><code><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.ViewUtilityType.html" title="enum in org.deidentifier.arx.gui.view.impl.utility">LayoutUtility.ViewUtilityType</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#getSelectedView()">getSelectedView</a></strong>()</code>
 <div class="block">Returns the selection index.</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>java.util.List&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#getVisibleItems()">getVisibleItems</a></strong>()</code>
+<div class="block">Returns all visible items</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#reset()">reset</a></strong>()</code>
 <div class="block">Resets the view.</div>
 </td>
 </tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#setItemVisibilityListener(org.eclipse.swt.events.SelectionListener)">setItemVisibilityListener</a></strong>(org.eclipse.swt.events.SelectionListener&nbsp;listener)</code>
+<div class="block">Sets the according listener</div>
+</td>
+</tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#setSelectionIdex(int)">setSelectionIdex</a></strong>(int&nbsp;index)</code>
-<div class="block">Sets the selection index.</div>
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#setSelectedView(org.deidentifier.arx.gui.view.impl.utility.LayoutUtility.ViewUtilityType)">setSelectedView</a></strong>(<a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.ViewUtilityType.html" title="enum in org.deidentifier.arx.gui.view.impl.utility">LayoutUtility.ViewUtilityType</a>&nbsp;type)</code>
+<div class="block">Sets the selected view type</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#setVisibleItems(java.util.List)">setVisibleItems</a></strong>(java.util.List&lt;java.lang.String&gt;&nbsp;items)</code>
+<div class="block">Sets all visible items</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html#update(org.deidentifier.arx.gui.model.ModelEvent)">update</a></strong>(<a href="../../../../../../../org/deidentifier/arx/gui/model/ModelEvent.html" title="class in org.deidentifier.arx.gui.model">ModelEvent</a>&nbsp;event)</code>
 <div class="block">Updates the view.</div>
@@ -248,14 +266,25 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/ILayo
 </dl>
 </li>
 </ul>
-<a name="getSelectionIndex()">
+<a name="getSelectedView()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getSelectionIndex</h4>
-<pre>public&nbsp;int&nbsp;getSelectionIndex()</pre>
+<h4>getSelectedView</h4>
+<pre>public&nbsp;<a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.ViewUtilityType.html" title="enum in org.deidentifier.arx.gui.view.impl.utility">LayoutUtility.ViewUtilityType</a>&nbsp;getSelectedView()</pre>
 <div class="block">Returns the selection index.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="getVisibleItems()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getVisibleItems</h4>
+<pre>public&nbsp;java.util.List&lt;java.lang.String&gt;&nbsp;getVisibleItems()</pre>
+<div class="block">Returns all visible items</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
@@ -274,15 +303,37 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/ILayo
 </dl>
 </li>
 </ul>
-<a name="setSelectionIdex(int)">
+<a name="setItemVisibilityListener(org.eclipse.swt.events.SelectionListener)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setSelectionIdex</h4>
-<pre>public&nbsp;void&nbsp;setSelectionIdex(int&nbsp;index)</pre>
-<div class="block">Sets the selection index.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>index</code> - </dd></dl>
+<h4>setItemVisibilityListener</h4>
+<pre>public&nbsp;void&nbsp;setItemVisibilityListener(org.eclipse.swt.events.SelectionListener&nbsp;listener)</pre>
+<div class="block">Sets the according listener</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>listener</code> - </dd></dl>
+</li>
+</ul>
+<a name="setSelectedView(org.deidentifier.arx.gui.view.impl.utility.LayoutUtility.ViewUtilityType)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSelectedView</h4>
+<pre>public&nbsp;void&nbsp;setSelectedView(<a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.ViewUtilityType.html" title="enum in org.deidentifier.arx.gui.view.impl.utility">LayoutUtility.ViewUtilityType</a>&nbsp;type)</pre>
+<div class="block">Sets the selected view type</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>type</code> - </dd></dl>
+</li>
+</ul>
+<a name="setVisibleItems(java.util.List)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setVisibleItems</h4>
+<pre>public&nbsp;void&nbsp;setVisibleItems(java.util.List&lt;java.lang.String&gt;&nbsp;items)</pre>
+<div class="block">Sets all visible items</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>items</code> - </dd></dl>
 </li>
 </ul>
 <a name="update(org.deidentifier.arx.gui.model.ModelEvent)">
@@ -326,8 +377,8 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/ILayo
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Next Class</span></a></li>
+<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtility.ViewUtilityType.html" title="enum in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewClassificationAttributes.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../../../index.html?org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html" target="_top">Frames</a></li>

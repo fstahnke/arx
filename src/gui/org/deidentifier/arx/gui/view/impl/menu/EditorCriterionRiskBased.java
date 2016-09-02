@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,23 @@
 
 package org.deidentifier.arx.gui.view.impl.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.deidentifier.arx.gui.model.ModelCriterion;
 import org.deidentifier.arx.gui.model.ModelRiskBasedCriterion;
 import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Text;
+
+import de.linearbits.swt.widgets.Knob;
 
 /**
  * A view on a risk-based criterion.
@@ -38,14 +43,14 @@ import org.eclipse.swt.widgets.Scale;
 public class EditorCriterionRiskBased extends EditorCriterion<ModelRiskBasedCriterion>{
 
     /** View */
-    private Scale sliderThreshold;
+    private Knob<Double> knobThreshold;
 
     /** View */
-    private Label labelThreshold;
+    private Text         labelThreshold;
 
     /** View */
-    private Combo cmbModel;
-    
+    private Combo        cmbModel;
+
     /**
      * Creates a new instance.
      *
@@ -55,16 +60,6 @@ public class EditorCriterionRiskBased extends EditorCriterion<ModelRiskBasedCrit
     public EditorCriterionRiskBased(final Composite parent, 
                                     final ModelRiskBasedCriterion model) {
         super(parent, model);
-    }
-
-    /**
-     * Updates the "threshold" label and tool tip text.
-     *
-     * @param text
-     */
-    private void updateThresholdLabel(String text) {
-        labelThreshold.setText(text);
-        labelThreshold.setToolTipText(text);
     }
     
     /**
@@ -89,34 +84,27 @@ public class EditorCriterionRiskBased extends EditorCriterion<ModelRiskBasedCrit
         final Label zLabel = new Label(group, SWT.NONE);
         zLabel.setText(Resources.getMessage("CriterionDefinitionView.81")); //$NON-NLS-1$
 
-        labelThreshold = new Label(group, SWT.BORDER | SWT.CENTER);
-        final GridData d9 = new GridData();
-        d9.minimumWidth = LABEL_WIDTH;
-        d9.widthHint = LABEL_WIDTH;
-        labelThreshold.setLayoutData(d9);
-        updateThresholdLabel("0"); //$NON-NLS-1$
-
-        sliderThreshold = new Scale(group, SWT.HORIZONTAL);
-        sliderThreshold.setLayoutData(SWTUtil.createFillHorizontallyGridData());
-        sliderThreshold.setMaximum(SWTUtil.SLIDER_MAX);
-        sliderThreshold.setMinimum(0);
-        sliderThreshold.setSelection(0);
-        sliderThreshold.addSelectionListener(new SelectionAdapter() {
+        labelThreshold = createLabel(group);
+        knobThreshold = createKnobDouble(group, 0d, 1d);
+        updateLabel(labelThreshold, knobThreshold.getValue());
+        knobThreshold.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(final SelectionEvent arg0) {
-                model.setThreshold(SWTUtil.sliderToDouble(0, 1, sliderThreshold.getSelection()));
-                String dmin = String.valueOf(model.getThreshold());
-                updateThresholdLabel(dmin);
+                model.setThreshold(knobThreshold.getValue());
+                updateLabel(labelThreshold, model.getThreshold());
             }
         });
         
         if (isPopulation) {
             
             Label lblModel = new Label(group, SWT.NONE);
-            lblModel.setText("Model:");
+            lblModel.setText(Resources.getMessage("EditorCriterionRiskBased.0")); //$NON-NLS-1$
             
             cmbModel = new Combo(group, SWT.READ_ONLY);
-            cmbModel.setItems(new String[]{"Dankar", "Pitman", "Zayatz", "SNB"});
+            cmbModel.setItems(new String[]{Resources.getMessage("EditorCriterionRiskBased.1"), //$NON-NLS-1$
+                                           Resources.getMessage("EditorCriterionRiskBased.2"), //$NON-NLS-1$
+                                           Resources.getMessage("EditorCriterionRiskBased.3"), //$NON-NLS-1$
+                                           Resources.getMessage("EditorCriterionRiskBased.4")}); //$NON-NLS-1$
             cmbModel.select(0);
             cmbModel.addSelectionListener(new SelectionAdapter() {
                 @Override
@@ -145,9 +133,9 @@ public class EditorCriterionRiskBased extends EditorCriterion<ModelRiskBasedCrit
     /**
      * Parses the input
      */
-    protected void parse(ModelRiskBasedCriterion model) {
-        updateThresholdLabel(String.valueOf(model.getThreshold()));
-        sliderThreshold.setSelection(SWTUtil.doubleToSlider(0, 1d, model.getThreshold()));
+    protected void parse(ModelRiskBasedCriterion model, boolean _default) {
+        updateLabel(labelThreshold, model.getThreshold());
+        knobThreshold.setValue(model.getThreshold());
         switch(model.getVariant()) {
             case ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_DANKAR:
                 cmbModel.select(0);
@@ -162,5 +150,25 @@ public class EditorCriterionRiskBased extends EditorCriterion<ModelRiskBasedCrit
                 cmbModel.select(3);
                 break;
         }
+    }
+
+
+    @Override
+    protected List<ModelCriterion> getTypicalParameters() {
+
+        List<ModelCriterion> result = new ArrayList<ModelCriterion>();
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_DANKAR, 0.01d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_DANKAR, 0.001d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_DANKAR, 0.0001d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_PITMAN, 0.01d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_PITMAN, 0.001d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_PITMAN, 0.0001d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_ZAYATZ, 0.01d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_ZAYATZ, 0.001d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_ZAYATZ, 0.0001d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_SNB, 0.01d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_SNB, 0.001d));
+        result.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_SNB, 0.0001d));
+        return result;
     }
 }

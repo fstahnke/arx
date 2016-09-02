@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class Example17 extends Example {
      * @throws ParseException 
      */
     @SuppressWarnings("unused")
-    public static void main(final String[] args) throws ParseException {
+    public static void main(String[] args) throws ParseException {
         
         // 1. List all data types
         for (DataTypeDescription<?> type : DataType.list()){
@@ -65,10 +65,9 @@ public class Example17 extends Example {
         
         // 2. Obtain specific data type
         DataTypeDescription<Double> entry = DataType.list(Double.class);
-        
 
         // 3. Obtain data in specific formats
-        final DefaultData data = Data.create();
+        DefaultData data = Data.create();
         data.add("identifier", "name", "zip", "age", "nationality", "sen");
         data.add("a", "Alice", "47906", "35", "USA", "1.1.2013");
         data.add("b", "Bob", "47903", "59", "Canada", "1.1.2013");

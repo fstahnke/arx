@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,12 +49,14 @@ public class MetricMDNUEntropyPotentiallyPrecomputed extends AbstractMetricMulti
      * #distinctValues / #rows <= threshold for all quasi-identifiers.
      * 
      * @param threshold
+     * @param gsFactor
      * @param function
      */
     protected MetricMDNUEntropyPotentiallyPrecomputed(double threshold,
+                                                      double gsFactor,
                                                       AggregateFunction function) {
-        super(new MetricMDNUEntropy(function),
-              new MetricMDNUEntropyPrecomputed(function),
+        super(new MetricMDNUEntropy(gsFactor, function),
+              new MetricMDNUEntropyPrecomputed(gsFactor, function),
               threshold);
     }
     
@@ -64,12 +66,12 @@ public class MetricMDNUEntropyPotentiallyPrecomputed extends AbstractMetricMulti
      * @return
      */
     public MetricConfiguration getConfiguration() {
-        return new MetricConfiguration(true,                       // monotonic
-                                       0.5d,                       // gs-factor
-                                       super.isPrecomputed(),      // precomputed
-                                       super.getThreshold(),       // precomputation threshold
-                                       this.getAggregateFunction() // aggregate function
-                                       );
+        return new MetricConfiguration(true, // monotonic
+                                       super.getDefaultMetric().getGeneralizationSuppressionFactor(), // gs-factor
+                                       super.isPrecomputed(), // precomputed
+                                       super.getThreshold(), // precomputation threshold
+                                       super.getDefaultMetric().getAggregateFunction() // aggregate function
+        );
     }
     
     @Override
@@ -78,14 +80,10 @@ public class MetricMDNUEntropyPotentiallyPrecomputed extends AbstractMetricMulti
     }
 
     /**
-     * For backwards compatibility.
-     *
-     * @param cache
-     * @param cardinalities
-     * @param hierarchies
+     * Does this metric handle microaggregation
+     * @return
      */
-    protected void initialize(double[][] cache, int[][][] cardinalities, int[][][] hierarchies) {
-        ((MetricMDNUEntropy)this.getDefaultMetric()).initialize(cache, cardinalities, hierarchies);
-        ((MetricMDNUEntropyPrecomputed)this.getPrecomputedMetric()).initialize(cache, cardinalities, hierarchies);
+    protected boolean isAbleToHandleMicroaggregation() {
+        return false;
     }
 }

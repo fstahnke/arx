@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.deidentifier.arx.DataHandleStatistics.InterruptHandler;
+import org.deidentifier.arx.DataHandleInternal.InterruptHandler;
 import org.deidentifier.arx.aggregates.StatisticsBuilder;
 import org.deidentifier.arx.framework.data.Dictionary;
 
@@ -100,7 +100,7 @@ public class DataHandleInput extends DataHandle {
         this.dataTypes = getDataTypeArray();
         
         // Create statistics
-        this.statistics = new StatisticsBuilder(new DataHandleStatistics(this), null);
+        this.statistics = new StatisticsBuilder(new DataHandleInternal(this));
     }
 
     @Override
@@ -133,7 +133,7 @@ public class DataHandleInput extends DataHandle {
         checkRegistry();
         checkColumn(column);
         checkRow(row, data.length);
-        return internalGetValue(row, column);
+        return internalGetValue(row, column, false);
     }
 
     @Override
@@ -204,6 +204,11 @@ public class DataHandleInput extends DataHandle {
     }
     
     @Override
+    protected ARXConfiguration getConfiguration() {
+        return null;
+    }
+
+    @Override
     protected DataType<?>[][] getDataTypeArray() {
         checkRegistry();
         DataType<?>[][] dataTypes = new DataType[1][header.length];
@@ -219,7 +224,7 @@ public class DataHandleInput extends DataHandle {
     }
 
     @Override
-    protected String[] getDistinctValues(final int column, InterruptHandler handler) {
+    protected String[] getDistinctValues(final int column, final boolean ignoreSuppression, InterruptHandler handler) {
         checkRegistry();
         handler.checkInterrupt();
         checkColumn(column);
@@ -232,11 +237,20 @@ public class DataHandleInput extends DataHandle {
         return vals;
     }
     
-    @Override
-    protected String internalGetValue(final int row, final int column) {
-        return dictionary.getMapping()[column][data[row][column]];
+    /**
+     * Returns the input buffer
+     * @return
+     */
+    protected int[][] getInputBuffer() {
+        checkRegistry();
+        return this.dataGH;
     }
 
+    @Override
+    protected String internalGetValue(final int row, final int column, final boolean ignoreSuppression) {
+        return dictionary.getMapping()[column][data[row][column]];
+    }
+    
     @Override
     protected boolean internalReplace(int column,
                                       String original,
@@ -271,7 +285,7 @@ public class DataHandleInput extends DataHandle {
         if (dataDI != null) swap(row1, row2, dataDI);
         if (dataIS != null) swap(row1, row2, dataIS);
     }
-    
+
     /**
      * Is this handle locked?.
      *

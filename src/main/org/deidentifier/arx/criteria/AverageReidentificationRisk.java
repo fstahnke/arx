@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,16 +36,34 @@ public class AverageReidentificationRisk extends RiskBasedCriterion{
      * @param riskThreshold
      */
     public AverageReidentificationRisk(double riskThreshold){
-        super(true, riskThreshold);
+        super(true, true, riskThreshold);
+    }
+
+    @Override
+    public AverageReidentificationRisk clone() {
+        return new AverageReidentificationRisk(this.getRiskThreshold());
+    }
+    
+    @Override
+    public boolean isLocalRecodingSupported() {
+        return false;
     }
 
     @Override
     public String toString() {
-        return "(<"+getRiskThreshold()+")-avg-reidentification-risk";
+        return "("+getRiskThreshold()+")-avg-reidentification-risk";
     }
 
     @Override
     protected boolean isFulfilled(HashGroupifyDistribution distribution) {
         return 1.0d / (double)distribution.getAverageClassSize() <= getRiskThreshold();
+    }
+
+    /**
+     * Return marketer risk threshold, 1 if there is none
+     * @return
+     */
+    public double getRiskThresholdMarketer() {
+        return getRiskThreshold();
     }
 }

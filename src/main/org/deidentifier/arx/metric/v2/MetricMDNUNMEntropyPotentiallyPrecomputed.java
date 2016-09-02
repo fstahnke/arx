@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,43 +49,41 @@ public class MetricMDNUNMEntropyPotentiallyPrecomputed extends AbstractMetricMul
      * #distinctValues / #rows <= threshold for all quasi-identifiers.
      * 
      * @param threshold
+     * @param gsFactor
      * @param function
      */
     protected MetricMDNUNMEntropyPotentiallyPrecomputed(double threshold,
+                                                        double gsFactor,
                                                         AggregateFunction function) {
-        super(new MetricMDNUNMEntropy(function),
-              new MetricMDNUNMEntropyPrecomputed(function),
+        super(new MetricMDNUNMEntropy(gsFactor, function),
+              new MetricMDNUNMEntropyPrecomputed(gsFactor, function),
               threshold);
     }
-    
+
     /**
      * Returns the configuration of this metric.
      *
      * @return
      */
     public MetricConfiguration getConfiguration() {
-        return new MetricConfiguration(false,                       // monotonic
-                                       0.5d,                       // gs-factor
-                                       super.isPrecomputed(),      // precomputed
-                                       super.getThreshold(),       // precomputation threshold
-                                       this.getAggregateFunction() // aggregate function
-                                       );
+        return new MetricConfiguration(false, // monotonic
+                                       super.getDefaultMetric().getGeneralizationSuppressionFactor(), // gs-factor
+                                       super.isPrecomputed(), // precomputed
+                                       super.getThreshold(), // precomputation threshold
+                                       super.getDefaultMetric().getAggregateFunction() // aggregate function
+        );
     }
-
+    
     @Override
     public String toString() {
         return "Non-monotonic non-uniform entropy";
     }
 
     /**
-     * For backwards compatibility.
-     *
-     * @param cache
-     * @param cardinalities
-     * @param hierarchies
+     * Does this metric handle microaggregation
+     * @return
      */
-    protected void initialize(double[][] cache, int[][][] cardinalities, int[][][] hierarchies) {
-        ((MetricMDNUNMEntropy)this.getDefaultMetric()).initialize(cache, cardinalities, hierarchies);
-        ((MetricMDNUNMEntropyPrecomputed)this.getPrecomputedMetric()).initialize(cache, cardinalities, hierarchies);
+    protected boolean isAbleToHandleMicroaggregation() {
+        return false;
     }
 }

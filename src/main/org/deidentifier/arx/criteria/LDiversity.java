@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,11 @@ public abstract class LDiversity extends ExplicitPrivacyCriterion {
      *
      * @param attribute
      * @param l
-     * @param monotonic
+     * @param monotonicWithSuppression
+     * @param monotonicWithGeneralization
      */
-    public LDiversity(String attribute, double l, boolean monotonic) {
-        super(attribute, monotonic);
+    public LDiversity(String attribute, double l, boolean monotonicWithSuppression, boolean monotonicWithGeneralization) {
+        super(attribute, monotonicWithSuppression, monotonicWithGeneralization);
         this.l = l;
         this.minSize = (int) Math.ceil(l);
     }
@@ -77,5 +78,29 @@ public abstract class LDiversity extends ExplicitPrivacyCriterion {
 
         // Requires a distribution, but nothing else
         return ARXConfiguration.REQUIREMENT_DISTRIBUTION;
+    }
+
+    /**
+     * Return prosecutor risk threshold, 1 if there is none
+     * @return
+     */
+    public double getRiskThresholdProsecutor() {
+        return 1d / getL();
+    }
+
+    /**
+     * Return journalist risk threshold, 1 if there is none
+     * @return
+     */
+    public double getRiskThresholdJournalist() {
+        return getRiskThresholdProsecutor();
+    }
+
+    /**
+     * Return marketer risk threshold, 1 if there is none
+     * @return
+     */
+    public double getRiskThresholdMarketer() {
+        return getRiskThresholdProsecutor();
     }
 }

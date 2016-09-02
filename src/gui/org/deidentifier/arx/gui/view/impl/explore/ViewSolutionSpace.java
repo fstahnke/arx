@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.deidentifier.arx.gui.view.impl.explore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 import org.deidentifier.arx.ARXLattice;
 import org.deidentifier.arx.ARXLattice.ARXNode;
@@ -58,9 +56,6 @@ import de.linearbits.swt.tiles.DecoratorString;
  */
 public abstract class ViewSolutionSpace implements IView {
 
-    /** Number format. */
-    private final NumberFormat       format;
-
     /** The controller. */
     private final Controller         controller;
 
@@ -81,7 +76,7 @@ public abstract class ViewSolutionSpace implements IView {
 
     /** View component */
     private Composite                secondary;
-    
+
     /** View component */
     private StackLayout              layout;
 
@@ -98,52 +93,37 @@ public abstract class ViewSolutionSpace implements IView {
     private ARXNode                  optimum           = null;
 
     /** Color. */
-    private static final Color       COLOR_GREEN       = GUIHelper.getColor(50,
-                                                                            205,
-                                                                            50);
+    private static final Color       COLOR_GREEN       = GUIHelper.getColor(50, 205, 50);
 
     /** Color. */
-    private static final Color       COLOR_LIGHT_GREEN = GUIHelper.getColor(150,
-                                                                            255,
-                                                                            150);
+    private static final Color       COLOR_LIGHT_GREEN = GUIHelper.getColor(150, 255, 150);
 
     /** Color. */
-    private static final Color       COLOR_RED         = GUIHelper.getColor(255,
-                                                                            99,
-                                                                            71);
+    private static final Color       COLOR_RED         = GUIHelper.getColor(255, 99, 71);
 
     /** Color. */
-    private static final Color       COLOR_LIGHT_RED   = GUIHelper.getColor(255,
-                                                                            150,
-                                                                            150);
+    private static final Color       COLOR_LIGHT_RED   = GUIHelper.getColor(255, 150, 150);
 
     /** Color. */
-    private static final Color       COLOR_BLUE        = GUIHelper.getColor(0,
-                                                                            0,
-                                                                            255);
+    private static final Color       COLOR_BLUE        = GUIHelper.getColor(0, 0, 255);
 
     /** Color. */
-    private static final Color       COLOR_YELLOW      = GUIHelper.getColor(255,
-                                                                            215,
-                                                                            0);
+    private static final Color       COLOR_YELLOW      = GUIHelper.getColor(255, 215, 0);
 
     /** Color. */
-    private static final Color       COLOR_DARK_GRAY   = GUIHelper.getColor(180,
-                                                                            180,
-                                                                            180);
+    private static final Color       COLOR_DARK_GRAY   = GUIHelper.getColor(180, 180, 180);
 
     /** Color. */
-    private static final Color       COLOR_GRAY        = GUIHelper.getColor(160,
-                                                                            160,
-                                                                            160);
+    private static final Color       COLOR_GRAY        = GUIHelper.getColor(160, 160, 160);
 
     /** Color. */
-    private static final Color       COLOR_BLACK       = GUIHelper.getColor(0,
-                                                                            0,
-                                                                            0);
+    private static final Color       COLOR_BLACK       = GUIHelper.getColor(0, 0, 0);
 
     /** Decorator */
     private Gradient                 gradient;
+
+    /** Maximal length of a label in characters */
+    private static final int         MAX_LABEL_LENGTH  = 20;
 
     /**
      * Constructor
@@ -157,11 +137,11 @@ public abstract class ViewSolutionSpace implements IView {
         controller.addListener(ModelPart.FILTER, this);
         controller.addListener(ModelPart.MODEL, this);
         controller.addListener(ModelPart.RESULT, this);
+        controller.addListener(ModelPart.EXPAND, this);
 
         // Store
         this.parent = parent;
         this.controller = controller;
-        this.format = new DecimalFormat("##0.000"); //$NON-NLS-1$
         
         // Initialize
         initializeMenu();
@@ -192,13 +172,13 @@ public abstract class ViewSolutionSpace implements IView {
         // Show primary
         this.showPrimaryComposite();
     }
-    
+
     @Override
     public void dispose() {
         controller.removeListener(this);
         gradient.dispose();
     }
-
+    
     /**
      * Resets the view.
      */
@@ -239,9 +219,13 @@ public abstract class ViewSolutionSpace implements IView {
             if (model!=null && !isTooLarge(model.getResult(), (ModelNodeFilter) event.data, model.getMaxNodesInViewer())) {
                 eventFilterChanged(model.getResult(), (ModelNodeFilter) event.data);
             }
+        } else if (event.part == ModelPart.EXPAND) {
+            if (model!=null && !isTooLarge(model.getResult(), model.getNodeFilter(), model.getMaxNodesInViewer())) {
+                eventFilterChanged(model.getResult(), model.getNodeFilter());
+            }
         }
     }
-    
+
     /**
      * Creates the context menu.
      */
@@ -271,17 +255,30 @@ public abstract class ViewSolutionSpace implements IView {
                 actionRedraw();
             }
         });
-    }
 
+        MenuItem item3 = new MenuItem(menu, SWT.NONE);
+        item3.setText(Resources.getMessage("LatticeView.11")); //$NON-NLS-1$
+        item3.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(final SelectionEvent arg0) {
+                model.setSelectedNode(selectedNode);
+                controller.update(new ModelEvent(ViewSolutionSpace.this, ModelPart.SELECTED_NODE, selectedNode));
+                controller.actionExpand(selectedNode);
+                controller.update(new ModelEvent(ViewSolutionSpace.this, ModelPart.EXPAND, selectedNode));
+                eventFilterChanged(model.getResult(), model.getNodeFilter());
+            }
+        });
+    }
+    
     private void initializeTooltip() {
         this.tooltipDecorator = new DecoratorString<ARXNode>() {
             @Override
             public String decorate(ARXNode node) {
                 final StringBuffer b = new StringBuffer();
                 b.append(Resources.getMessage("LatticeView.1")); //$NON-NLS-1$
-                b.append(format.format(asRelativeValue(node.getMinimumInformationLoss())));
+                b.append(SWTUtil.getPrettyString(asRelativeValue(node.getMinimumInformationLoss())));
                 b.append(" - "); //$NON-NLS-1$
-                b.append(format.format(asRelativeValue(node.getMaximumInformationLoss())));
+                b.append(SWTUtil.getPrettyString(asRelativeValue(node.getMaximumInformationLoss())));
                 b.append(" [%]\n"); //$NON-NLS-1$
                 if (model.getOutputDefinition() != null) {
                     for (final String qi : node.getQuasiIdentifyingAttributes()) {
@@ -292,7 +289,7 @@ public abstract class ViewSolutionSpace implements IView {
                         b.append(" * "); //$NON-NLS-1$
                         b.append(qi);
                         b.append(": "); //$NON-NLS-1$
-                        b.append(format.format(asRelativeValue(node.getGeneralization(qi), height - 1)));
+                        b.append(SWTUtil.getPrettyString(asRelativeValue(node.getGeneralization(qi), height - 1)));
                         b.append(" [%]\n"); //$NON-NLS-1$
                     }
                 }
@@ -332,7 +329,7 @@ public abstract class ViewSolutionSpace implements IView {
             return false;
         }
     }
-    
+
     /**gray.dispose();
      * Action to redraw
      */
@@ -347,7 +344,7 @@ public abstract class ViewSolutionSpace implements IView {
         getModel().setSelectedNode(node);
         controller.update(new ModelEvent(this, ModelPart.SELECTED_NODE, node));
     }
-
+    
     /**
      * Action show menu
      * @param x
@@ -357,7 +354,7 @@ public abstract class ViewSolutionSpace implements IView {
         menu.setLocation(x, y);
         menu.setVisible(true);
     }
-    
+
     /**
      * Converts an information loss into a relative value in percent.
      *
@@ -412,21 +409,13 @@ public abstract class ViewSolutionSpace implements IView {
      * @param result
      */
     protected abstract void eventResultChanged(ARXResult result);
-
+    
     /**
      * Returns the controller
      * @return
      */
     protected Controller getController() {
         return this.controller;
-    }
-    
-    /**
-     * Returns the number formatter
-     * @return
-     */
-    protected NumberFormat getFormat() {
-        return this.format;
     }
     
     /**
@@ -479,7 +468,7 @@ public abstract class ViewSolutionSpace implements IView {
         result = node.isChecked() ? result + 1 : result;
         return result >=1 ? result < 1 ? 1 : result : 1;
     }
-    
+
     /**
      * Returns the primary composite
      * @return
@@ -487,7 +476,7 @@ public abstract class ViewSolutionSpace implements IView {
     protected Composite getPrimaryComposite() {
         return this.primary;
     }
-
+    
     /**
      * Returns the selected node
      * @return
@@ -495,7 +484,7 @@ public abstract class ViewSolutionSpace implements IView {
     protected ARXNode getSelectedNode() {
         return this.selectedNode;
     }
-    
+
     /**
      * Returns the tool tip decorator
      * @return
@@ -518,7 +507,7 @@ public abstract class ViewSolutionSpace implements IView {
             return gradient.getColor(asRelativeValue(node.getMinimumInformationLoss()) / 100d);
         }
     }
-
+    
     /**
      * Shows the primary composite
      */
@@ -526,7 +515,7 @@ public abstract class ViewSolutionSpace implements IView {
         this.layout.topControl = this.primary;
         this.base.layout();
     }
-
+    
     /**
      * Shows the secondary composite
      */
@@ -539,5 +528,23 @@ public abstract class ViewSolutionSpace implements IView {
         
         this.layout.topControl = this.secondary;
         this.base.layout();
+    }
+
+    /**
+     * Trims the label to a predefined length
+     * @param label
+     * @return
+     */
+    protected String trimLabel(String label) {
+        if (label.length() > MAX_LABEL_LENGTH) {
+            label = label.replace(" ", "");
+        }
+        if (label.length() > MAX_LABEL_LENGTH) {
+            label = label.replace(",", "");
+        }
+        if (label.length() > MAX_LABEL_LENGTH) {
+            label = label.substring(0, MAX_LABEL_LENGTH -3) + "...";
+        }
+        return label;
     }
 }

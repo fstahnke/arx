@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.deidentifier.arx.ARXAnonymizer;
+import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.ARXLattice;
 import org.deidentifier.arx.ARXLattice.ARXNode;
 import org.deidentifier.arx.ARXLattice.Anonymity;
@@ -45,6 +47,7 @@ import org.deidentifier.arx.Data;
 import org.deidentifier.arx.DataDefinition;
 import org.deidentifier.arx.DataType;
 import org.deidentifier.arx.DataType.DataTypeDescription;
+import org.deidentifier.arx.framework.lattice.SolutionSpace;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.Model;
 import org.deidentifier.arx.gui.model.ModelConfiguration;
@@ -224,6 +227,7 @@ public class WorkerLoad extends Worker<Model> {
      * @throws ClassNotFoundException
      * @throws SAXException
      */
+    @SuppressWarnings("deprecation")
     private void readConfiguration(final String prefix,
                                    final boolean output,
                                    final Map<String, ARXNode> map,
@@ -256,15 +260,19 @@ public class WorkerLoad extends Worker<Model> {
             // Read input, config and definition
         	readInput(config, zip);
             model.setInputConfig(config);
-            readDefinition(config, model.getInputDefinition(), prefix, zip);
+            readDefinition(config, output, model.getInputDefinition(), prefix, zip);
             
+            // TODO: Needed for backwards compatibility of ARX 3.4.0 with previous versions
+            if (model.getInputPopulationModel() != null) {
+                model.getInputPopulationModel().makeBackwardsCompatible(config.getInput().getHandle().getNumRows());
+            }
         } else {
             
             // Read input, config and definition
             config.setInput(model.getInputConfig().getInput());
             model.setOutputConfig(config);
             DataDefinition definition = new DataDefinition();
-            readDefinition(config, definition, prefix, zip);
+            readDefinition(config, output, definition, prefix, zip);
             
             // Create Handles
             final int historySize = model.getHistorySize();
@@ -287,6 +295,10 @@ public class WorkerLoad extends Worker<Model> {
             }
             model.setSelectedNode(outputNode);
             
+            // Create solution space
+            ARXConfiguration arxconfig = model.getOutputConfig().getConfig();
+            SolutionSpace solutions = new SolutionSpace(lattice, arxconfig);
+            
             // Update model
             model.setResult(new ARXResult(config.getInput().getHandle(),
                                           definition,
@@ -295,9 +307,16 @@ public class WorkerLoad extends Worker<Model> {
                                           snapshotSizeSnapshot,
                                           snapshotSizeDataset,
                                           metric,
-                                          model.getOutputConfig().getConfig(),
+                                          arxconfig,
                                           optimalNode,
-                                          time));
+                                          time,
+                                          solutions));
+            
+            // Update lattice
+            ARXLattice lattice = model.getResult().getLattice();
+            if (lattice != null) {
+                lattice.access().setSolutionSpace(solutions);
+            }
 
             // Create anonymizer
             final ARXAnonymizer f = new ARXAnonymizer();
@@ -312,6 +331,7 @@ public class WorkerLoad extends Worker<Model> {
      * Reads the data definition from the file.
      *
      * @param config
+     * @param output 
      * @param definition
      * @param prefix
      * @param zip
@@ -319,9 +339,10 @@ public class WorkerLoad extends Worker<Model> {
      * @throws SAXException
      */
     private void readDefinition(final ModelConfiguration config,
-                                final DataDefinition definition, final String prefix,
-                                final ZipFile zip) throws IOException,
-                                                          SAXException {
+                                final boolean output,
+                                final DataDefinition definition,
+                                final String prefix,
+                                final ZipFile zip) throws IOException, SAXException {
     	
     	// Obtain entry
         final ZipEntry entry = zip.getEntry(prefix + "definition.xml"); //$NON-NLS-1$
@@ -418,7 +439,25 @@ public class WorkerLoad extends Worker<Model> {
                             // Check if a hierarchy is defined in the XML file
                             if (ref != null) {
                                 try {
-                                    hierarchy = readHierarchy(zip, prefix, ref);
+
+                                    // Bugfix: ARX 3.4.1 does not serialize automatically created empty hierarchies
+                                    // but it does create a reference to such a file. We handle this case separately now
+                                    // which probably breaks the backwards compatibility to older versions of ARX for
+                                    // which this clodeblock was initially implemented:
+                                    if (output && zip.getEntry(prefix + ref) == null) {
+
+                                        // Create an empty hierarchy
+                                        String[] data = config.getInput().getHandle().getDistinctValues(config.getInput()
+                                                                                     .getHandle()
+                                                                                     .getColumnIndexOf(attr));
+                                        String[][] array = new String[data.length][];
+                                        for (int i=0; i<data.length; i++) {
+                                            array[i] = new String[]{data[i]};
+                                        }
+                                        hierarchy = Hierarchy.create(array);
+                                    } else {
+                                        hierarchy = readHierarchy(zip, prefix, ref);
+                                    }
                                 } catch (final IOException e) {
                                     throw new SAXException(e);
                                 }
@@ -426,12 +465,11 @@ public class WorkerLoad extends Worker<Model> {
                         }
                         
                         // Only if a hierarchy has been defined
-                        if (hierarchy != null) {
+                        if (hierarchy != null && hierarchy.getHierarchy() != null) {
                             config.setHierarchy(attr, hierarchy); /* For backwards compatibility */
                             definition.setHierarchy(attr, hierarchy);
                             
-                            int height = hierarchy.getHierarchy().length > 0 ?
-                                    hierarchy.getHierarchy()[0].length : 0;
+                            int height = hierarchy.getHierarchy().length > 0 ? hierarchy.getHierarchy()[0].length : 0;
                             if (min.equals("All")) { //$NON-NLS-1$
                                 config.setMinimumGeneralization(attr, null);
                                 definition.setMinimumGeneralization(attr, 0);
@@ -576,7 +614,7 @@ public class WorkerLoad extends Worker<Model> {
         final InputStream is = new BufferedInputStream(zip.getInputStream(entry));
         
         // Use project delimiter for backwards compatibility
-        return Hierarchy.create(is, model.getCSVSyntax().getDelimiter());
+        return Hierarchy.create(is, Charset.defaultCharset(), model.getCSVSyntax().getDelimiter());
     }
 
     /**
@@ -594,6 +632,7 @@ public class WorkerLoad extends Worker<Model> {
         // Read input
         // Use project delimiter for backwards compatibility
         config.setInput(Data.create(new BufferedInputStream(zip.getInputStream(entry)),
+                                    Charset.defaultCharset(),
                                     model.getCSVSyntax().getDelimiter()));
         
         // Disable visualization
@@ -685,7 +724,7 @@ public class WorkerLoad extends Worker<Model> {
                     vocabulary.isMin2(localName)) {
                         return true;
                 } else if (vocabulary.isNode2(localName)) {
-                    final ARXNode node = lattice.new ARXNode();
+                    final ARXNode node = lattice.new ARXNode(lattice);
                     node.access().setAnonymity(anonymity);
                     node.access().setChecked(checked);
                     node.access().setTransformation(transformation);

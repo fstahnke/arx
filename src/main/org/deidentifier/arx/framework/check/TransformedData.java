@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 package org.deidentifier.arx.framework.check;
 
-import org.deidentifier.arx.framework.check.groupify.HashGroupify.EquivalenceClassStatistics;
 import org.deidentifier.arx.framework.data.Data;
 
 /**
@@ -28,26 +27,25 @@ import org.deidentifier.arx.framework.data.Data;
  *
  */
 public class TransformedData {
-    
+
     /** The GH buffer */
-    public Data            bufferGeneralized;
-    
+    public Data                       bufferGeneralized;
+
     /** The OT buffer */
-    public Data            bufferMicroaggregated;
-    
-    /** The group statistic */
-    public EquivalenceClassStatistics statistics;
+    public Data                       bufferMicroaggregated;
+
+    /** The properties */
+    public NodeChecker.Result         properties;
     
     /**
      * Instantiate the helper object.
      * 
      * @param bufferGH
      * @param bufferOT
-     * @param statistics
      */
-    public TransformedData(Data bufferGH, Data bufferOT, EquivalenceClassStatistics statistics) {
+    public TransformedData(Data bufferGH, Data bufferOT, NodeChecker.Result properties) {
         this.bufferGeneralized = bufferGH;
         this.bufferMicroaggregated = bufferOT;
-        this.statistics = statistics;
+        this.properties = properties;
     }
 }

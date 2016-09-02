@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.deidentifier.arx.DataSubset;
 import org.deidentifier.arx.aggregates.HierarchyBuilder;
 import org.deidentifier.arx.criteria.DPresence;
 import org.deidentifier.arx.criteria.Inclusion;
-import org.deidentifier.arx.criteria.PopulationUniqueness;
+import org.deidentifier.arx.criteria.KMap;
 import org.deidentifier.arx.criteria.PrivacyCriterion;
 import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.io.CSVSyntax;
@@ -93,7 +93,7 @@ public class Model implements Serializable {
     /** The currently selected node. */
     private transient ARXNode                     selectedNode                    = null;
     
-    /** The clipboard. */
+    /** The clip board. */
     private transient ModelClipboard              clipboard                       = null;
     
     /** The perspective */
@@ -115,9 +115,6 @@ public class Model implements Serializable {
     
     /** Threshold. */
     private int                                   maximalSizeForComplexOperations = 5000000;
-    
-    /** Threshold. */
-    private int                                   maxNodesInLattice               = 100000;
     
     /** Threshold. */
     private int                                   initialNodesInViewer            = 100;
@@ -216,32 +213,41 @@ public class Model implements Serializable {
     private ModelRisk                             riskModel                       = null;
 
     /* *****************************************
-     * PRIVACY CRITERIA
-     ******************************************/
+     * PRIVACY CRITERIA****************************************
+     */
 
     /** Model for a specific privacy criterion. */
-    private ModelDPresenceCriterion               dPresenceModel                  = new ModelDPresenceCriterion();
-    
-    /** Model for a specific privacy criterion. */
-    private ModelKAnonymityCriterion              kAnonymityModel                 = new ModelKAnonymityCriterion();
-    
-    /** Model for a specific privacy criterion. */
-    private Map<String, ModelLDiversityCriterion> lDiversityModel                 = new HashMap<String, ModelLDiversityCriterion>();
-    
-    /** Model for a specific privacy criterion. */
-    private Map<String, ModelTClosenessCriterion> tClosenessModel                 = new HashMap<String, ModelTClosenessCriterion>();
+    private ModelDPresenceCriterion                       dPresenceModel                  = new ModelDPresenceCriterion();
 
     /** Model for a specific privacy criterion. */
-    private Set<ModelRiskBasedCriterion>          riskBasedModel                  = new HashSet<ModelRiskBasedCriterion>();
+    private ModelKMapCriterion                            kMapModel                       = new ModelKMapCriterion();
+
+    /** Model for a specific privacy criterion. */
+    private ModelKAnonymityCriterion                      kAnonymityModel                 = new ModelKAnonymityCriterion();
+
+    /** Model for a specific privacy criterion. */
+    private Map<String, ModelLDiversityCriterion>         lDiversityModel                 = new HashMap<String, ModelLDiversityCriterion>();
+
+    /** Model for a specific privacy criterion. */
+    private Map<String, ModelTClosenessCriterion>         tClosenessModel                 = new HashMap<String, ModelTClosenessCriterion>();
+
+    /** Model for a specific privacy criterion. */
+    private Set<ModelRiskBasedCriterion>                  riskBasedModel                  = new HashSet<ModelRiskBasedCriterion>();
+
+    /** Model for a specific privacy criterion. */
+    private ModelDifferentialPrivacyCriterion             differentialPrivacyModel        = new ModelDifferentialPrivacyCriterion();
+
+    /** Model for a specific privacy criterion. */
+    private Map<String, ModelDDisclosurePrivacyCriterion> dDisclosurePrivacyModel         = new HashMap<String, ModelDDisclosurePrivacyCriterion>();
 
     /* *****************************************
      * UTILITY ANALYSIS
      ******************************************/
     /** Configuration. */
-    private MetricConfiguration                   metricConfig                    = ARXConfiguration.create().getMetric().getConfiguration();
+    private MetricConfiguration                   metricConfig                    = null;
     
     /** Description. */
-    private MetricDescription                     metricDescription               = ARXConfiguration.create().getMetric().getDescription();
+    private MetricDescription                     metricDescription               = null;
     
     /** Summary statistics */
     private Boolean                               useListwiseDeletion             = true;
@@ -252,7 +258,25 @@ public class Model implements Serializable {
     /* *****************************************
      * RISK ANALYSIS
      ******************************************/
+    /** Selected quasi identifiers*/
     private Set<String>                           selectedQuasiIdentifiers        = null;
+    
+
+    /* *****************************************
+     * LOCAL RECODING
+     ******************************************/
+    /** The local recoding model */
+    private ModelLocalRecoding                            localRecodingModel              = new ModelLocalRecoding();
+
+    /* *****************************************
+     * Data Mining
+     *******************************************/
+    /** Selected attributes */
+    private Set<String>                                   selectedFeatures                = null;
+    /** Selected attributes */
+    private Set<String>                                   selectedClasses                 = null;
+    /** Model */
+    private ModelClassification                           classificationModel             = new ModelClassification();
     
     /**
      * Creates a new instance.
@@ -276,8 +300,8 @@ public class Model implements Serializable {
 	    this.getAuditTrail().add(entry);
 	    this.setModified();
 	}
-
-    /**
+	
+	/**
      * Creates an anonymizer for the current config.
      *
      * @return
@@ -289,7 +313,6 @@ public class Model implements Serializable {
 		this.anonymizer.setHistorySize(getHistorySize());
 		this.anonymizer.setMaximumSnapshotSizeDataset(getSnapshotSizeDataset());
 		this.anonymizer.setMaximumSnapshotSizeSnapshot(getSnapshotSizeSnapshot());
-		this.anonymizer.setMaxTransformations(getMaxNodesInLattice());
 		
 		// Add all criteria
 		this.createConfig();
@@ -297,7 +320,7 @@ public class Model implements Serializable {
         // Return the anonymizer
 		return anonymizer;
 	}
-
+	
 	/**
      * Replaces the output config with a clone of the input config.
      */
@@ -308,7 +331,7 @@ public class Model implements Serializable {
         this.setModified();
 	}
 
-	/**
+    /**
      * Creates an ARXConfiguration.
      */
 	public void createConfig() {
@@ -369,11 +392,21 @@ public class Model implements Serializable {
                 }
             }
         }
-        
+
+        if (this.differentialPrivacyModel != null &&
+            this.differentialPrivacyModel.isEnabled()) {
+            config.addCriterion(this.differentialPrivacyModel.getCriterion(this));
+        }
+
 		if (this.kAnonymityModel != null &&
 		    this.kAnonymityModel.isEnabled()) {
 		    config.addCriterion(this.kAnonymityModel.getCriterion(this));
 		}
+
+        if (this.kMapModel != null &&
+            this.kMapModel.isEnabled()) {
+            config.addCriterion(this.kMapModel.getCriterion(this));
+        }
 
         if (this.dPresenceModel != null && 
             this.dPresenceModel.isEnabled()) {
@@ -401,6 +434,13 @@ public class Model implements Serializable {
                 config.addCriterion(criterion);
             }
         }
+
+        for (Entry<String, ModelDDisclosurePrivacyCriterion> entry : this.dDisclosurePrivacyModel.entrySet()){
+            if (entry.getValue() != null &&
+                entry.getValue().isEnabled()) {
+                config.addCriterion(entry.getValue().getCriterion(this));
+            }
+        }
         
         for (ModelRiskBasedCriterion entry : this.riskBasedModel){
             if (entry != null &&
@@ -412,16 +452,17 @@ public class Model implements Serializable {
         }
 
         // Allow adding and removing tuples
-        if (!config.containsCriterion(DPresence.class)){
+        if (!config.containsCriterion(DPresence.class) || 
+            !config.containsCriterion(KMap.class) || 
+            (config.containsCriterion(KMap.class) && !config.getCriterion(KMap.class).isAccurate())){
             if (config.getInput() != null && config.getResearchSubset() != null && 
                 config.getResearchSubset().size() != config.getInput().getHandle().getNumRows()) {
-                    DataSubset subset = DataSubset.create(config.getInput(), 
-                                                          config.getResearchSubset());
+                    DataSubset subset = DataSubset.create(config.getInput(), config.getResearchSubset());
                     config.addCriterion(new Inclusion(subset));
             }
         }
 	}
-    
+
     /**
      * Creates an ARXConfiguration for the subset.
      *
@@ -449,7 +490,7 @@ public class Model implements Serializable {
 	public ARXAnonymizer getAnonymizer() {
 		return anonymizer;
 	}
-    
+
 	/**
      * Returns the last two selected attributes.
      *
@@ -459,8 +500,8 @@ public class Model implements Serializable {
 		if (pair == null) pair = new String[] { null, null };
 		return pair;
 	}
-	
-	/**
+    
+    /**
 	 * Returns the audit trail
 	 * @return
 	 */
@@ -469,6 +510,17 @@ public class Model implements Serializable {
 	        this.auditTrail = new ArrayList<ModelAuditTrailEntry>();
 	    }
 	    return auditTrail;
+	}
+
+	/**
+	 * Returns the classification model
+	 * @return
+	 */
+	public ModelClassification getClassificationModel() {
+	    if (this.classificationModel == null) {
+	        this.classificationModel = new ModelClassification();
+	    }
+	    return this.classificationModel;
 	}
 	
 	/**
@@ -496,6 +548,23 @@ public class Model implements Serializable {
     }
 
 	/**
+     * Returns the d-disclosure privacy model.
+     *
+     * @return
+     */
+    public Map<String, ModelDDisclosurePrivacyCriterion> getDDisclosurePrivacyModel() {
+        if (this.dDisclosurePrivacyModel == null) {
+            this.dDisclosurePrivacyModel = new HashMap<String, ModelDDisclosurePrivacyCriterion>();
+            DataHandle handle = inputConfig.getInput().getHandle();
+            for (int col = 0; col < handle.getNumColumns(); col++) {
+                String attribute = handle.getAttributeName(col);
+                dDisclosurePrivacyModel.put(attribute, new ModelDDisclosurePrivacyCriterion(attribute));
+            }
+        }
+        return dDisclosurePrivacyModel;
+    }
+
+	/**
      * Returns the project description.
      *
      * @return
@@ -503,6 +572,18 @@ public class Model implements Serializable {
 	public String getDescription() {
 		return description;
 	}
+
+	/**
+     * Returns the (e,d)-DP model.
+     *
+     * @return
+     */
+    public ModelDifferentialPrivacyCriterion getDifferentialPrivacyModel() {
+        if (this.differentialPrivacyModel == null) {
+            this.differentialPrivacyModel = new ModelDifferentialPrivacyCriterion();
+        }
+        return differentialPrivacyModel;
+    }
 
 	/**
      * Returns the d-presence model.
@@ -513,6 +594,18 @@ public class Model implements Serializable {
 		return dPresenceModel;
 	}
 
+    /**
+     * Returns the k-map model.
+     *
+     * @return
+     */
+    public ModelKMapCriterion getKMapModel() {
+        if (kMapModel == null) {
+            kMapModel = new ModelKMapCriterion();
+        }
+        return kMapModel;
+    }
+    
 	/**
      * Returns a list of indices of all equivalence classes.
      *
@@ -571,14 +664,14 @@ public class Model implements Serializable {
 	    else return inputConfig.getInput().getDefinition();
 	}
 
-	/**
+    /**
 	 * Returns the input population model
 	 * @return
 	 */
 	public ARXPopulationModel getInputPopulationModel() {
 	    return getRiskModel().getPopulationModel();
 	}
-
+    
 	/**
      * Returns the k-anonymity model.
      *
@@ -612,7 +705,18 @@ public class Model implements Serializable {
 	        return locale;
 	    }
 	}
-	
+
+	/**
+     * Returns the model for local recoding
+     * @return
+     */
+    public ModelLocalRecoding getLocalRecodingModel() {
+        if (this.localRecodingModel == null) {
+            this.localRecodingModel = new ModelLocalRecoding();
+        }
+        return localRecodingModel;
+    }
+
 	/**
      * When a dataset has more records than this threshold,
      * visualization of statistics will be disabled.
@@ -621,15 +725,6 @@ public class Model implements Serializable {
      */
 	public int getMaximalSizeForComplexOperations(){
 	    return this.maximalSizeForComplexOperations;
-	}
-
-	/**
-     * Returns the maximal size of the lattice.
-     *
-     * @return
-     */
-	public int getMaxNodesInLattice() {
-		return maxNodesInLattice;
 	}
 
 	/**
@@ -728,7 +823,7 @@ public class Model implements Serializable {
 		else return this.output.getDefinition();
 	}
 
-	/**
+    /**
      * Returns the currently applied transformation.
      *
      * @return
@@ -753,15 +848,16 @@ public class Model implements Serializable {
     public ARXPopulationModel getOutputPopulationModel() {
         ModelConfiguration config = getOutputConfig();
         if (config != null) {
-            Set<PopulationUniqueness> set = config.getCriteria(PopulationUniqueness.class);
-            if (set != null && !set.isEmpty()) {
-                return set.iterator().next().getPopulationModel();
+            for (PrivacyCriterion c : config.getCriteria()) {
+                if (c.getPopulationModel() != null) {
+                    return c.getPopulationModel();
+                }
             }
         }
         return null;
     }
-
-    /**
+	
+	/**
      * Returns the path of the project.
      *
      * @return
@@ -769,7 +865,7 @@ public class Model implements Serializable {
 	public String getPath() {
 		return path;
 	}
-
+	
 	/**
      * @return the perspective
      */
@@ -788,7 +884,7 @@ public class Model implements Serializable {
 	public String getQuery() {
         return query;
     }
-	
+
 	/**
      * Returns the current result.
      *
@@ -797,8 +893,8 @@ public class Model implements Serializable {
 	public ARXResult getResult() {
 		return result;
 	}
-	
-	/**
+
+    /**
      * Returns the risk-based model.
      *
      * @return
@@ -812,7 +908,7 @@ public class Model implements Serializable {
         }
         return riskBasedModel;
     }
-
+	
 	/**
      * Returns the risk model
      * @return the risk model
@@ -824,13 +920,67 @@ public class Model implements Serializable {
         return riskModel;
     }
 
-	/**
+
+    /**
      * Returns the currently selected attribute.
      *
      * @return
      */
 	public String getSelectedAttribute() {
 		return selectedAttribute;
+	}
+
+	
+    /**
+     * Returns the selected features
+     * @return
+     */
+    public Set<String> getSelectedClasses() {
+
+        if (this.selectedClasses == null) {
+
+            // Add attributes
+            if (this.getInputConfig() != null && this.getInputConfig().getInput() != null) {
+                DataHandle handle = this.getInputConfig().getInput().getHandle();
+
+                this.selectedClasses = new HashSet<String>();
+                for (int i = 0; i < handle.getNumColumns(); i++) {
+                    this.selectedClasses.add(handle.getAttributeName(i));
+                }
+
+            } else {
+
+                // Return empty set
+                return new HashSet<String>();
+            }
+        }
+        return this.selectedClasses;
+    }
+
+	/**
+	 * Returns the selected features
+	 * @return
+	 */
+	public Set<String> getSelectedFeatures() {
+
+        if (this.selectedFeatures == null) {
+
+            // Add attributes
+            if (this.getInputConfig() != null && this.getInputConfig().getInput() != null) {
+                DataHandle handle = this.getInputConfig().getInput().getHandle();
+
+                this.selectedFeatures = new HashSet<String>();
+                for (int i = 0; i < handle.getNumColumns(); i++) {
+                    this.selectedFeatures.add(handle.getAttributeName(i));
+                }
+
+            } else {
+
+                // Return empty set
+                return new HashSet<String>();
+            }
+        }
+        return this.selectedFeatures;
 	}
 
     /**
@@ -841,7 +991,7 @@ public class Model implements Serializable {
 	public ARXNode getSelectedNode() {
 		return selectedNode;
 	}
-    
+
     /**
      * Returns a set of quasi identifiers selected for risk analysis
      * @return
@@ -884,7 +1034,7 @@ public class Model implements Serializable {
         return this.selectedQuasiIdentifiers;
     }
 
-	/**
+    /**
      * Returns the separator.
      *
      * @return
@@ -902,7 +1052,7 @@ public class Model implements Serializable {
 		return snapshotSizeDataset;
 	}
 
-    /**
+	/**
      * Returns the according parameter.
      *
      * @return
@@ -911,7 +1061,7 @@ public class Model implements Serializable {
 		return snapshotSizeSnapshot;
 	}
 
-    /**
+	/**
      * Returns the origin of the subset.
      *
      * @return
@@ -920,7 +1070,7 @@ public class Model implements Serializable {
         return this.subsetOrigin;
     }
 
-	/**
+    /**
      * Returns the t-closeness model.
      *
      * @return
@@ -932,7 +1082,7 @@ public class Model implements Serializable {
 		return tClosenessModel;
 	}
 
-	/**
+    /**
      * Returns the execution time of the last anonymization process.
      *
      * @return
@@ -941,20 +1091,7 @@ public class Model implements Serializable {
 		return time;
 	}
 
-    /**
-     * Returns whether list-wise deletion is used for summary statistics
-     * @return
-     */
-    public Boolean getUseListwiseDeletion() {
-        
-        // Backwards compatibility
-        if (useListwiseDeletion == null) {
-            useListwiseDeletion = true;
-        }
-        return useListwiseDeletion;
-    }
-
-    /**
+	/**
      * Returns whether functional hierarchies should be used
      * @return
      */
@@ -968,6 +1105,19 @@ public class Model implements Serializable {
     }
 
 	/**
+     * Returns whether list-wise deletion is used for summary statistics
+     * @return
+     */
+    public Boolean getUseListwiseDeletion() {
+        
+        // Backwards compatibility
+        if (useListwiseDeletion == null) {
+            useListwiseDeletion = true;
+        }
+        return useListwiseDeletion;
+    }
+
+    /**
      * Returns the view configuration.
      *
      * @return
@@ -991,19 +1141,12 @@ public class Model implements Serializable {
      * @return
      */
     public boolean isModified() {
-		if (inputConfig.isModified()) {
-			return true;
-		}
-		if (riskModel.isModified()) {
-            return true;
-        }
-		if ((outputConfig != null) && outputConfig.isModified()) {
-			return true;
-		}
-        if ((clipboard != null) && clipboard.isModified()) { 
-            return true; 
-        }
-		return modified;
+        if (inputConfig.isModified()) { return true; }
+        if (getRiskModel().isModified()) { return true; }
+        if (getClassificationModel().isModified()) { return true; }
+        if ((outputConfig != null) && outputConfig.isModified()) { return true; }
+        if ((clipboard != null) && clipboard.isModified()) { return true; }
+        return modified;
 	}
 
 	/**
@@ -1014,8 +1157,8 @@ public class Model implements Serializable {
 	public boolean isQuasiIdentifierSelected() {
 		return (getInputDefinition().getAttributeType(getSelectedAttribute()) == AttributeType.QUASI_IDENTIFYING_ATTRIBUTE);
 	}
-
-    /**
+	
+	/**
      * Returns whether a sensitive attribute is selected.
      *
      * @return
@@ -1041,19 +1184,22 @@ public class Model implements Serializable {
      * Resets the model.
      */
 	public void reset() {
-        resetCriteria();
-        resetAttributePair();
-        inputConfig = new ModelConfiguration();
-        outputConfig = null;
-        output = null;
-        result = null;
+        this.resetCriteria();
+        this.resetAttributePair();
+        this.inputConfig = new ModelConfiguration();
+        this.outputConfig = null;
+        this.output = null;
+        this.result = null;
         if (auditTrail != null) auditTrail.clear();
-        selectedQuasiIdentifiers = null;
-        subsetOrigin = Resources.getMessage("Model.0"); //$NON-NLS-1$
-        groups = null;
+        this.selectedQuasiIdentifiers = null;
+        this.selectedFeatures = null;
+        this.selectedClasses = null;
+        this.subsetOrigin = Resources.getMessage("Model.0"); //$NON-NLS-1$
+        this.groups = null;
+        this.classificationModel = new ModelClassification();
 	}
-
-	/**
+    
+    /**
      * Returns the last two selected attributes.
      */
     public void resetAttributePair() {
@@ -1070,23 +1216,27 @@ public class Model implements Serializable {
 		
 		if (inputConfig==null || inputConfig.getInput()==null) return;
 		
+		differentialPrivacyModel = new ModelDifferentialPrivacyCriterion();
 		kAnonymityModel = new ModelKAnonymityCriterion();
 		dPresenceModel = new ModelDPresenceCriterion();
+		kMapModel = new ModelKMapCriterion();
 		lDiversityModel.clear();
 		tClosenessModel.clear();
 		riskBasedModel.clear();
+		dDisclosurePrivacyModel.clear();
 		DataHandle handle = inputConfig.getInput().getHandle();
 		for (int col = 0; col < handle.getNumColumns(); col++) {
 			String attribute = handle.getAttributeName(col);
 			lDiversityModel.put(attribute, new ModelLDiversityCriterion(attribute));
 			tClosenessModel.put(attribute, new ModelTClosenessCriterion(attribute));
+			dDisclosurePrivacyModel.put(attribute, new ModelDDisclosurePrivacyCriterion(attribute));
 		}
 		riskBasedModel.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_AVERAGE_RISK));
 		riskBasedModel.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_SAMPLE_UNIQUES));
 		riskBasedModel.add(new ModelRiskBasedCriterion(ModelRiskBasedCriterion.VARIANT_POPULATION_UNIQUES_DANKAR));
 	}
-    
-    /**
+
+	/**
      * Sets the anonymizer.
      *
      * @param anonymizer
@@ -1116,7 +1266,7 @@ public class Model implements Serializable {
 		setModified();
 	}
 
-	/**
+    /**
      * Sets the indices of equivalence classes.
      *
      * @param groups
@@ -1145,7 +1295,7 @@ public class Model implements Serializable {
 		setModified();
 	}
 
-    /**
+	/**
      * Sets the size of the input in bytes.
      *
      * @param inputBytes
@@ -1162,8 +1312,6 @@ public class Model implements Serializable {
      */
 	public void setInputConfig(final ModelConfiguration config) {
 		this.inputConfig = config;
-		this.metricConfig = config.getMetric().getConfiguration();
-		this.metricDescription = config.getMetric().getDescription();
 	}
 
 	/**
@@ -1175,7 +1323,7 @@ public class Model implements Serializable {
         this.locale = locale;
         this.setModified();
     }
-
+	
 	/**
      * Sets the according parameter.
      *
@@ -1185,17 +1333,7 @@ public class Model implements Serializable {
         this.maximalSizeForComplexOperations = numberOfRows;
         this.setModified();
     }
-
-	/**
-     * Sets the according parameter.
-     *
-     * @param maxNodesInLattice
-     */
-	public void setMaxNodesInLattice(final int maxNodesInLattice) {
-		this.maxNodesInLattice = maxNodesInLattice;
-		setModified();
-	}
-
+	
 	/**
      * Sets the according parameter.
      *
@@ -1205,16 +1343,7 @@ public class Model implements Serializable {
 		this.maxNodesInViewer = maxNodesInViewer;
 		setModified();
 	}
-
-	/**
-     * Sets the metric configuration.
-     *
-     * @param config
-     */
-    public void setMetricConfiguration(MetricConfiguration config) {
-        this.metricConfig = config;
-    }
-
+	
 	/**
      * Sets the description of the metric.
      *
@@ -1230,7 +1359,7 @@ public class Model implements Serializable {
     public void setModified() {
 		modified = true;
 	}
-	
+
 	/**
      * Sets the project name.
      *
@@ -1240,7 +1369,7 @@ public class Model implements Serializable {
 		this.name = name;
 		setModified();
 	}
-	
+
 	/**
      * Sets a filter.
      *
@@ -1250,7 +1379,7 @@ public class Model implements Serializable {
 		nodeFilter = filter;
 		setModified();
 	}
-	
+
 	/**
      * Sets the current output.
      *
@@ -1277,7 +1406,7 @@ public class Model implements Serializable {
 		outputConfig = config;
 	}
 
-	/**
+    /**
      * Sets the project path.
      *
      * @param path
@@ -1285,15 +1414,15 @@ public class Model implements Serializable {
 	public void setPath(final String path) {
 		this.path = path;
 	}
-
+    
 	/**
      * @param perspective the perspective to set
      */
     public void setPerspective(Perspective perspective) {
         this.perspective = perspective;
     }
-
-	/**
+    
+    /**
      * Sets the query.
      *
      * @param query
@@ -1302,8 +1431,8 @@ public class Model implements Serializable {
         this.query = query;
         setModified();
     }
-
-	/**
+    
+    /**
      * Sets the result.
      *
      * @param result
@@ -1323,8 +1452,8 @@ public class Model implements Serializable {
 	public void setSaved() {
 		modified = false;
 	}
-    
-	/**
+
+    /**
      * Sets the selected attribute.
      *
      * @param attribute
@@ -1347,7 +1476,25 @@ public class Model implements Serializable {
 
 		setModified();
 	}
-    
+
+	/**
+     * Sets a set of selected attributes
+     * @param set
+     */
+    public void setSelectedClasses(Set<String> set) {
+        this.selectedClasses = set;
+        this.setModified();
+    }
+
+    /**
+     * Sets a set of selected attributes
+     * @param set
+     */
+    public void setSelectedFeatures(Set<String> set) {
+        this.selectedFeatures = set;
+        this.setModified();
+    }
+
     /**
      * Sets the selected node.
      *
@@ -1357,7 +1504,7 @@ public class Model implements Serializable {
 		selectedNode = node;
 		setModified();
 	}
-    
+
     /**
      * Sets a set of quasi identifiers selected for risk analysis
      * @param set
@@ -1367,7 +1514,7 @@ public class Model implements Serializable {
         this.setModified();
     }
 
-	/**
+    /**
      * 
      *
      * @param snapshotSize
@@ -1404,7 +1551,7 @@ public class Model implements Serializable {
     public void setSubsetOrigin(String origin){
         this.subsetOrigin = origin;
     }
-
+    
     /**
      * Sets the execution time of the last anonymization process.
      *
@@ -1413,29 +1560,22 @@ public class Model implements Serializable {
     public void setTime(final long time) {
 		this.time = time;
 	}
-
+    
     /**
      * Marks this model as unmodified.
      */
     public void setUnmodified() {
 		modified = false;
 		inputConfig.setUnmodified();
-		riskModel.setUnmodified();
+		getRiskModel().setUnmodified();
 		if (outputConfig != null) {
 			outputConfig.setUnmodified();
 		}
 		if (clipboard != null) {
 		    clipboard.setUnmodified();
 		}
+		getClassificationModel().setUnmodified();
 	}
-
-    /**
-     * Sets whether list-wise deletion should be used for summary statistics
-     * @param useListwiseDeletion
-     */
-    public void setUseListwiseDeletion(boolean useListwiseDeletion) {
-        this.useListwiseDeletion = useListwiseDeletion;
-    }
 
     /**
      * Sets whether funtional hierarchies should be used during anonymization to esimtate utility
@@ -1443,6 +1583,14 @@ public class Model implements Serializable {
      */
     public void setUseFunctionalHierarchies(boolean useFunctionalHierarchies) {
         this.useFunctionalHierarchies = useFunctionalHierarchies;
+    }
+
+    /**
+     * Sets whether list-wise deletion should be used for summary statistics
+     * @param useListwiseDeletion
+     */
+    public void setUseListwiseDeletion(boolean useListwiseDeletion) {
+        this.useListwiseDeletion = useListwiseDeletion;
     }
     
     /**

@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * Copyright 2014 Karol Babioch <karol@babioch.de>
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.math3.util.Pair;
@@ -44,15 +47,18 @@ import org.deidentifier.arx.AttributeType.Hierarchy;
 import org.deidentifier.arx.Data;
 import org.deidentifier.arx.DataDefinition;
 import org.deidentifier.arx.DataHandle;
+import org.deidentifier.arx.DataScale;
 import org.deidentifier.arx.DataSelector;
 import org.deidentifier.arx.DataSubset;
 import org.deidentifier.arx.DataType;
 import org.deidentifier.arx.DataType.DataTypeDescription;
 import org.deidentifier.arx.RowSet;
 import org.deidentifier.arx.aggregates.HierarchyBuilder;
+import org.deidentifier.arx.exceptions.RollbackRequiredException;
 import org.deidentifier.arx.gui.model.Model;
 import org.deidentifier.arx.gui.model.ModelAuditTrailEntry;
 import org.deidentifier.arx.gui.model.ModelCriterion;
+import org.deidentifier.arx.gui.model.ModelDDisclosurePrivacyCriterion;
 import org.deidentifier.arx.gui.model.ModelEvent;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
 import org.deidentifier.arx.gui.model.ModelExplicitCriterion;
@@ -78,11 +84,13 @@ import org.deidentifier.arx.gui.worker.WorkerAnonymize;
 import org.deidentifier.arx.gui.worker.WorkerExport;
 import org.deidentifier.arx.gui.worker.WorkerImport;
 import org.deidentifier.arx.gui.worker.WorkerLoad;
+import org.deidentifier.arx.gui.worker.WorkerLocalRecode;
 import org.deidentifier.arx.gui.worker.WorkerSave;
 import org.deidentifier.arx.gui.worker.WorkerTransform;
 import org.deidentifier.arx.io.CSVDataOutput;
 import org.deidentifier.arx.io.ImportConfiguration;
 import org.deidentifier.arx.io.ImportConfigurationCSV;
+import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -125,6 +133,59 @@ public class Controller implements IView {
     }
 
     /**
+     * Applies local recoding
+     */
+    public void actionApplyLocalRecoding() {
+        
+
+        // Run the worker
+        final WorkerLocalRecode worker = new WorkerLocalRecode(model);
+        main.showProgressDialog(Resources.getMessage("Controller.140"), worker); //$NON-NLS-1$
+
+        // Show errors
+        if (worker.getError() != null) {
+
+            // Extract
+            Throwable t = worker.getError();
+            if (worker.getError() instanceof InvocationTargetException) {
+                t = worker.getError().getCause();
+            }
+            if (t instanceof RollbackRequiredException) {
+                // Rollback
+                this.actionApplySelectedTransformation();
+                return;
+                
+            } else if (t instanceof OutOfMemoryError) {
+                main.showInfoDialog(main.getShell(),
+                                    Resources.getMessage("Controller.13"), //$NON-NLS-1$
+                                    Resources.getMessage("Controller.120")); //$NON-NLS-1$
+            } else if (t instanceof NullPointerException) {
+                main.showErrorDialog(main.getShell(), Resources.getMessage("Controller.36"), t); //$NON-NLS-1$
+            } else {
+                main.showInfoDialog(main.getShell(),
+                                    Resources.getMessage("Controller.13"), //$NON-NLS-1$
+                                    Resources.getMessage("Controller.141") + t.getMessage()); //$NON-NLS-1$
+            }
+        }
+
+        update(new ModelEvent(this,
+                              ModelPart.OUTPUT,
+                              model.getOutput()));
+
+        // Do not sort if dataset is too large
+        if (model.getMaximalSizeForComplexOperations() == 0 ||
+            model.getInputConfig().getInput().getHandle().getNumRows() <=
+            model.getMaximalSizeForComplexOperations()) {
+            this.model.getViewConfig().setMode(Mode.GROUPED);
+            this.updateViewConfig(true);
+        } else {
+            this.model.getViewConfig().setMode(Mode.UNSORTED);
+            this.updateViewConfig(true);
+        }
+        this.update(new ModelEvent(this, ModelPart.SELECTED_VIEW_CONFIG, model.getOutput()));
+    }
+    
+    /**
      * Applies the selected transformation.
      */
     public void actionApplySelectedTransformation() {
@@ -154,6 +215,7 @@ public class Controller implements IView {
                 this.updateViewConfig(true);
             } else {
                 this.model.getViewConfig().setMode(Mode.UNSORTED);
+                this.updateViewConfig(true);
             }
             this.update(new ModelEvent(this, ModelPart.SELECTED_VIEW_CONFIG, model.getOutput()));
         }
@@ -172,9 +234,15 @@ public class Controller implements IView {
     public void actionCriterionAdd() {
 
         List<ModelCriterion> criteria = new ArrayList<ModelCriterion>();
-        
+
+        if (!model.getDifferentialPrivacyModel().isEnabled()) {
+            criteria.add(model.getDifferentialPrivacyModel());
+        }
         if (!model.getKAnonymityModel().isEnabled()) {
             criteria.add(model.getKAnonymityModel());
+        }
+        if (!model.getKMapModel().isEnabled()) {
+            criteria.add(model.getKMapModel());
         }
         if (!model.getDPresenceModel().isEnabled()) {
             criteria.add(model.getDPresenceModel());
@@ -189,6 +257,11 @@ public class Controller implements IView {
             }
         }
         for (ModelTClosenessCriterion other : model.getTClosenessModel().values()) {
+            if (!other.isEnabled() && sensitive.contains(other.getAttribute())) {
+                explicit.add(other);
+            }
+        }
+        for (ModelDDisclosurePrivacyCriterion other : model.getDDisclosurePrivacyModel().values()) {
             if (!other.isEnabled() && sensitive.contains(other.getAttribute())) {
                 explicit.add(other);
             }
@@ -218,7 +291,7 @@ public class Controller implements IView {
         }
         
         // Select criterion
-        ModelCriterion criterion = main.showAddCriterionDialog(criteria);
+        ModelCriterion criterion = main.showAddCriterionDialog(model, criteria);
         if (criterion != null) {
             criterion.setEnabled(true);
             this.update(new ModelEvent(this, ModelPart.CRITERION_DEFINITION, criterion));
@@ -232,9 +305,15 @@ public class Controller implements IView {
     public void actionCriterionConfigure(ModelCriterion criterion) {
 
         List<ModelCriterion> criteria = new ArrayList<ModelCriterion>();
-        
+
+        if (model.getDifferentialPrivacyModel().isEnabled()) {
+            criteria.add(model.getDifferentialPrivacyModel());
+        }
         if (model.getKAnonymityModel().isEnabled()) {
             criteria.add(model.getKAnonymityModel());
+        }
+        if (model.getKMapModel().isEnabled()) {
+            criteria.add(model.getKMapModel());
         }
         if (model.getDPresenceModel().isEnabled()) {
             criteria.add(model.getDPresenceModel());
@@ -249,6 +328,11 @@ public class Controller implements IView {
             }
         }
         for (ModelTClosenessCriterion other : model.getTClosenessModel().values()) {
+            if (other.isEnabled() && sensitive.contains(other.getAttribute())) {
+                explicit.add(other);
+            }
+        }
+        for (ModelDDisclosurePrivacyCriterion other : model.getDDisclosurePrivacyModel().values()) {
             if (other.isEnabled() && sensitive.contains(other.getAttribute())) {
                 explicit.add(other);
             }
@@ -279,7 +363,7 @@ public class Controller implements IView {
         }
         
         // Select criterion
-        main.showConfigureCriterionDialog(criteria, criterion);
+        main.showConfigureCriterionDialog(model, criteria, criterion);
         this.update(new ModelEvent(this, ModelPart.CRITERION_DEFINITION, null));
     }
 
@@ -314,6 +398,12 @@ public class Controller implements IView {
             }
         } else if (criterion instanceof ModelTClosenessCriterion) {
             for (ModelTClosenessCriterion other : model.getTClosenessModel().values()) {
+                if (!other.equals(criterion) && other.isEnabled()) {
+                    others.add((ModelExplicitCriterion) other);
+                }
+            }
+        } else if (criterion instanceof ModelDDisclosurePrivacyCriterion) {
+            for (ModelDDisclosurePrivacyCriterion other : model.getDDisclosurePrivacyModel().values()) {
                 if (!other.equals(criterion) && other.isEnabled()) {
                     others.add((ModelExplicitCriterion) other);
                 }
@@ -359,6 +449,12 @@ public class Controller implements IView {
                 }
             } else if (criterion instanceof ModelTClosenessCriterion) {
                 for (ModelTClosenessCriterion other : model.getTClosenessModel().values()) {
+                    if (!other.equals(criterion) && other.isEnabled()) {
+                        other.pull((ModelExplicitCriterion) criterion);
+                    }
+                }
+            } else if (criterion instanceof ModelDDisclosurePrivacyCriterion) {
+                for (ModelDDisclosurePrivacyCriterion other : model.getDDisclosurePrivacyModel().values()) {
                     if (!other.equals(criterion) && other.isEnabled()) {
                         other.pull((ModelExplicitCriterion) criterion);
                     }
@@ -425,67 +521,18 @@ public class Controller implements IView {
     }
 
     /**
-     * Find and replace action
+     * Expand action
+     * @param transformation
      */
-    public void actionFindReplace() {
-
-        // Check
-        if (model == null) {
-            main.showInfoDialog(main.getShell(),
-                                Resources.getMessage("Controller.3"), //$NON-NLS-1$
-                                Resources.getMessage("Controller.4")); //$NON-NLS-1$
-            return;
-        }
-
-        // Check
-        if (model.getInputConfig().getInput() == null) {
-            main.showInfoDialog(main.getShell(),
-                                Resources.getMessage("Controller.5"), //$NON-NLS-1$
-                                Resources.getMessage("Controller.6")); //$NON-NLS-1$
-            return;
-        }
-
-        // Show dialog
-        DataHandle handle = model.getInputConfig().getInput().getHandle();
-        int column = handle.getColumnIndexOf(model.getSelectedAttribute());
-        Pair<String, String> pair = main.showFindReplaceDialog(model, handle, column);
-        
-        // If action must be performed
-        if (pair != null) {
-            
-            // Replace in input
-            handle.replace(column, pair.getFirst(), pair.getSecond());
-            
-            // Replace in output
-            if (model.getOutputConfig() != null) {
-                Hierarchy hierarchy = model.getOutputConfig().getHierarchy(model.getSelectedAttribute());
-                if (hierarchy != null) {
-                    for (String[] array : hierarchy.getHierarchy()) {
-                        for (int i=0; i<array.length; i++) {
-                            if (array[i].equals(pair.getFirst())) {
-                                array[i] = pair.getSecond();
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Fire event
-            ModelAuditTrailEntry entry = ModelAuditTrailEntry.createfindReplaceEntry( model.getSelectedAttribute(), 
-                                                                                      pair.getFirst(), 
-                                                                                      pair.getSecond());
-            update(new ModelEvent(this, ModelPart.ATTRIBUTE_VALUE, entry));
-            
-            // Store in model
-            model.addAuditTrailEntry(entry);
-            model.setModified();
-        }
+    public void actionExpand(ARXNode transformation) {
+        model.getResult().getLattice().expand(transformation);
     }
 
     /**
      * Starts the anonymization.
+     * @param heuristicSearch 
      */
-    public void actionMenuEditAnonymize() {
+    public void actionMenuEditAnonymize(boolean heuristicSearch) {
 
         if (model == null) {
             main.showInfoDialog(main.getShell(),
@@ -507,10 +554,35 @@ public class Controller implements IView {
             return;
         }
 
-        actionMenuEditReset();
+        // Query for execution time
+        int timeLimit = 0;
+        if (heuristicSearch) {
+            String output = this.actionShowInputDialog(main.getShell(), 
+                                                       Resources.getMessage("Controller.38"),  //$NON-NLS-1$
+                                                       Resources.getMessage("Controller.79") + //$NON-NLS-1$
+                                                       Resources.getMessage("Controller.80"), "0.5", //$NON-NLS-1$ //$NON-NLS-2$
+                                                       new IInputValidator(){
+                                                        public String isValid(String arg0) {
+                                                            // TODO: Ugly hack
+                                                            try { 
+                                                                double val = Double.parseDouble(arg0); 
+                                                                return val>0d ? null : Resources.getMessage("Controller.98");  //$NON-NLS-1$
+                                                            } catch (Exception e) {
+                                                                return Resources.getMessage("Controller.99"); //$NON-NLS-1$
+                                                            }
+                                                        }
+            });
+            if (output == null) {
+                return;
+            }
+            timeLimit = Double.valueOf(Double.valueOf(output) * 1000d).intValue();
+        }
 
+        // Reset
+        actionMenuEditReset();
+        
         // Run the worker
-        final WorkerAnonymize worker = new WorkerAnonymize(model);
+        final WorkerAnonymize worker = new WorkerAnonymize(model, timeLimit);
         main.showProgressDialog(Resources.getMessage("Controller.12"), worker); //$NON-NLS-1$
 
         // Show errors
@@ -521,7 +593,11 @@ public class Controller implements IView {
             if (worker.getError() instanceof InvocationTargetException) {
                 t = worker.getError().getCause();
             }
-            if (t instanceof NullPointerException) {
+            if (t instanceof OutOfMemoryError) {
+                main.showInfoDialog(main.getShell(),
+                                    Resources.getMessage("Controller.13"), //$NON-NLS-1$
+                                    Resources.getMessage("Controller.120")); //$NON-NLS-1$
+            } else if (t instanceof NullPointerException) {
                 main.showErrorDialog(main.getShell(), Resources.getMessage("Controller.36"), t); //$NON-NLS-1$
             } else {
                 main.showInfoDialog(main.getShell(),
@@ -562,6 +638,7 @@ public class Controller implements IView {
             // Update model
             update(new ModelEvent(this, ModelPart.FILTER, filter));
             update(new ModelEvent(this, ModelPart.RESULT, result));
+            model.getClipboard().addInterestingTransformations(model);
             update(new ModelEvent(this, ModelPart.CLIPBOARD, null));
             if (result.isResultAvailable()) {
                 model.setOutput(result.getOutput(false), result.getGlobalOptimum());
@@ -647,6 +724,183 @@ public class Controller implements IView {
     }
 
     /**
+     * Initializes the hierarchy for the currently selected attribute with a scheme
+     * for top-/bottom coding.
+     */
+    public void actionMenuEditCreateTopBottomCodingHierarchy() {
+
+        // Check
+        if (model == null ||
+            model.getInputConfig() == null ||
+            model.getInputConfig().getInput() == null ||
+            model.getSelectedAttribute() == null) {
+            return;
+        }
+        
+        // Check
+        DataType<?>type = model.getInputDefinition().getDataType(model.getSelectedAttribute());
+        if (type.getDescription().getScale() != DataScale.INTERVAL &&
+            type.getDescription().getScale() != DataScale.RATIO) {
+            actionShowInfoDialog(this.main.getShell(), Resources.getMessage("Controller.150"), Resources.getMessage("Controller.151")); //$NON-NLS-1$ //$NON-NLS-2$
+            return;
+        }
+        
+        // User input
+        Pair<Pair<String, Boolean>, Pair<String, Boolean>> pair = main.showTopBottomCodingDialog(type);
+        if (pair == null || (pair.getFirst() == null && pair.getSecond() == null)) {
+            return;
+        }
+        
+        // Obtain values
+        DataHandle handle = model.getInputConfig().getInput().getHandle();
+        int index = handle.getColumnIndexOf(model.getSelectedAttribute());
+        String[] values = handle.getStatistics().getDistinctValuesOrdered(index);
+        
+        String bottom = pair.getFirst() != null ? pair.getFirst().getFirst() : null;
+        Boolean bottomInclusive = pair.getFirst() != null ? pair.getFirst().getSecond() : null;
+        String top = pair.getSecond() != null ? pair.getSecond().getFirst() : null;
+        Boolean topInclusive = pair.getSecond() != null ? pair.getSecond().getSecond() : null;
+        
+        // Create hierarchy
+        String[][] array;
+        try {
+            array = new String[values.length][2];
+            for (int i = 0; i < values.length; i++) {
+
+                String value = values[i];
+                String coded = null;
+
+                if (top != null) {
+                    int cmp = type.compare(value, top);
+                    if (cmp > 0 || (topInclusive && cmp == 0)) {
+                        coded = topInclusive ? ">=" + top : ">" + top; //$NON-NLS-1$ //$NON-NLS-2$
+                    }
+                }
+                if (coded == null && bottom != null) {
+                    int cmp = type.compare(value, bottom);
+                    if (cmp < 0 || (bottomInclusive && cmp == 0)) {
+                        coded = bottomInclusive ? "<=" + bottom : "<" + bottom; //$NON-NLS-1$ //$NON-NLS-2$
+                    }
+                }
+                if (coded == null) {
+                    coded = value;
+                }
+                
+                array[i] = new String[] {value, coded};
+            }
+        } catch (Exception e) {
+            this.actionShowInfoDialog(main.getShell(), Resources.getMessage("Controller.152"), Resources.getMessage("Controller.153")); //$NON-NLS-1$ //$NON-NLS-2$
+            return;
+        }
+        
+        // Update
+        Hierarchy hierarchy = Hierarchy.create(array);
+        this.model.getInputConfig().setHierarchy(model.getSelectedAttribute(), hierarchy);
+        this.update(new ModelEvent(this, ModelPart.HIERARCHY, hierarchy));
+    }
+
+    /**
+     * Find and replace action
+     */
+    public void actionMenuEditFindReplace() {
+
+        // Check
+        if (model == null) {
+            main.showInfoDialog(main.getShell(),
+                                Resources.getMessage("Controller.3"), //$NON-NLS-1$
+                                Resources.getMessage("Controller.4")); //$NON-NLS-1$
+            return;
+        }
+
+        // Check
+        if (model.getInputConfig().getInput() == null) {
+            main.showInfoDialog(main.getShell(),
+                                Resources.getMessage("Controller.5"), //$NON-NLS-1$
+                                Resources.getMessage("Controller.6")); //$NON-NLS-1$
+            return;
+        }
+
+        // Show dialog
+        DataHandle handle = model.getInputConfig().getInput().getHandle();
+        int column = handle.getColumnIndexOf(model.getSelectedAttribute());
+        Pair<String, String> pair = main.showFindReplaceDialog(model, handle, column);
+        
+        // If action must be performed
+        if (pair != null) {
+            
+            // Replace in input
+            handle.replace(column, pair.getFirst(), pair.getSecond());
+            
+            // Replace in output
+            if (model.getOutputConfig() != null) {
+                Hierarchy hierarchy = model.getOutputConfig().getHierarchy(model.getSelectedAttribute());
+                if (hierarchy != null) {
+                    for (String[] array : hierarchy.getHierarchy()) {
+                        for (int i=0; i<array.length; i++) {
+                            if (array[i].equals(pair.getFirst())) {
+                                array[i] = pair.getSecond();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Replace in input hierarchy
+            if (model.getInputConfig() != null) {
+                Hierarchy hierarchy = model.getInputConfig().getHierarchy(model.getSelectedAttribute());
+                if (hierarchy != null) {
+                    for (String[] array : hierarchy.getHierarchy()) {
+                        for (int i=0; i<array.length; i++) {
+                            if (array[i].equals(pair.getFirst())) {
+                                array[i] = pair.getSecond();
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Fire event
+            ModelAuditTrailEntry entry = ModelAuditTrailEntry.createfindReplaceEntry( model.getSelectedAttribute(), 
+                                                                                      pair.getFirst(), 
+                                                                                      pair.getSecond());
+            update(new ModelEvent(this, ModelPart.ATTRIBUTE_VALUE, entry));
+            
+            // Store in model
+            model.addAuditTrailEntry(entry);
+            model.setModified();
+        }
+    }
+
+    /**
+     * Initializes the hierarchy for the currently selected attribute
+     */
+    public void actionMenuEditInitializeHierarchy() {
+
+        // Check
+        if (model == null ||
+            model.getInputConfig() == null ||
+            model.getInputConfig().getInput() == null ||
+            model.getSelectedAttribute() == null) {
+            return;
+        }
+        
+        // Obtain values
+        DataHandle handle = model.getInputConfig().getInput().getHandle();
+        int index = handle.getColumnIndexOf(model.getSelectedAttribute());
+        String[] values = handle.getStatistics().getDistinctValuesOrdered(index);
+        
+        // Create hierarchy
+        String[][] array = new String[values.length][0];
+        for (int i = 0; i < values.length; i++) {
+            array[i] = new String[] { values[i] };
+        }
+        
+        // Update
+        Hierarchy hierarchy = Hierarchy.create(array);
+        this.model.getInputConfig().setHierarchy(model.getSelectedAttribute(), hierarchy);
+        this.update(new ModelEvent(this, ModelPart.HIERARCHY, hierarchy));
+    }
+    /**
      * Resets the current output
      */
     public void actionMenuEditReset() {
@@ -659,6 +913,7 @@ public class Controller implements IView {
         model.setOutputConfig(null);
         model.setOutput(null, null);
         model.setSelectedNode(null);
+        model.getClipboard().clearClipboard();
 
         update(new ModelEvent(this, ModelPart.SELECTED_VIEW_CONFIG, null));
         update(new ModelEvent(this, ModelPart.RESULT, null));
@@ -909,7 +1164,8 @@ public class Controller implements IView {
 
             // Load hierarchy
             final char separator = dialog.getSeparator();
-            final Hierarchy hierarchy = actionImportHierarchy(path, separator);
+            final Charset charset = Charset.defaultCharset();
+            final Hierarchy hierarchy = actionImportHierarchy(path, charset, separator);
             if (hierarchy != null) {
                 String attr = model.getSelectedAttribute();
                 model.getInputConfig().setMaximumGeneralization(attr, null);
@@ -951,6 +1207,7 @@ public class Controller implements IView {
      */
     public void actionMenuFileOpen() {
 
+        // Check
         if ((model != null) && model.isModified()) {
             if (main.showQuestionDialog(main.getShell(),
                                         Resources.getMessage("Controller.63"), //$NON-NLS-1$
@@ -965,11 +1222,11 @@ public class Controller implements IView {
             return;
         }
 
-        // Set project
+        // Reset
         reset();
 
+        // Load
         actionOpenProject(path);
-
     }
 
     /**
@@ -1055,15 +1312,17 @@ public class Controller implements IView {
 
         main.showProgressDialog(Resources.getMessage("Controller.83"), worker); //$NON-NLS-1$
         if (worker.getError() != null) {
-            
-            String message = worker.getError().getMessage();
-            if (message == null || message.equals("")) { //$NON-NLS-1$
-                message = Resources.getMessage("Controller.46")+worker.getError().getClass().getSimpleName(); //$NON-NLS-1$
+            Throwable t = worker.getError();
+            if (worker.getError() instanceof InvocationTargetException) {
+                t = worker.getError().getCause();
             }
-            
+            String message = t.getMessage();
+            if (message == null || message.equals("")) { //$NON-NLS-1$
+                message = Resources.getMessage("Controller.46") + t.getClass().getSimpleName(); //$NON-NLS-1$
+            }
+
             getResources().getLogger().info(worker.getError());
-            main.showInfoDialog(main.getShell(),
-                                Resources.getMessage("Controller.85"), //$NON-NLS-1$
+            main.showInfoDialog(main.getShell(), Resources.getMessage("Controller.85"), //$NON-NLS-1$
                                 message);
             return;
         }
@@ -1095,13 +1354,6 @@ public class Controller implements IView {
         // Update subsets of the model
         if (model.getResult() != null) {
             update(new ModelEvent(this, ModelPart.RESULT, model.getResult()));
-        }
-
-        // Update subsets of the model
-        if (tempSelectedNode != null) {
-            model.setSelectedNode(tempSelectedNode);
-            update(new ModelEvent(this, ModelPart.SELECTED_NODE, model.getSelectedNode()));
-            this.actionApplySelectedTransformation();
         }
 
         // Update subsets of the model
@@ -1142,7 +1394,11 @@ public class Controller implements IView {
         // Update subsets of the model
         if (tempClipboard != null) {
             model.getClipboard().clearClipboard();
-            model.getClipboard().addAllToClipboard(tempClipboard);
+            if (tempClipboard.isEmpty() && model.getResult() != null) {
+                model.getClipboard().addInterestingTransformations(model);
+            } else {
+                model.getClipboard().addAllToClipboard(tempClipboard);
+            }
             update(new ModelEvent(this,
                                   ModelPart.CLIPBOARD,
                                   model.getClipboard().getClipboardEntries()));
@@ -1172,6 +1428,13 @@ public class Controller implements IView {
                                   model.getOutput()));
         }
 
+        // Update subsets of the model
+        if (tempSelectedNode != null) {
+            this.model.setSelectedNode(tempSelectedNode);
+            this.update(new ModelEvent(this, ModelPart.SELECTED_NODE, model.getSelectedNode()));
+            this.actionApplySelectedTransformation();
+        }
+
         // We just loaded the model, so there are no changes
         model.setUnmodified();
     }
@@ -1181,6 +1444,15 @@ public class Controller implements IView {
      */
     public void actionShowAuditTrail() {
         main.showAuditTrail(model.getAuditTrail());
+    }
+
+    /**
+     * Shows an input dialog for selecting a charset.
+     * @param shell
+     * @return
+     */
+    public Charset actionShowCharsetInputDialog(final Shell shell) {
+        return main.showCharsetInputDialog(shell);
     }
 
     /**
@@ -1258,7 +1530,7 @@ public class Controller implements IView {
 
         return main.showFormatInputDialog(shell, title, text, preselected, locale, type, values);
     }
-
+    
     /**
      * Shows a help dialog.
      *
@@ -1293,6 +1565,35 @@ public class Controller implements IView {
                                         final String text,
                                         final String initial) {
         return main.showInputDialog(shell, header, text, initial);
+    }
+    /**
+     * Shows an input dialog.
+     *
+     * @param shell
+     * @param header
+     * @param text
+     * @param initial
+     * @return
+     */
+    public String actionShowInputDialog(final Shell shell,
+                                        final String header,
+                                        final String text,
+                                        final String initial,
+                                        final IInputValidator validator) {
+        return main.showInputDialog(shell, header, text, initial, validator);
+    }
+
+    /**
+     * Shows a dialog for selecting multiple elements
+     * @param shell
+     * @param title
+     * @param text
+     * @param elements
+     * @param selected
+     * @return
+     */
+    public List<String> actionShowMultiSelectionDialog(Shell shell, String title, String text, List<String> elements, List<String> selected) {
+        return main.showMultiSelectionDialog(shell, title, text, elements, selected);
     }
 
     /**
@@ -1353,6 +1654,17 @@ public class Controller implements IView {
     }
 
     /**
+     * Shows a question dialog.
+     *
+     * @param header
+     * @param text
+     * @return
+     */
+    public boolean actionShowQuestionDialog(final String header,
+                                            final String text) {
+        return main.showQuestionDialog(this.main.getShell(), header, text);
+    }
+    /**
      * Internal method for showing a "save file" dialog.
      *
      * @param shell
@@ -1362,7 +1674,7 @@ public class Controller implements IView {
     public String actionShowSaveFileDialog(final Shell shell, String filter) {
         return main.showSaveFileDialog(shell, filter);
     }
-
+    
     /**
      * Includes all tuples in the research subset.
      */
@@ -1455,6 +1767,54 @@ public class Controller implements IView {
     }
 
     /**
+     * Creates a subset via random sampling
+     */
+    public void actionSubsetRandom() {
+
+        String result = main.showInputDialog(main.getShell(), Resources.getMessage("Controller.130"), //$NON-NLS-1$
+                                                  Resources.getMessage("Controller.131"), //$NON-NLS-1$
+                                                  Resources.getMessage("Controller.132"), //$NON-NLS-1$
+                                                  new IInputValidator() {
+                                                      @Override
+                                                      public String isValid(String arg0) {
+                                                          double value = 0d;
+                                                          try {
+                                                              value = Double.valueOf(arg0);
+                                                          } catch (Exception e) {
+                                                              return "Not a decimal";
+                                                          }
+                                                          if (value < 0d || value > 1d) {
+                                                              return "Out of range";
+                                                          }
+                                                          return null;
+                                                      }
+                                                  });
+        
+        // Check
+        if (result == null) {
+            return;
+        }
+        
+        // Convert
+        double probability = Double.valueOf(result);
+
+        // Create a data subset via sampling based on beta
+        Set<Integer> subsetIndices = new HashSet<Integer>();
+        Random random = new SecureRandom();
+        int records = model.getInputConfig().getInput().getHandle().getNumRows();
+        for (int i = 0; i < records; ++i) {
+            if (random.nextDouble() < probability) {
+                subsetIndices.add(i);
+            }
+        }
+        DataSubset subset = DataSubset.create(records, subsetIndices);
+        
+        this.model.getInputConfig().setResearchSubset(subset.getSet());
+        model.setSubsetOrigin(Resources.getMessage("Controller.133")); //$NON-NLS-1$
+        update(new ModelEvent(this, ModelPart.RESEARCH_SUBSET, subset.getSet()));
+    }
+
+    /**
      * Registers a listener at the controller.
      *
      * @param target
@@ -1466,7 +1826,7 @@ public class Controller implements IView {
         }
         listeners.get(target).add(listener);
     }
-
+    
     @Override
     public void dispose() {
         for (final Set<IView> listeners : getListeners().values()) {
@@ -1475,7 +1835,7 @@ public class Controller implements IView {
             }
         }
     }
-    
+
     /**
      * Returns debug data.
      *
@@ -1635,9 +1995,10 @@ public class Controller implements IView {
      * @return
      */
     private Hierarchy actionImportHierarchy(final String path,
+                                            final Charset charset,
                                             final char separator) {
         try {
-            return Hierarchy.create(path, separator);
+            return Hierarchy.create(path, charset, separator);
         } catch (Throwable error) {
             if (error instanceof RuntimeException) {
                 if (error.getCause() != null) {
@@ -1710,7 +2071,9 @@ public class Controller implements IView {
 
         handle = config.isSubset() ? handle.getView() : handle;
 
-        if (config.getMode() == Mode.SORTED_INPUT ||
+        if (config.getMode() == Mode.UNSORTED) {
+            model.setGroups(null);
+        } else  if (config.getMode() == Mode.SORTED_INPUT ||
             config.getMode() == Mode.SORTED_OUTPUT) {
 
             // Sort

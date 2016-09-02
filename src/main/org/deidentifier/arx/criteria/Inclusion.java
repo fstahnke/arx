@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,9 +54,14 @@ public class Inclusion extends DPresence {
     public void initialize(DataManager manager) {
         // Nothing to do
     }
-
+    
     @Override
     public boolean isAnonymous(HashGroupifyEntry entry) {
+        return true;
+    }
+
+    @Override
+    public boolean isLocalRecodingSupported() {
         return true;
     }
 

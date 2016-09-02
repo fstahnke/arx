@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Text;
 public class DialogAbout extends TitleAreaDialog implements IDialog {
 
     /**  TODO */
-    private static final String LICENSE      = Resources.getLicencseText();
+    private static final String LICENSE      = Resources.getLicenseText();
     
     /**  TODO */
     private static final String ABOUT =   Resources.getMessage("AboutDialog.16") + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
@@ -61,7 +61,12 @@ public class DialogAbout extends TitleAreaDialog implements IDialog {
     private static final String CONTRIBUTORS = "Karol Babioch (data import wizard)\n" + //$NON-NLS-1$
                                                "Ledian Xhani (hierarchy editor)\n" + //$NON-NLS-1$
                                                "Ljubomir Dshevlekov (hierarchy editor)\n" +  //$NON-NLS-1$
-                                               "Michael Schneider (risk analysis)"; //$NON-NLS-1$
+                                               "Michael Schneider (risk analysis)\n" + //$NON-NLS-1$
+                                               "Raffael Bild (heuristic search, differential privacy)\n" + //$NON-NLS-1$
+                                               "Johanna Eicher (heuristic search)\n" + //$NON-NLS-1$
+                                               "Helmut Spengler (heuristic search)\n" + //$NON-NLS-1$
+                                               "David Gassmann (HIPAA identifiers)\n" + //$NON-NLS-1$
+                                               "Sebastian Stammler (performance improvements)" ; //$NON-NLS-1$
     
     /**  TODO */
     private Image image;
@@ -132,7 +137,7 @@ public class DialogAbout extends TitleAreaDialog implements IDialog {
     
     @Override
     protected Control createContents(Composite parent) {
-    	Control contents = super.createContents(parent);
+        Control contents = super.createContents(parent);
         setTitle(Resources.getMessage("AboutDialog.12")); //$NON-NLS-1$
         setMessage(Resources.getMessage("AboutDialog.13"), IMessageProvider.INFORMATION); //$NON-NLS-1$
         if (image!=null) setTitleImage(image); //$NON-NLS-1$

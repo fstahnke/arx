@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 
 package org.deidentifier.arx.gui.view.impl.define;
 
-import java.text.DecimalFormat;
-
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.Model;
 import org.deidentifier.arx.gui.model.ModelEvent;
@@ -27,7 +25,7 @@ import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.gui.view.def.IView;
 import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolder;
-import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButton;
+import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButtonBar;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -42,41 +40,38 @@ import org.eclipse.swt.widgets.ToolItem;
  */
 public class ViewSubsetDefinition implements IView{
 
-    /**  TODO */
+    /**  Controller */
     private Controller controller;
     
-    /**  TODO */
+    /**  View */
     private Composite root;
     
-    /**  TODO */
+    /**  Model */
     private Model model;
     
-    /**  TODO */
+    /**  View */
     private Text size;
     
-    /**  TODO */
+    /**  View */
     private Text origin;
     
-    /**  TODO */
+    /**  View */
     private Text total;
     
-    /**  TODO */
+    /**  View */
     private Text percent;
 
-    /**  TODO */
+    /**  View */
     private ToolItem all;
     
-    /**  TODO */
+    /**  View */
     private ToolItem none;
     
-    /**  TODO */
+    /**  View */
     private ToolItem file;
     
-    /**  TODO */
+    /**  View */
     private ToolItem filter;
-    
-    /**  TODO */
-    private DecimalFormat format = new DecimalFormat("##0.00"); //$NON-NLS-1$
     
     /**
      * Creates a new instance.
@@ -103,7 +98,7 @@ public class ViewSubsetDefinition implements IView{
     public void reset() {
         size.setText("0"); //$NON-NLS-1$
         total.setText("0"); //$NON-NLS-1$
-        percent.setText("0"); //$NON-NLS-1$
+        percent.setText("0%"); //$NON-NLS-1$
         origin.setText(""); //$NON-NLS-1$
         disable();
     }
@@ -137,7 +132,7 @@ public class ViewSubsetDefinition implements IView{
      */
     private Composite build(Composite parent) {
 
-        ComponentTitledFolderButton bar = new ComponentTitledFolderButton("id-40"); //$NON-NLS-1$
+        ComponentTitledFolderButtonBar bar = new ComponentTitledFolderButtonBar("id-40"); //$NON-NLS-1$
         bar.add(Resources.getMessage("SubsetDefinitionView.1"),  //$NON-NLS-1$
                 controller.getResources().getManagedImage("page_white.png"), //$NON-NLS-1$
                 new Runnable() {
@@ -170,13 +165,21 @@ public class ViewSubsetDefinition implements IView{
                         controller.actionSubsetQuery();
                     }
                 });
+        bar.add(Resources.getMessage("SubsetDefinitionView.7"),  //$NON-NLS-1$
+                controller.getResources().getManagedImage("shuffle.png"), //$NON-NLS-1$
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        controller.actionSubsetRandom();
+                    }
+                });
         
         ComponentTitledFolder folder = new ComponentTitledFolder(parent, controller, bar, null);
         folder.setLayoutData(SWTUtil.createFillHorizontallyGridData());
         Composite group = folder.createItem(Resources.getMessage("SubsetDefinitionView.0"), null); //$NON-NLS-1$
         folder.setSelection(0);
         GridLayout layout = new GridLayout();
-        layout.numColumns = 9;
+        layout.numColumns = 8;
         layout.makeColumnsEqualWidth = false;
         group.setLayout(layout);
         group.setLayoutData(SWTUtil.createFillGridData());
@@ -196,11 +199,9 @@ public class ViewSubsetDefinition implements IView{
         l = new Label(group, SWT.NONE);
         l.setText("="); //$NON-NLS-1$
         percent = new Text(group, SWT.BORDER);
-        percent.setText("0"); //$NON-NLS-1$
+        percent.setText("0%"); //$NON-NLS-1$
         percent.setLayoutData(SWTUtil.createFillHorizontallyGridData());
         percent.setEditable(false);
-        l = new Label(group, SWT.NONE);
-        l.setText("%"); //$NON-NLS-1$
         l = new Label(group, SWT.NONE);
         l.setText(Resources.getMessage("SubsetDefinitionView.5")); //$NON-NLS-1$
         origin = new Text(group, SWT.BORDER);
@@ -252,9 +253,9 @@ public class ViewSubsetDefinition implements IView{
         int size = model.getInputConfig().getResearchSubset().size();
         int total = model.getInputConfig().getInput().getHandle().getNumRows();
         double percent = (double)size / (double)total * 100d;
-        this.size.setText(String.valueOf(size));
-        this.total.setText(String.valueOf(total));
-        this.percent.setText(format.format(percent));
+        this.size.setText(SWTUtil.getPrettyString(size));
+        this.total.setText(SWTUtil.getPrettyString(total));
+        this.percent.setText(SWTUtil.getPrettyString(percent)+"%");
         this.origin.setText(model.getSubsetOrigin());
     }
 }

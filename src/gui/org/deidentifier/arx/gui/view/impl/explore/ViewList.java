@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,7 @@ public class ViewList extends ViewSolutionSpace {
         String min = null;
         if (node.getMinimumInformationLoss() != null) {
             min = node.getMinimumInformationLoss().toString() +
-                  " [" + getFormat().format(asRelativeValue(node.getMinimumInformationLoss())) + "%]"; //$NON-NLS-1$ //$NON-NLS-2$
+                  " [" + SWTUtil.getPrettyString(asRelativeValue(node.getMinimumInformationLoss())) + "%]"; //$NON-NLS-1$ //$NON-NLS-2$
         } else {
             min = Resources.getMessage("ListView.7"); //$NON-NLS-1$
         }
@@ -245,7 +245,7 @@ public class ViewList extends ViewSolutionSpace {
         String max = null;
         if (node.getMaximumInformationLoss() != null) {
             max = node.getMaximumInformationLoss().toString() +
-                  " [" + getFormat().format(asRelativeValue(node.getMaximumInformationLoss())) + "%]"; //$NON-NLS-1$ //$NON-NLS-2$
+                  " [" + SWTUtil.getPrettyString(asRelativeValue(node.getMaximumInformationLoss())) + "%]"; //$NON-NLS-1$ //$NON-NLS-2$
         } else {
             max = Resources.getMessage("ListView.10"); //$NON-NLS-1$
         }

@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,11 @@ public class EqualDistanceTCloseness extends TCloseness {
     }
 
     @Override
+    public EqualDistanceTCloseness clone() {
+        return new EqualDistanceTCloseness(this.getAttribute(), this.getT());
+    }
+    
+    @Override
     public void initialize(DataManager manager) {
         super.initialize(manager);
         distribution = manager.getDistribution(attribute);
@@ -73,7 +78,7 @@ public class EqualDistanceTCloseness extends TCloseness {
          * Additionally,
          * SUM_{i \in Q\P} q_i = 1 - SUM_{i \in P} q_i = 1 + SUM_{i \in P} - q_i
          * 
-         * As a result, we implement the metric as follows
+         * As a result, we implement the distance measure as follows
          * 
          * D[P, Q] = 1/2 * ( 1 + SUM_{i \in P} (|p_i - q_i| - q_i))
          */
@@ -92,7 +97,12 @@ public class EqualDistanceTCloseness extends TCloseness {
     }
 
 	@Override
+    public boolean isLocalRecodingSupported() {
+        return true;
+    }
+
+    @Override
 	public String toString() {
-		return t+"-closeness with equal distance for attribute '"+attribute+"'";
+		return t+"-closeness with equal ground-distance for attribute '"+attribute+"'";
 	}
 }

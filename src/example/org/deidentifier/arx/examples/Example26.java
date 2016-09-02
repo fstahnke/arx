@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,8 @@ import org.deidentifier.arx.aggregates.HierarchyBuilderIntervalBased.Range;
  */
 public class Example26 extends Example {
     
-    /**
-     * 
-     *
+    /** 
+     * Main
      * @param args
      */
     public static void main(final String[] args) {

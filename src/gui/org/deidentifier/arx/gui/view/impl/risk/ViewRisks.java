@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.deidentifier.arx.gui.view.def.IView;
 import org.deidentifier.arx.gui.view.impl.common.ComponentStatus;
 import org.deidentifier.arx.gui.view.impl.common.ComponentStatusLabelProgressProvider;
 import org.deidentifier.arx.gui.view.impl.common.async.AnalysisContext;
-import org.deidentifier.arx.gui.view.impl.utility.AnalysisContextVisualization;
+import org.deidentifier.arx.gui.view.impl.common.async.AnalysisContextVisualization;
 import org.deidentifier.arx.risk.RiskEstimateBuilderInterruptible;
 import org.deidentifier.arx.risk.RiskModelHistogram;
 import org.eclipse.swt.custom.StackLayout;
@@ -55,7 +55,7 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
     private AnalysisContext       context              = new AnalysisContext();
 
     /** Internal stuff. */
-    private final Controller      controller;
+    protected final Controller    controller;
 
     /** Internal stuff. */
     private Model                 model;
@@ -70,11 +70,11 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
     private final ComponentStatus status;
 
     /** Internal stuff. */
-    private boolean               enabled = true;
+    private boolean               enabled              = true;
 
     /** Internal stuff. */
     private T                     viewContext;
-    
+
 	/**
      * Creates a new instance.
      *
@@ -117,7 +117,7 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
         // Reset
         this.reset();
     }
-
+    
     @Override
     public void dispose() {
         controller.removeListener(this);
@@ -136,7 +136,7 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
         this.doReset();
         status.setEmpty();
     }
-    
+
     /**
      * Enables or disables this view
      * @param enabled
@@ -148,7 +148,7 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
             this.update();
         }
     }
-
+    
     @Override
     public void update(final ModelEvent event) {
 
@@ -183,22 +183,25 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
             return;
         }
     }
-    
+
     /**
      * Redraws the plot.
      */
     private void update() {
         
-        if (!this.status.isVisible()){
-            return;
-        }
-
+        // Disable the view
         if (!this.isEnabled()) {
             this.doReset();
             this.setStatusEmpty();
             return;
         }
 
+        // Check visibility
+        if (!this.status.isVisible()){
+            return;
+        }
+
+        // Check if already done
         if (this.viewContext != null) {
             if (!isRunning()) {
                 this.status.setDone();
@@ -206,6 +209,7 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
             return;
         }
 
+        // Update
         T context = createViewConfig(this.context);
         if (context.isValid()) {
 
@@ -219,7 +223,7 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
             status.setWorking();
         }
     }
-
+    
     /**
      * 
      * Implement this to create the widget.
@@ -228,7 +232,7 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
      * @return
      */
     protected abstract Control createControl(Composite parent);
-    
+
     /**
      * Creates a view config
      *
@@ -248,7 +252,7 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
      * @param context
      */
     protected abstract void doUpdate(T context);
-
+    
     /**
      * Creates a risk estimate builder
      * @param context
@@ -260,45 +264,25 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
         if (analysisContext.getData() == null || analysisContext.getData().definition == null) {
             return null;
         }
-        return context.handle.getRiskEstimator(analysisContext.getModel().getRiskModel().getPopulationModel(),
+        return context.handle.getRiskEstimator(analysisContext.getPopulationModel(),
                                                analysisContext.getData().definition.getQuasiIdentifyingAttributes(),
                                                analysisContext.getModel().getRiskModel().getSolverConfiguration())
                                                .getInterruptibleInstance();
     }
 
     /**
-     * Returns a string containing all quasi-identifiers
-     * @param context
-     * @return
-     */
-    protected String getQuasiIdentifiers(AnalysisContextRisk context) {
-        AnalysisContext analysisContext = context.context;
-        List<String> list = new ArrayList<String>();
-        list.addAll(analysisContext.getData().definition.getQuasiIdentifyingAttributes());
-        Collections.sort(list);
-        StringBuilder builder = new StringBuilder();
-        for (int i=0; i<list.size(); i++) {
-            builder.append(list.get(i));
-            if (i < list.size() - 1){
-                builder.append(", "); //$NON-NLS-1$
-            }
-        }
-        return builder.toString();
-    }
-    
-    /**
      * Creates a risk estimate builder
      * @param context
-     * @param model
+     * @param population
      * @param classes
      * @return
      */
     protected RiskEstimateBuilderInterruptible getBuilder(AnalysisContextRisk context, 
-                                                          ARXPopulationModel model, 
+                                                          ARXPopulationModel population, 
                                                           RiskModelHistogram classes) {
 
         AnalysisContext analysisContext = context.context;
-        return context.handle.getRiskEstimator(model, 
+        return context.handle.getRiskEstimator(population, 
                                                classes, 
                                                analysisContext.getModel().getRiskModel().getSolverConfiguration())
                                                .getInterruptibleInstance();
@@ -319,7 +303,6 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
                                                analysisContext.getModel().getRiskModel().getSolverConfiguration())
                                                .getInterruptibleInstance();
     }
-
     
     /**
      * Returns the model
@@ -335,11 +318,40 @@ public abstract class ViewRisks<T extends AnalysisContextVisualization> implemen
      */
     protected abstract ComponentStatusLabelProgressProvider getProgressProvider();
 
+    
+    /**
+     * Returns a string containing all quasi-identifiers
+     * @param context
+     * @return
+     */
+    protected String getQuasiIdentifiers(AnalysisContextRisk context) {
+        AnalysisContext analysisContext = context.context;
+        List<String> list = new ArrayList<String>();
+        list.addAll(analysisContext.getData().definition.getQuasiIdentifyingAttributes());
+        Collections.sort(list);
+        StringBuilder builder = new StringBuilder();
+        for (int i=0; i<list.size(); i++) {
+            builder.append(list.get(i));
+            if (i < list.size() - 1){
+                builder.append(", "); //$NON-NLS-1$
+            }
+        }
+        return builder.toString();
+    }
+
     /**
      * Returns the according type of view
      * @return
      */
     protected abstract ViewRiskType getViewType();
+
+    /**
+     * Is this an input data oriented control
+     * @return
+     */
+    protected boolean isInput() {
+        return target == ModelPart.INPUT;
+    }
     
     /**
      * Is a job running

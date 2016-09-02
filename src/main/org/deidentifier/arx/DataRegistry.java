@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.deidentifier.arx.ARXLattice.ARXNode;
-import org.deidentifier.arx.aggregates.StatisticsEquivalenceClasses;
-import org.deidentifier.arx.criteria.DPresence;
 
 import cern.colt.GenericSorting;
 import cern.colt.Swapper;
@@ -77,12 +75,11 @@ class DataRegistry {
      *
      * @param handle
      * @param subset
-     * @param eqStatistics
      * @return
      */
-    private DataHandleSubset createSubset(DataHandle handle, DataSubset subset, StatisticsEquivalenceClasses eqStatistics) {
+    private DataHandleSubset createSubset(DataHandle handle, DataSubset subset) {
         
-        DataHandleSubset result = new DataHandleSubset(handle, subset, eqStatistics);
+        DataHandleSubset result = new DataHandleSubset(handle, subset);
         result.setRegistry(this);
         return result;
     }
@@ -224,8 +221,8 @@ class DataRegistry {
      */
     protected void createInputSubset(ARXConfiguration config){
         
-        if (config.containsCriterion(DPresence.class)) {
-            this.inputSubset = createSubset(this.input, config.getCriterion(DPresence.class).getSubset(), null);
+        if (config.getSubset() != null) {
+            this.inputSubset = createSubset(this.input, config.getSubset());
         } else {
             this.inputSubset = null;
         }
@@ -237,11 +234,10 @@ class DataRegistry {
      *
      * @param node
      * @param config
-     * @param peqStatistics
      */
-    protected void createOutputSubset(ARXNode node, ARXConfiguration config, StatisticsEquivalenceClasses peqStatistics){
-        if (config.containsCriterion(DPresence.class)) {
-            this.outputSubset.put(node, createSubset(this.output.get(node), config.getCriterion(DPresence.class).getSubset(), peqStatistics));
+    protected void createOutputSubset(ARXNode node, ARXConfiguration config){
+        if (config.getSubset() != null) {
+            this.outputSubset.put(node, createSubset(this.output.get(node), config.getSubset()));
         } else {
             this.outputSubset.remove(node);
         }
@@ -257,7 +253,15 @@ class DataRegistry {
     protected DataType<?> getBaseDataType(String attribute) {
         return this.input.getBaseDataType(attribute);
     }
-    
+
+    /**
+     * Returns the input handle
+     * @return
+     */
+    protected DataHandleInput getInputHandle() {
+        return this.input;
+    }
+
     /**
      * Returns a registered handle, if any.
      *
@@ -267,7 +271,7 @@ class DataRegistry {
     protected DataHandle getOutputHandle(ARXNode node) {
         return this.output.get(node);
     }
-
+    
     /**
      * Implementation of {@link DataHandle#isOutlier(row)}.
      *

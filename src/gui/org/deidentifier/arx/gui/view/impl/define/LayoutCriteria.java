@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.gui.view.def.ILayout;
 import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolder;
-import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButton;
+import org.deidentifier.arx.gui.view.impl.common.ComponentTitledFolderButtonBar;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
@@ -63,7 +63,7 @@ public class LayoutCriteria implements ILayout {
                           final Controller controller) {
 
 
-        ComponentTitledFolderButton bar = new ComponentTitledFolderButton("id-80"); //$NON-NLS-1$
+        ComponentTitledFolderButtonBar bar = new ComponentTitledFolderButtonBar("id-80"); //$NON-NLS-1$
         bar.add(Resources.getMessage("CriterionDefinitionView.80"),  //$NON-NLS-1$
                 controller.getResources().getManagedImage("add.png"), //$NON-NLS-1$
                 new Runnable() {

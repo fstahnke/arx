@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ package org.deidentifier.arx.metric.v2;
 
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.DataDefinition;
-import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.check.groupify.HashGroupify;
+import org.deidentifier.arx.framework.check.groupify.HashGroupifyEntry;
 import org.deidentifier.arx.framework.data.Data;
+import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
-import org.deidentifier.arx.framework.lattice.Node;
+import org.deidentifier.arx.framework.lattice.Transformation;
 import org.deidentifier.arx.metric.InformationLoss;
 import org.deidentifier.arx.metric.InformationLossWithBound;
 
@@ -73,6 +74,8 @@ public abstract class AbstractMetricMultiDimensionalPotentiallyPrecomputed exten
         this.defaultMetric = defaultMetric;
         this.precomputedMetric = precomputedMetric;
     }
+    
+    
 
     @Override
     public InformationLoss<?> createMaxInformationLoss() {
@@ -83,6 +86,8 @@ public abstract class AbstractMetricMultiDimensionalPotentiallyPrecomputed exten
         }
     }
 
+
+
     @Override
     public InformationLoss<?> createMinInformationLoss() {
         if (precomputed) {
@@ -91,7 +96,9 @@ public abstract class AbstractMetricMultiDimensionalPotentiallyPrecomputed exten
             return defaultMetric.createMinInformationLoss();
         }
     }
-    
+
+
+
     @Override
     public AggregateFunction getAggregateFunction() {
         if (precomputed) {
@@ -99,6 +106,21 @@ public abstract class AbstractMetricMultiDimensionalPotentiallyPrecomputed exten
         } else {
             return defaultMetric.getAggregateFunction();
         }
+    }
+
+    @Override
+    public double getGeneralizationFactor() {
+        return defaultMetric.getGeneralizationFactor();
+    }
+
+    @Override
+    public double getGeneralizationSuppressionFactor() {
+        return defaultMetric.getGeneralizationSuppressionFactor();
+    }
+
+    @Override
+    public double getSuppressionFactor() {
+        return defaultMetric.getSuppressionFactor();
     }
     
     @Override
@@ -117,7 +139,14 @@ public abstract class AbstractMetricMultiDimensionalPotentiallyPrecomputed exten
     }
 
     @Override
-    protected InformationLossWithBound<AbstractILMultiDimensional> getInformationLossInternal(Node node, HashGroupifyEntry entry) {
+    protected InformationLossWithBound<AbstractILMultiDimensional>
+            getInformationLossInternal(Transformation node, HashGroupify groupify) {
+        return precomputed ? precomputedMetric.getInformationLoss(node, groupify) : 
+                             defaultMetric.getInformationLoss(node, groupify);
+    }
+
+    @Override
+    protected InformationLossWithBound<AbstractILMultiDimensional> getInformationLossInternal(Transformation node, HashGroupifyEntry entry) {
         if (precomputed) {
             return precomputedMetric.getInformationLoss(node, entry);
         } else {
@@ -126,20 +155,13 @@ public abstract class AbstractMetricMultiDimensionalPotentiallyPrecomputed exten
     }
 
     @Override
-    protected InformationLossWithBound<AbstractILMultiDimensional>
-            getInformationLossInternal(Node node, HashGroupify groupify) {
-        return precomputed ? precomputedMetric.getInformationLoss(node, groupify) : 
-                             defaultMetric.getInformationLoss(node, groupify);
-    }
-
-    @Override
-    protected AbstractILMultiDimensional getLowerBoundInternal(Node node) {
+    protected AbstractILMultiDimensional getLowerBoundInternal(Transformation node) {
         return precomputed ? precomputedMetric.getLowerBound(node) : 
                              defaultMetric.getLowerBound(node);
     }
     
     @Override
-    protected AbstractILMultiDimensional getLowerBoundInternal(Node node, HashGroupify groupify) {
+    protected AbstractILMultiDimensional getLowerBoundInternal(Transformation node, HashGroupify groupify) {
         return precomputed ? precomputedMetric.getLowerBound(node, groupify) : 
                              defaultMetric.getLowerBound(node, groupify);
     }
@@ -163,7 +185,8 @@ public abstract class AbstractMetricMultiDimensionalPotentiallyPrecomputed exten
     }
     
     @Override
-    protected void initializeInternal(final DataDefinition definition,
+    protected void initializeInternal(final DataManager manager,
+                                      final DataDefinition definition, 
                                       final Data input, 
                                       final GeneralizationHierarchy[] ahierarchies, 
                                       final ARXConfiguration config) {
@@ -179,9 +202,9 @@ public abstract class AbstractMetricMultiDimensionalPotentiallyPrecomputed exten
         }
         
         if (precomputed) {
-            precomputedMetric.initializeInternal(definition, input, ahierarchies, config);
+            precomputedMetric.initializeInternal(manager, definition, input, ahierarchies, config);
         } else {
-            defaultMetric.initializeInternal(definition, input, ahierarchies, config);
+            defaultMetric.initializeInternal(manager, definition, input, ahierarchies, config);
         }
     }
     

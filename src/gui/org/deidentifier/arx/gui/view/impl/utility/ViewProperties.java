@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 
 package org.deidentifier.arx.gui.view.impl.utility;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,13 +31,14 @@ import org.deidentifier.arx.gui.view.impl.common.async.AnalysisContext;
 import org.deidentifier.arx.metric.InformationLoss;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.TreeColumn;
 
 /**
  * This view displays basic properties about input or output data.
  *
  * @author Fabian Prasser
  */
-public abstract class ViewProperties implements IView {
+public abstract class ViewProperties implements IView, ViewStatisticsBasic {
 
     /**
      * A class for properties displayed in the tree view.
@@ -48,16 +47,16 @@ public abstract class ViewProperties implements IView {
      */
     protected class Property {
         
-        /**  TODO */
+        /**  Parent */
         public Property       parent;
         
-        /**  TODO */
+        /**  Children */
         public List<Property> children = new ArrayList<Property>();
         
-        /**  TODO */
+        /**  Label */
         public String         property;
         
-        /**  TODO */
+        /**  Values */
         public String[]       values;
 
         /**
@@ -99,26 +98,23 @@ public abstract class ViewProperties implements IView {
     }
 
     /** Internal stuff. */
-    protected final List<Property> roots  = new ArrayList<Property>();
-    
+    protected final List<Property> roots   = new ArrayList<Property>();
+
     /** Internal stuff. */
     protected final Composite      root;
-    
-    /** Internal stuff. */
-    protected final NumberFormat   format = new DecimalFormat("##0.000"); //$NON-NLS-1$
-    
+
     /** Internal stuff. */
     protected Model                model;
-    
+
+    /** Internal stuff. */
+    protected final Controller     controller;
+
     /** Internal stuff. */
     protected TreeViewer           treeViewer;
-    
-    /** Internal stuff. */
-    private final Controller       controller;
-    
+
     /** Internal stuff. */
     private final ModelPart        reset;
-    
+
     /** Internal stuff. */
     private final AnalysisContext  context = new AnalysisContext();
     
@@ -144,18 +140,23 @@ public abstract class ViewProperties implements IView {
         controller.addListener(ModelPart.DATA_TYPE, this);
         controller.addListener(ModelPart.MODEL, this);
         controller.addListener(target, this);
-        this.controller = controller;
         if (reset != null) {
             controller.addListener(reset, this);
         }
         this.reset = reset;
         this.root = parent;
+        this.controller = controller;
         this.context.setTarget(target);
     }
 
     @Override
     public void dispose() {
         controller.removeListener(this);
+    }
+
+    @Override
+    public Composite getParent() {
+        return this.root;
     }
 
     @Override
@@ -195,7 +196,7 @@ public abstract class ViewProperties implements IView {
         return infoLoss.relativeTo(model.getResult().getLattice().getMinimumInformationLoss(), 
                                    model.getResult().getLattice().getMaximumInformationLoss()) * 100d;
     }
-
+    
     /**
      * Returns the context.
      *
@@ -204,7 +205,18 @@ public abstract class ViewProperties implements IView {
     protected AnalysisContext getContext(){
         return context;
     }
-    
+
+    /**
+     * Refreshes the tree
+     */
+    protected void refresh() {
+        treeViewer.refresh();
+        treeViewer.expandAll();
+        for (TreeColumn tc : treeViewer.getTree().getColumns()) {
+            tc.pack();
+        }
+    }
+
     /**
      * Implement this to update the view.
      */

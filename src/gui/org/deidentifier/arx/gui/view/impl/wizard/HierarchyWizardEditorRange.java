@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,11 +122,13 @@ public class HierarchyWizardEditorRange<T> implements HierarchyWizardView {
      * @param model
      * @param lower
      * @param adjustment
+     * @param bottom
      */
     private void createLabel(final HierarchyWizardModelGrouping<T> model,
                              final boolean lower,
                              final HierarchyWizardGroupingRange<T> adjustment) {
-        createLabel(composite, Resources.getMessage("HierarchyWizardEditorRange.2")); //$NON-NLS-1$
+        createLabel(composite, lower ? Resources.getMessage("HierarchyWizardEditorRange.7") : //$NON-NLS-1$
+                                       Resources.getMessage("HierarchyWizardEditorRange.8")); //$NON-NLS-1$
         label = new EditorString(composite) {
             
             @Override

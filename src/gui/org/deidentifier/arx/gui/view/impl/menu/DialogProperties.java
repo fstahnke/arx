@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.deidentifier.arx.ARXLogisticRegressionConfiguration.PriorFunction;
 import org.deidentifier.arx.AttributeType;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.Model;
@@ -70,13 +71,11 @@ public class DialogProperties implements IDialog {
         // Create dialog
         this.dialog = new PreferencesDialog(parent, Resources.getMessage("DialogProperties.0"), Resources.getMessage("DialogProperties.1")); //$NON-NLS-1$ //$NON-NLS-2$
         this.createTabProject(this.dialog);
-        this.createTabIOSettings(this.dialog);
-        this.createTabTransformation(this.dialog);
         this.createTabInternals(this.dialog);
-        this.createTabVisualization(this.dialog);
+        this.createTabTransformation(this.dialog);
+        this.createTabSearch(this.dialog);
         this.createTabUtility(this.dialog);
         this.createTabRisk(this.dialog);
-        this.createTabSolver(this.dialog);
     }
 
     /**
@@ -94,6 +93,8 @@ public class DialogProperties implements IDialog {
         
         window.addCategory(Resources.getMessage("PropertyDialog.16"), //$NON-NLS-1$
                            controller.getResources().getManagedImage("settings-internals.png")); //$NON-NLS-1$
+        
+        window.addGroup(Resources.getMessage("DialogProperties.2")); //$NON-NLS-1$
         
         window.addPreference(new PreferenceInteger(Resources.getMessage("PropertyDialog.17"), 0, 1000000, 200) { //$NON-NLS-1$
             protected Integer getValue() { return model.getHistorySize(); }
@@ -114,18 +115,43 @@ public class DialogProperties implements IDialog {
         window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.29"), false) { //$NON-NLS-1$
             protected Boolean getValue() { return model.isDebugEnabled(); }
             protected void setValue(Object t) { model.setDebugEnabled((Boolean)t); }});
-    }
 
+        window.addGroup(Resources.getMessage("DialogProperties.3")); //$NON-NLS-1$
+
+        window.addPreference(new PreferenceInteger(Resources.getMessage("PropertyDialog.23"), 0, 10000, 100) { //$NON-NLS-1$
+            protected Integer getValue() { return model.getInitialNodesInViewer(); }
+            protected void setValue(Object t) { model.setInitialNodesInViewer((Integer)t); }});
+        
+        window.addPreference(new PreferenceInteger(Resources.getMessage("PropertyDialog.25"), 0, 10000, 700) { //$NON-NLS-1$
+            protected Integer getValue() { return model.getMaxNodesInViewer(); }
+            protected void setValue(Object t) { model.setMaxNodesInViewer((Integer)t); }});
+    }
 
     /**
      * Create a tab
      * @param window
      */
-    private void createTabIOSettings(PreferencesDialog window) {
+    private void createTabProject(PreferencesDialog window) {
         
-        window.addCategory(Resources.getMessage("PropertyDialog.34"), //$NON-NLS-1$
-                           controller.getResources().getManagedImage("settings-io.png")); //$NON-NLS-1$
-     
+        window.addCategory(Resources.getMessage("PropertyDialog.3"), //$NON-NLS-1$
+                           controller.getResources().getManagedImage("settings-project.png")); //$NON-NLS-1$
+        
+        window.addGroup(Resources.getMessage("DialogProperties.5")); //$NON-NLS-1$
+        
+        window.addPreference(new PreferenceString(Resources.getMessage("PropertyDialog.4")) { //$NON-NLS-1$
+            protected String getValue() { return model.getName(); }
+            protected void setValue(Object t) { model.setName((String)t); }});
+        
+        window.addPreference(new PreferenceText(Resources.getMessage("PropertyDialog.7")) { //$NON-NLS-1$
+            protected String getValue() { return model.getDescription(); }
+            protected void setValue(Object t) { model.setDescription((String)t); }});
+
+        window.addPreference(new PreferenceSelection(Resources.getMessage("PropertyDialog.33"), getLocales()) { //$NON-NLS-1$
+            protected String getValue() { return model.getLocale().getLanguage().toUpperCase(); }
+            protected void setValue(Object t) { model.setLocale(((String)t).equals("Default") ? Locale.getDefault() : new Locale(((String)t).toLowerCase())); }}); //$NON-NLS-1$
+
+        window.addGroup(Resources.getMessage("DialogProperties.6")); //$NON-NLS-1$
+
         window.addPreference(new PreferenceCharacter(Resources.getMessage("PropertyDialog.35"), ';') { //$NON-NLS-1$
             protected String getValue() { return String.valueOf(model.getCSVSyntax().getDelimiter()); }
             protected void setValue(Object t) { model.getCSVSyntax().setDelimiter(((String)t).charAt(0)); }});
@@ -148,51 +174,12 @@ public class DialogProperties implements IDialog {
      * Create a tab
      * @param window
      */
-    private void createTabProject(PreferencesDialog window) {
-        
-        window.addCategory(Resources.getMessage("PropertyDialog.3"), //$NON-NLS-1$
-                           controller.getResources().getManagedImage("settings-project.png")); //$NON-NLS-1$
-          
-        window.addPreference(new PreferenceString(Resources.getMessage("PropertyDialog.4")) { //$NON-NLS-1$
-            protected String getValue() { return model.getName(); }
-            protected void setValue(Object t) { model.setName((String)t); }});
-        
-        window.addPreference(new PreferenceText(Resources.getMessage("PropertyDialog.7")) { //$NON-NLS-1$
-            protected String getValue() { return model.getDescription(); }
-            protected void setValue(Object t) { model.setDescription((String)t); }});
-
-        window.addPreference(new PreferenceSelection(Resources.getMessage("PropertyDialog.33"), getLocales()) { //$NON-NLS-1$
-            protected String getValue() { return model.getLocale().getLanguage().toUpperCase(); }
-            protected void setValue(Object t) { model.setLocale(((String)t).equals("Default") ? Locale.getDefault() : new Locale(((String)t).toLowerCase())); }}); //$NON-NLS-1$
-    }
-
-    /**
-     * Create a tab
-     * @param window
-     */
-    private void createTabUtility(PreferencesDialog window) {
-
-        window.addCategory(Resources.getMessage("PropertyDialog.60"), //$NON-NLS-1$
-                           controller.getResources().getManagedImage("settings-utility.png")); //$NON-NLS-1$
-        
-        window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.61")) { //$NON-NLS-1$
-            protected Boolean getValue() { return model.getUseListwiseDeletion(); }
-            protected void setValue(Object t) { model.setUseListwiseDeletion((Boolean)t); }});
-        
-
-        window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.62")) { //$NON-NLS-1$
-            protected Boolean getValue() { return model.getUseFunctionalHierarchies(); }
-            protected void setValue(Object t) { model.setUseFunctionalHierarchies((Boolean)t); }});
-    }
-
-    /**
-     * Create a tab
-     * @param window
-     */
     private void createTabRisk(PreferencesDialog window) {
 
         window.addCategory(Resources.getMessage("PropertyDialog.40"), //$NON-NLS-1$
                            controller.getResources().getManagedImage("settings-risk.png")); //$NON-NLS-1$
+        
+        window.addGroup(Resources.getMessage("DialogProperties.7")); //$NON-NLS-1$
         
         window.addPreference(new PreferenceInteger(Resources.getMessage("PropertyDialog.43"), 1, 10, 10) { //$NON-NLS-1$
             protected Integer getValue() { return model.getRiskModel().getMaxQiSize(); }
@@ -202,21 +189,9 @@ public class DialogProperties implements IDialog {
             protected String getValue() { return model.getRiskModel().getRiskModelForAttributes().name(); }
             protected void setValue(Object arg0) { model.getRiskModel().setRiskModelForAttributes(RiskModelForAttributes.valueOf((String)arg0)); }
         });
-        
-        window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.44")) { //$NON-NLS-1$
-            protected Boolean getValue() { return model.getInputConfig().isHeuristicForSampleBasedCriteria(); }
-            protected void setValue(Object t) { model.getInputConfig().setHeuristicForSampleBasedCriteria((Boolean)t); }});
-    }
 
-    /**
-     * Creates a tab
-     * @param window
-     */
-    private void createTabSolver(PreferencesDialog window) {
+        window.addGroup(Resources.getMessage("DialogProperties.8")); //$NON-NLS-1$
 
-        window.addCategory(Resources.getMessage("PropertyDialog.55"), //$NON-NLS-1$
-                           controller.getResources().getManagedImage("settings-solver.png")); //$NON-NLS-1$
-        
         window.addPreference(new PreferenceDouble(Resources.getMessage("PropertyDialog.50"), 1.0e-12, 1d, 1.0e-6) { //$NON-NLS-1$
             protected Double getValue() { return model.getRiskModel().getSolverConfiguration().getAccuracy(); }
             protected void setValue(Object t) { model.getRiskModel().getSolverConfiguration().accuracy((Double)t); }});
@@ -237,8 +212,41 @@ public class DialogProperties implements IDialog {
             protected Integer getValue() { return model.getRiskModel().getSolverConfiguration().getTimeTotal(); }
             protected void setValue(Object t) { model.getRiskModel().getSolverConfiguration().timeTotal((Integer)t); }});
 
+        window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.56"), false) { //$NON-NLS-1$
+            protected Boolean getValue() { return model.getRiskModel().getSolverConfiguration().getStartValues() != null; }
+            protected void setValue(Object t) { model.getRiskModel().getSolverConfiguration().preparedStartValues((Boolean)t ? getSolverStartValues() : null); }});
+        
     }
-    
+
+    /**
+     * Create a tab
+     * @param window
+     */
+    private void createTabSearch(PreferencesDialog window) {
+        window.addCategory(Resources.getMessage("PropertyDialog.130"), //$NON-NLS-1$
+                           controller.getResources().getManagedImage("settings-search.png")); //$NON-NLS-1$
+        
+        window.addGroup(Resources.getMessage("DialogProperties.9")); //$NON-NLS-1$
+        
+        window.addPreference(new PreferenceInteger(Resources.getMessage("PropertyDialog.131"), 0, Integer.MAX_VALUE, 100000) { //$NON-NLS-1$
+            protected Integer getValue() { return model.getInputConfig().getHeuristicSearchThreshold(); }
+            protected void setValue(Object t) { model.getInputConfig().setHeuristicSearchThreshold((Integer)t); }});
+
+        window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.132"), false) { //$NON-NLS-1$
+            protected Boolean getValue() { return model.getInputConfig().isHeuristicSearchEnabled(); }
+            protected void setValue(Object t) { model.getInputConfig().setHeuristicSearchEnabled((Boolean)t); }});
+        
+        window.addPreference(new PreferenceInteger(Resources.getMessage("PropertyDialog.133"), 0, Integer.MAX_VALUE, 30000) { //$NON-NLS-1$
+            protected Integer getValue() { return model.getInputConfig().getHeuristicSearchTimeLimit(); }
+            protected void setValue(Object t) { model.getInputConfig().setHeuristicSearchTimeLimit((Integer)t); }});
+
+        window.addGroup(Resources.getMessage("DialogProperties.10")); //$NON-NLS-1$
+
+        window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.44")) { //$NON-NLS-1$
+            protected Boolean getValue() { return model.getInputConfig().isHeuristicForSampleBasedCriteria(); }
+            protected void setValue(Object t) { model.getInputConfig().setHeuristicForSampleBasedCriteria((Boolean)t); }});
+    }
+
     /**
      * Create a tab
      * @param window
@@ -248,6 +256,8 @@ public class DialogProperties implements IDialog {
         window.addCategory(Resources.getMessage("PropertyDialog.10"), //$NON-NLS-1$
                            controller.getResources().getManagedImage("settings-transformation.png")); //$NON-NLS-1$
 
+        window.addGroup(Resources.getMessage("DialogProperties.11")); //$NON-NLS-1$
+        
         window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.11"), true) { //$NON-NLS-1$
             protected Boolean getValue() { return model.getInputConfig().isSuppressionAlwaysEnabled(); }
             protected void setValue(Object t) { model.getInputConfig().setSuppressionAlwaysEnabled((Boolean)t); }});
@@ -259,33 +269,53 @@ public class DialogProperties implements IDialog {
         window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.32"), false) { //$NON-NLS-1$
             protected Boolean getValue() { return model.getInputConfig().isAttributeTypeSuppressed(AttributeType.INSENSITIVE_ATTRIBUTE); }
             protected void setValue(Object t) { model.getInputConfig().setAttributeTypeSuppressed(AttributeType.INSENSITIVE_ATTRIBUTE, (Boolean)t); }});
-        
-        window.addPreference(new PreferenceString(Resources.getMessage("PropertyDialog.13"), "*") { //$NON-NLS-1$ //$NON-NLS-2$
-            protected String getValue() { return model.getInputConfig().getSuppressionString(); }
-            protected void setValue(Object t) { model.getInputConfig().setSuppressionString((String)t); }});
-        
-        window.addPreference(new PreferenceInteger(Resources.getMessage("PropertyDialog.15"), 0, 1000000, 100000) { //$NON-NLS-1$
-            protected Integer getValue() { return model.getMaxNodesInLattice(); }
-            protected void setValue(Object t) { model.setMaxNodesInLattice((Integer)t); }});
     }
 
     /**
      * Create a tab
      * @param window
      */
-    private void createTabVisualization(PreferencesDialog window) {
-        window.addCategory(Resources.getMessage("PropertyDialog.22"), //$NON-NLS-1$
-                           controller.getResources().getManagedImage("settings-visualization.png")); //$NON-NLS-1$
-        
-        window.addPreference(new PreferenceInteger(Resources.getMessage("PropertyDialog.23"), 0, 10000, 100) { //$NON-NLS-1$
-            protected Integer getValue() { return model.getInitialNodesInViewer(); }
-            protected void setValue(Object t) { model.setInitialNodesInViewer((Integer)t); }});
-        
-        window.addPreference(new PreferenceInteger(Resources.getMessage("PropertyDialog.25"), 0, 10000, 700) { //$NON-NLS-1$
-            protected Integer getValue() { return model.getMaxNodesInViewer(); }
-            protected void setValue(Object t) { model.setMaxNodesInViewer((Integer)t); }});
-    }
+    private void createTabUtility(PreferencesDialog window) {
 
+        window.addCategory(Resources.getMessage("PropertyDialog.60"), //$NON-NLS-1$
+                           controller.getResources().getManagedImage("settings-utility.png")); //$NON-NLS-1$
+        
+        window.addGroup(Resources.getMessage("DialogProperties.12")); //$NON-NLS-1$
+        
+        window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.61")) { //$NON-NLS-1$
+            protected Boolean getValue() { return model.getUseListwiseDeletion(); }
+            protected void setValue(Object t) { model.setUseListwiseDeletion((Boolean)t); }});
+
+        window.addGroup(Resources.getMessage("DialogProperties.13")); //$NON-NLS-1$
+        
+        window.addPreference(new PreferenceBoolean(Resources.getMessage("PropertyDialog.62")) { //$NON-NLS-1$
+            protected Boolean getValue() { return model.getUseFunctionalHierarchies(); }
+            protected void setValue(Object t) { model.setUseFunctionalHierarchies((Boolean)t); }});
+
+        window.addGroup(Resources.getMessage("DialogProperties.14")); //$NON-NLS-1$
+
+        window.addPreference(new PreferenceInteger(Resources.getMessage("DialogProperties.15"), 1000, Integer.MAX_VALUE, 100000) { //$NON-NLS-1$
+            protected Integer getValue() { return model.getClassificationModel().getMaxRecords(); }
+            protected void setValue(Object t) { model.getClassificationModel().setMaxRecords((Integer)t); }});
+
+        window.addPreference(new PreferenceBoolean(Resources.getMessage("DialogProperties.17")) { //$NON-NLS-1$
+            protected Boolean getValue() { return model.getClassificationModel().isDeterministic(); }
+            protected void setValue(Object t) { model.getClassificationModel().setDeterministic((Boolean)t); }});
+        
+        window.addPreference(new PreferenceInteger(Resources.getMessage("DialogProperties.18"), 2, 100, 10) { //$NON-NLS-1$
+            protected Integer getValue() { return model.getClassificationModel().getNumberOfFolds(); }
+            protected void setValue(Object t) { model.getClassificationModel().setNumberOfFolds((Integer)t); }});
+
+        window.addPreference(new PreferenceInteger(Resources.getMessage("DialogProperties.19"), 10, Integer.MAX_VALUE, 1000) { //$NON-NLS-1$
+            protected Integer getValue() { return model.getClassificationModel().getVectorLength(); }
+            protected void setValue(Object t) { model.getClassificationModel().setVectorLength((Integer)t); }});
+
+        window.addPreference(new PreferenceSelection(Resources.getMessage("DialogProperties.20"), getPriorFunctions()) { //$NON-NLS-1$
+            protected String getValue() { return model.getClassificationModel().getPriorFunction().name(); }
+            protected void setValue(Object arg0) { model.getClassificationModel().setPriorFunction(PriorFunction.valueOf((String)arg0)); }
+        });
+    }
+    
     /**
      * Returns a list of available locales
      * @return
@@ -300,6 +330,18 @@ public class DialogProperties implements IDialog {
     }
 
     /**
+     * Creates a list of prior functions
+     * @return
+     */
+    private String[] getPriorFunctions() {
+        List<String> result = new ArrayList<String>();
+        for (PriorFunction function : PriorFunction.values()) {
+            result.add(function.name());
+        }
+        return result.toArray(new String[result.size()]);
+    }
+
+    /**
      * Creates a list of models
      * @return
      */
@@ -309,5 +351,20 @@ public class DialogProperties implements IDialog {
             result.add(model.name());
         }
         return result.toArray(new String[result.size()]);
+    }
+
+    /**
+     * Returns start values for the solver, if it is configured to be deterministic
+     * @return
+     */
+    private double[][] getSolverStartValues() {
+        double[][] result = new double[16][];
+        int index = 0;
+        for (double d1 = 0.25d; d1 <= 1d; d1 += 0.25d) {
+            for (double d2 = 0.25d; d2 <= 1d; d2 += 0.25d) {
+                result[index++] = new double[] { d1, d2 };
+            }
+        }
+        return result;
     }
 }

@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ package org.deidentifier.arx;
 public interface ARXListener {
 
     /**
-     * Is called when a node has been processed.
+     * Reports a progress value in [0, 1]
      *
-     * @param searchSpaceSize The total number of transformations in the search space
+     * @param progress The progress value in [0, 1]
      */
-    public void nodeTagged(int searchSpaceSize);
+    public void progress(double progress);
 
 }

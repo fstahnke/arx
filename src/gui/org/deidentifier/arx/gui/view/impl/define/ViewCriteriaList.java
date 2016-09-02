@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.deidentifier.arx.gui.model.Model;
 import org.deidentifier.arx.gui.model.ModelCriterion;
 import org.deidentifier.arx.gui.model.ModelEvent;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
+import org.deidentifier.arx.gui.model.ModelDDisclosurePrivacyCriterion;
 import org.deidentifier.arx.gui.model.ModelExplicitCriterion;
 import org.deidentifier.arx.gui.model.ModelLDiversityCriterion;
 import org.deidentifier.arx.gui.model.ModelRiskBasedCriterion;
@@ -54,10 +55,10 @@ import de.linearbits.swt.table.DynamicTableColumn;
 public class ViewCriteriaList implements IView {
 
     /** Controller */
-    private Controller         controller;
+    private Controller               controller;
 
     /** Model */
-    private Model              model = null;
+    private Model                    model = null;
 
     /** View */
     private final DynamicTable       table;
@@ -77,6 +78,8 @@ public class ViewCriteriaList implements IView {
     private final Image              symbolK;
     /** View */
     private final Image              symbolD;
+    /** View */
+    private final Image              symbolDP;
     /** View */
     private final Image              symbolR;
     /** View */
@@ -102,6 +105,7 @@ public class ViewCriteriaList implements IView {
         this.symbolT = controller.getResources().getManagedImage("symbol_t.png"); //$NON-NLS-1$
         this.symbolK = controller.getResources().getManagedImage("symbol_k.png"); //$NON-NLS-1$
         this.symbolD = controller.getResources().getManagedImage("symbol_d.png"); //$NON-NLS-1$
+        this.symbolDP = controller.getResources().getManagedImage("symbol_dp.png"); //$NON-NLS-1$
         this.symbolR = controller.getResources().getManagedImage("symbol_r.png"); //$NON-NLS-1$
         
         this.root = parent;
@@ -240,12 +244,26 @@ public class ViewCriteriaList implements IView {
         root.setRedraw(false);
         
         table.removeAll();
-        
+
+        if (model.getDifferentialPrivacyModel().isEnabled()) {
+            TableItem item = new TableItem(table, SWT.NONE);
+            item.setText(new String[] { "", model.getDifferentialPrivacyModel().toString(), "" }); //$NON-NLS-1$ //$NON-NLS-2$
+            item.setImage(0, symbolDP);
+            item.setData(model.getDifferentialPrivacyModel());
+        }
+
         if (model.getKAnonymityModel().isEnabled()) {
             TableItem item = new TableItem(table, SWT.NONE);
             item.setText(new String[] { "", model.getKAnonymityModel().toString(), "" }); //$NON-NLS-1$ //$NON-NLS-2$
             item.setImage(0, symbolK);
             item.setData(model.getKAnonymityModel());
+        }
+
+        if (model.getKMapModel().isEnabled()) {
+            TableItem item = new TableItem(table, SWT.NONE);
+            item.setText(new String[] { "", model.getKMapModel().toString(), "" }); //$NON-NLS-1$ //$NON-NLS-2$
+            item.setImage(0, symbolK);
+            item.setData(model.getKMapModel());
         }
 
         if (model.getDPresenceModel().isEnabled()) {
@@ -267,6 +285,11 @@ public class ViewCriteriaList implements IView {
                 explicit.add(other);
             }
         }
+        for (ModelDDisclosurePrivacyCriterion other : model.getDDisclosurePrivacyModel().values()) {
+            if (other.isEnabled()) {
+                explicit.add(other);
+            }
+        }
         Collections.sort(explicit, new Comparator<ModelExplicitCriterion>(){
             public int compare(ModelExplicitCriterion o1, ModelExplicitCriterion o2) {
                 return o1.getAttribute().compareTo(o2.getAttribute());
@@ -278,8 +301,10 @@ public class ViewCriteriaList implements IView {
             item.setText(new String[] { "", c.toString(), c.getAttribute() }); //$NON-NLS-1$
             if (c instanceof ModelLDiversityCriterion) {
                 item.setImage(0, symbolL);
-            } else {
+            } else if (c instanceof ModelTClosenessCriterion) {
                 item.setImage(0, symbolT);
+            } else if (c instanceof ModelDDisclosurePrivacyCriterion) {
+                item.setImage(0, symbolD);
             }
             item.setData(c);
         }

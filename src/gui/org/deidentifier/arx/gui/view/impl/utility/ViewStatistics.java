@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@ package org.deidentifier.arx.gui.view.impl.utility;
 
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.Model;
+import org.deidentifier.arx.gui.model.Model.Perspective;
 import org.deidentifier.arx.gui.model.ModelEvent;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
 import org.deidentifier.arx.gui.view.def.IView;
 import org.deidentifier.arx.gui.view.impl.common.ComponentStatus;
+import org.deidentifier.arx.gui.view.impl.common.ComponentStatusLabelProgressProvider;
 import org.deidentifier.arx.gui.view.impl.common.async.AnalysisContext;
+import org.deidentifier.arx.gui.view.impl.common.async.AnalysisContextVisualization;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -60,6 +63,15 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
     /** Internal stuff. */
     private T                     viewContext;
 
+    /** Internal stuff. */
+    private final boolean         dependsOnAttribute;
+
+    /** Is this view enabled */
+    private boolean               enabled              = false;
+
+    /** Parent */
+    private final Composite       parent;
+
 	/**
      * Creates a new instance.
      *
@@ -67,11 +79,13 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
      * @param controller
      * @param target
      * @param reset
+     * @param dependsOnAttribute
      */
     public ViewStatistics( final Composite parent,
                            final Controller controller,
                            final ModelPart target,
-                           final ModelPart reset) {
+                           final ModelPart reset,
+                           final boolean dependsOnAttribute) {
 
         // Register
         controller.addListener(ModelPart.SELECTED_ATTRIBUTE, this);
@@ -86,19 +100,31 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
             controller.addListener(reset, this);
         }
         
-        // Remember
+        // Init
         this.controller = controller;
         this.reset = reset;
         this.target = target;
+        this.dependsOnAttribute = dependsOnAttribute;
+        this.parent = parent;
 
         // Create controls
         parent.setLayout(new StackLayout());
         Control control = this.createControl(parent);
+        
+        // Obtain progress provider
+        ComponentStatusLabelProgressProvider provider = getProgressProvider();
 
         // Update status
-        this.status = new ComponentStatus(controller,
-                                          parent, 
-                                          control);
+        if (provider == null) {
+            this.status = new ComponentStatus(controller,
+                                              parent, 
+                                              control);
+        } else {
+            this.status = new ComponentStatus(controller,
+                                              parent,                                                  
+                                              control,                                             
+                                              getProgressProvider());
+        }
         
         // Reset
         this.reset();
@@ -108,6 +134,12 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
     public void dispose() {
         controller.removeListener(this);
     }
+
+    /**
+     * Returns the type
+     * @return
+     */
+    public abstract LayoutUtility.ViewUtilityType getType();
 
     @Override
     public void reset() {
@@ -136,28 +168,26 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
         }
         
         // Invalidate
-        if (event.part == ModelPart.OUTPUT ||
-            event.part == target ||
-            event.part == ModelPart.SELECTED_ATTRIBUTE ||
-            event.part == ModelPart.SELECTED_VIEW_CONFIG ||
-            event.part == ModelPart.ATTRIBUTE_VALUE) {
-            
-            this.viewContext = null;
-            this.update();
+        if (event.part == ModelPart.OUTPUT || event.part == target || event.part == ModelPart.SELECTED_VIEW_CONFIG) {
+            this.triggerUpdate();
             return;
+        }
+
+        // Invalidate
+        if (event.part == ModelPart.SELECTED_ATTRIBUTE || event.part == ModelPart.ATTRIBUTE_VALUE) {
+            if (dependsOnAttribute) {
+                this.triggerUpdate();
+                return;
+            }
         }
         
         // Potentially invalidate
-        if (event.part == ModelPart.DATA_TYPE ||
-            event.part == ModelPart.ATTRIBUTE_TYPE) {
-            
-            if (model == null || 
-                viewContext == null ||
-                viewContext.isAttributeSelected(model.getSelectedAttribute())) {
-                
-                this.viewContext = null;
-                this.update();
-                return;
+        if (event.part == ModelPart.DATA_TYPE || event.part == ModelPart.ATTRIBUTE_TYPE) {
+            if (dependsOnAttribute) {
+                if (model == null ||  viewContext == null || viewContext.isAttributeSelected(model.getSelectedAttribute())) {
+                    this.triggerUpdate();
+                    return;
+                }
             }
         }
 
@@ -167,14 +197,14 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
             this.reset();
             return;
         }
-         
+        
         // Update
         if (event.part == target ||
-           event.part == ModelPart.SELECTED_ATTRIBUTE ||
-           event.part == ModelPart.ATTRIBUTE_TYPE ||
-           event.part == ModelPart.SELECTED_VIEW_CONFIG ||
-           event.part == ModelPart.SELECTED_UTILITY_VISUALIZATION) {
-            
+            event.part == ModelPart.SELECTED_ATTRIBUTE ||
+            event.part == ModelPart.ATTRIBUTE_TYPE ||
+            event.part == ModelPart.SELECTED_VIEW_CONFIG ||
+            event.part == ModelPart.SELECTED_UTILITY_VISUALIZATION ||
+            (event.part == ModelPart.SELECTED_PERSPECTIVE && model != null && model.getPerspective() == Perspective.ANALYSIS)) {
             this.update();
         }
     }
@@ -184,16 +214,34 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
      */
     private void update() {
 
-        if (!this.status.isVisible() || !model.isVisualizationEnabled()){
-            this.status.setEmpty();
+        // Disable the view
+        if (model != null && !model.isVisualizationEnabled()) {
+            this.doReset();
+            this.setStatusEmpty();
+            this.enabled = false;
             return;
         }
+
+        // Check visibility
+        if (!this.status.isVisible()){
+            return;
+        }
+
+        // Enable the view
+        if (model != null && model.isVisualizationEnabled() && !this.enabled) {
+            this.enabled = true;
+            this.viewContext = null;
+        }
         
+        // Check if already done
         if (this.viewContext != null) {
-            this.status.setDone();
+            if (!isRunning()) {
+                this.status.setDone();
+            }
             return;
         }
         
+        // Update
         T context = createViewConfig(this.context);
         if (context.isValid()) {
             
@@ -207,7 +255,7 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
             status.setWorking();
         }
     }
-    
+
     /**
      * 
      * Implement this to create the widget.
@@ -216,7 +264,7 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
      * @return
      */
     protected abstract Control createControl(Composite parent);
-    
+
     /**
      * 
      *
@@ -236,6 +284,14 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
      * @param context
      */
     protected abstract void doUpdate(T context);
+    
+    /**
+     * Returns the controller
+     * @return
+     */
+    protected Controller getController() {
+        return this.controller;
+    }
 
     /**
      * Returns the model
@@ -244,25 +300,71 @@ public abstract class ViewStatistics<T extends AnalysisContextVisualization> imp
     protected Model getModel() {
         return this.model;
     }
+    
+    /**
+     * Returns the parent composite
+     */
+    protected Composite getParent() {
+        return this.parent;
+                
+    }
+
+    /**
+     * Overwrite this to return a progress provider
+     * @return
+     */
+    protected ComponentStatusLabelProgressProvider getProgressProvider() {
+        return null;
+    }
+    
+    /**
+     * Returns the target
+     * @return
+     */
+    protected ModelPart getTarget() {
+        return target;
+    }
+
+    /**
+     * Is this view enabled
+     * @return
+     */
+    protected boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Is a job running
+     * @return
+     */
+    protected abstract boolean isRunning();
 
     /**
      * Status update.
      */
     protected void setStatusDone(){
         this.status.setDone();
-    }
-
+    }           
+    
     /**
      * Status empty.
      */
     protected void setStatusEmpty(){
         this.status.setEmpty();
     }
-
+    
     /**
      * Status working.
      */
     protected void setStatusWorking(){
         this.status.setWorking();
+    }
+
+    /**
+     * Triggers an update
+     */
+    protected void triggerUpdate() {
+        this.viewContext = null;
+        this.update();
     }
 }

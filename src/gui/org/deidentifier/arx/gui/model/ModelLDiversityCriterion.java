@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.deidentifier.arx.criteria.EntropyLDiversity;
 import org.deidentifier.arx.criteria.PrivacyCriterion;
 import org.deidentifier.arx.criteria.RecursiveCLDiversity;
 import org.deidentifier.arx.gui.resources.Resources;
+import org.deidentifier.arx.gui.view.SWTUtil;
 
 /**
  * This class implements a model for the l-diversity criterion.
@@ -51,6 +52,24 @@ public class ModelLDiversityCriterion extends ModelExplicitCriterion{
     /** C, if any. */
     private double            c                 = 0.001d;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param attribute
+     * @param variant
+     * @param l
+     * @param c
+     */
+    public ModelLDiversityCriterion(String attribute,
+                                    int variant,
+                                    int l,
+                                    double c) {
+        super(attribute);
+        this.variant = variant;
+        this.l = l;
+        this.c = c;
+    }
+    
     /**
      * Creates a new instance.
      *
@@ -113,7 +132,7 @@ public class ModelLDiversityCriterion extends ModelExplicitCriterion{
 	}
 
 	@Override
-    public void parse(ModelCriterion criterion) {
+    public void parse(ModelCriterion criterion, boolean _default) {
         if (!(criterion instanceof ModelLDiversityCriterion)) {
             return;
         }
@@ -165,9 +184,9 @@ public class ModelLDiversityCriterion extends ModelExplicitCriterion{
     @Override
     public String toString() {
         switch (variant) {
-            case VARIANT_DISTINCT: return Resources.getMessage("Model.3")+l+Resources.getMessage("Model.4"); //$NON-NLS-1$ //$NON-NLS-2$
-            case VARIANT_ENTROPY: return Resources.getMessage("Model.5")+l+Resources.getMessage("Model.6");  //$NON-NLS-1$ //$NON-NLS-2$
-            case VARIANT_RECURSIVE: return Resources.getMessage("Model.7")+String.valueOf(c)+Resources.getMessage("Model.8")+l+Resources.getMessage("Model.9"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            case VARIANT_DISTINCT: return Resources.getMessage("Model.3")+SWTUtil.getPrettyString(l)+Resources.getMessage("Model.4"); //$NON-NLS-1$ //$NON-NLS-2$
+            case VARIANT_ENTROPY: return Resources.getMessage("Model.5")+SWTUtil.getPrettyString(l)+Resources.getMessage("Model.6");  //$NON-NLS-1$ //$NON-NLS-2$
+            case VARIANT_RECURSIVE: return Resources.getMessage("Model.7")+SWTUtil.getPrettyString(c)+Resources.getMessage("Model.8")+SWTUtil.getPrettyString(l)+Resources.getMessage("Model.9"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             default: throw new RuntimeException(Resources.getMessage("Model.10")); //$NON-NLS-1$
         }
     }

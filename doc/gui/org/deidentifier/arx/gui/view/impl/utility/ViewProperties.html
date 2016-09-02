@@ -34,7 +34,7 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewLocalRecoding.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Prev Class</span></a></li>
 <li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.Property.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -94,7 +94,7 @@
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a></dd>
+<dd><a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>, <a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">ViewStatisticsBasic</a></dd>
 </dl>
 <dl>
 <dt>Direct Known Subclasses:</dt>
@@ -104,7 +104,7 @@
 <br>
 <pre>public abstract class <span class="strong">ViewProperties</span>
 extends java.lang.Object
-implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a></pre>
+implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView.html" title="interface in org.deidentifier.arx.gui.view.def">IView</a>, <a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">ViewStatisticsBasic</a></pre>
 <div class="block">This view displays basic properties about input or output data.</div>
 </li>
 </ul>
@@ -146,8 +146,8 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>protected java.text.NumberFormat</code></td>
-<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html#format">format</a></strong></code>
+<td class="colFirst"><code>protected <a href="../../../../../../../org/deidentifier/arx/gui/Controller.html" title="class in org.deidentifier.arx.gui">Controller</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html#controller">controller</a></strong></code>
 <div class="block">Internal stuff.</div>
 </td>
 </tr>
@@ -192,7 +192,7 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>protected </code></td>
-<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html#ViewProperties(org.eclipse.swt.widgets.Composite, org.deidentifier.arx.gui.Controller, org.deidentifier.arx.gui.model.ModelEvent.ModelPart, org.deidentifier.arx.gui.model.ModelEvent.ModelPart)">ViewProperties</a></strong>(org.eclipse.swt.widgets.Composite&nbsp;parent,
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html#ViewProperties(org.eclipse.swt.widgets.Composite,%20org.deidentifier.arx.gui.Controller,%20org.deidentifier.arx.gui.model.ModelEvent.ModelPart,%20org.deidentifier.arx.gui.model.ModelEvent.ModelPart)">ViewProperties</a></strong>(org.eclipse.swt.widgets.Composite&nbsp;parent,
               <a href="../../../../../../../org/deidentifier/arx/gui/Controller.html" title="class in org.deidentifier.arx.gui">Controller</a>&nbsp;controller,
               <a href="../../../../../../../org/deidentifier/arx/gui/model/ModelEvent.ModelPart.html" title="enum in org.deidentifier.arx.gui.model">ModelEvent.ModelPart</a>&nbsp;target,
               <a href="../../../../../../../org/deidentifier/arx/gui/model/ModelEvent.ModelPart.html" title="enum in org.deidentifier.arx.gui.model">ModelEvent.ModelPart</a>&nbsp;reset)</code>
@@ -216,7 +216,7 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>protected double</code></td>
-<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html#asRelativeValue(org.deidentifier.arx.metric.InformationLoss, org.deidentifier.arx.ARXResult)">asRelativeValue</a></strong>(<a href="../../../../../../../org/deidentifier/arx/metric/InformationLoss.html" title="class in org.deidentifier.arx.metric">InformationLoss</a>&lt;?&gt;&nbsp;infoLoss,
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html#asRelativeValue(org.deidentifier.arx.metric.InformationLoss,%20org.deidentifier.arx.ARXResult)">asRelativeValue</a></strong>(<a href="../../../../../../../org/deidentifier/arx/metric/InformationLoss.html" title="class in org.deidentifier.arx.metric">InformationLoss</a>&lt;?&gt;&nbsp;infoLoss,
                <a href="../../../../../../../org/deidentifier/arx/ARXResult.html" title="class in org.deidentifier.arx">ARXResult</a>&nbsp;result)</code>
 <div class="block">Converts an information loss into a relative value in percent
  TODO: Code duplicate from NodePropertiesView.</div>
@@ -232,6 +232,18 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 <td class="colFirst"><code>protected <a href="../../../../../../../org/deidentifier/arx/gui/view/impl/common/async/AnalysisContext.html" title="class in org.deidentifier.arx.gui.view.impl.common.async">AnalysisContext</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html#getContext()">getContext</a></strong>()</code>
 <div class="block">Returns the context.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>org.eclipse.swt.widgets.Composite</code></td>
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html#getParent()">getParent</a></strong>()</code>
+<div class="block">Returns the parent composite</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><strong><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.html#refresh()">refresh</a></strong>()</code>
+<div class="block">Refreshes the tree</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -259,6 +271,13 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
 <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_org.deidentifier.arx.gui.view.impl.utility.ViewStatisticsBasic">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;org.deidentifier.arx.gui.view.impl.utility.<a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">ViewStatisticsBasic</a></h3>
+<code><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html#getType()">getType</a></code></li>
 </ul>
 </li>
 </ul>
@@ -294,16 +313,6 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 <div class="block">Internal stuff.</div>
 </li>
 </ul>
-<a name="format">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>format</h4>
-<pre>protected final&nbsp;java.text.NumberFormat format</pre>
-<div class="block">Internal stuff.</div>
-</li>
-</ul>
 <a name="model">
 <!--   -->
 </a>
@@ -311,6 +320,16 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 <li class="blockList">
 <h4>model</h4>
 <pre>protected&nbsp;<a href="../../../../../../../org/deidentifier/arx/gui/model/Model.html" title="class in org.deidentifier.arx.gui.model">Model</a> model</pre>
+<div class="block">Internal stuff.</div>
+</li>
+</ul>
+<a name="controller">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>controller</h4>
+<pre>protected final&nbsp;<a href="../../../../../../../org/deidentifier/arx/gui/Controller.html" title="class in org.deidentifier.arx.gui">Controller</a> controller</pre>
 <div class="block">Internal stuff.</div>
 </li>
 </ul>
@@ -369,6 +388,21 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 </dl>
 </li>
 </ul>
+<a name="getParent()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getParent</h4>
+<pre>public&nbsp;org.eclipse.swt.widgets.Composite&nbsp;getParent()</pre>
+<div class="block"><strong>Description copied from interface:&nbsp;<code><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html#getParent()">ViewStatisticsBasic</a></code></strong></div>
+<div class="block">Returns the parent composite</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html#getParent()">getParent</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewStatisticsBasic.html" title="interface in org.deidentifier.arx.gui.view.impl.utility">ViewStatisticsBasic</a></code></dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
 <a name="reset()">
 <!--   -->
 </a>
@@ -424,6 +458,16 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
+<a name="refresh()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>refresh</h4>
+<pre>protected&nbsp;void&nbsp;refresh()</pre>
+<div class="block">Refreshes the tree</div>
+</li>
+</ul>
 <a name="update()">
 <!--   -->
 </a>
@@ -460,7 +504,7 @@ implements <a href="../../../../../../../org/deidentifier/arx/gui/view/def/IView
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/LayoutUtilityStatistics.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewLocalRecoding.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Prev Class</span></a></li>
 <li><a href="../../../../../../../org/deidentifier/arx/gui/view/impl/utility/ViewProperties.Property.html" title="class in org.deidentifier.arx.gui.view.impl.utility"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">

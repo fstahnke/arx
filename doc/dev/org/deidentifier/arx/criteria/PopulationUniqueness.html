@@ -135,27 +135,27 @@ extends <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.ht
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#PopulationUniqueness(double, org.deidentifier.arx.ARXPopulationModel)">PopulationUniqueness</a></strong>(double&nbsp;riskThreshold,
+<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#PopulationUniqueness(double,%20org.deidentifier.arx.ARXPopulationModel)">PopulationUniqueness</a></strong>(double&nbsp;riskThreshold,
                     <a href="../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a>&nbsp;populationModel)</code>
 <div class="block">Creates a new instance of this criterion.</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#PopulationUniqueness(double, org.deidentifier.arx.ARXPopulationModel, org.deidentifier.arx.ARXSolverConfiguration)">PopulationUniqueness</a></strong>(double&nbsp;riskThreshold,
+<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#PopulationUniqueness(double,%20org.deidentifier.arx.ARXPopulationModel,%20org.deidentifier.arx.ARXSolverConfiguration)">PopulationUniqueness</a></strong>(double&nbsp;riskThreshold,
                     <a href="../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a>&nbsp;populationModel,
                     <a href="../../../../org/deidentifier/arx/ARXSolverConfiguration.html" title="class in org.deidentifier.arx">ARXSolverConfiguration</a>&nbsp;config)</code>
 <div class="block">Creates a new instance of this criterion.</div>
 </td>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#PopulationUniqueness(double, org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquenessModel, org.deidentifier.arx.ARXPopulationModel)">PopulationUniqueness</a></strong>(double&nbsp;riskThreshold,
+<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#PopulationUniqueness(double,%20org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquenessModel,%20org.deidentifier.arx.ARXPopulationModel)">PopulationUniqueness</a></strong>(double&nbsp;riskThreshold,
                     <a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.PopulationUniquenessModel.html" title="enum in org.deidentifier.arx.risk">RiskModelPopulationUniqueness.PopulationUniquenessModel</a>&nbsp;statisticalModel,
                     <a href="../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a>&nbsp;populationModel)</code>
 <div class="block">Creates a new instance of this criterion.</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#PopulationUniqueness(double, org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquenessModel, org.deidentifier.arx.ARXPopulationModel, org.deidentifier.arx.ARXSolverConfiguration)">PopulationUniqueness</a></strong>(double&nbsp;riskThreshold,
+<td class="colOne"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#PopulationUniqueness(double,%20org.deidentifier.arx.risk.RiskModelPopulationUniqueness.PopulationUniquenessModel,%20org.deidentifier.arx.ARXPopulationModel,%20org.deidentifier.arx.ARXSolverConfiguration)">PopulationUniqueness</a></strong>(double&nbsp;riskThreshold,
                     <a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.PopulationUniquenessModel.html" title="enum in org.deidentifier.arx.risk">RiskModelPopulationUniqueness.PopulationUniquenessModel</a>&nbsp;statisticalModel,
                     <a href="../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a>&nbsp;populationModel,
                     <a href="../../../../org/deidentifier/arx/ARXSolverConfiguration.html" title="class in org.deidentifier.arx">ARXSolverConfiguration</a>&nbsp;config)</code>
@@ -178,17 +178,43 @@ extends <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.ht
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html" title="class in org.deidentifier.arx.criteria">PopulationUniqueness</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#clone()">clone</a></strong>()</code>
+<div class="block">Clone</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a></code></td>
-<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#getPopulationModel()">getPopulationModel</a></strong>()</code>&nbsp;</td>
+<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#getPopulationModel()">getPopulationModel</a></strong>()</code>
+<div class="block">Returns the associated population model, <code>null</code> if there is none.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#getRiskThresholdMarketer()">getRiskThresholdMarketer</a></strong>()</code>
+<div class="block">Return marketer risk threshold, 1 if there is none</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.PopulationUniquenessModel.html" title="enum in org.deidentifier.arx.risk">RiskModelPopulationUniqueness.PopulationUniquenessModel</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#getStatisticalModel()">getStatisticalModel</a></strong>()</code>&nbsp;</td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#initialize(org.deidentifier.arx.framework.data.DataManager)">initialize</a></strong>(<a href="../../../../org/deidentifier/arx/framework/data/DataManager.html" title="class in org.deidentifier.arx.framework.data">DataManager</a>&nbsp;manager)</code>
+<div class="block">Override this to initialize the criterion.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>protected boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#isFulfilled(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution)">isFulfilled</a></strong>(<a href="../../../../org/deidentifier/arx/framework/check/groupify/HashGroupifyDistribution.html" title="class in org.deidentifier.arx.framework.check.groupify">HashGroupifyDistribution</a>&nbsp;distribution)</code>
 <div class="block">We currently assume that at any time, at least one statistical model converges.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><strong><a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html#isLocalRecodingSupported()">isLocalRecodingSupported</a></strong>()</code>
+<div class="block">Returns whether the criterion supports local recoding.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -203,7 +229,7 @@ extends <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.ht
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;org.deidentifier.arx.criteria.<a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html" title="class in org.deidentifier.arx.criteria">RiskBasedCriterion</a></h3>
-<code><a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution, int)">enforce</a>, <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#getRequirements()">getRequirements</a>, <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#getRiskThreshold()">getRiskThreshold</a></code></li>
+<code><a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#enforce(org.deidentifier.arx.framework.check.groupify.HashGroupifyDistribution,%20int)">enforce</a>, <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#getRequirements()">getRequirements</a>, <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.html#getRiskThreshold()">getRiskThreshold</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods_inherited_from_class_org.deidentifier.arx.criteria.SampleBasedCriterion">
@@ -217,14 +243,14 @@ extends <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.ht
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;org.deidentifier.arx.criteria.<a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html" title="class in org.deidentifier.arx.criteria">PrivacyCriterion</a></h3>
-<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#initialize(org.deidentifier.arx.framework.data.DataManager)">initialize</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isMonotonic()">isMonotonic</a></code></li>
+<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRiskThresholdJournalist()">getRiskThresholdJournalist</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRiskThresholdProsecutor()">getRiskThresholdProsecutor</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getSubset()">getSubset</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isMonotonicWithGeneralization()">isMonotonicWithGeneralization</a>, <a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isMonotonicWithSuppression()">isMonotonicWithSuppression</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
-<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
+<code>equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -308,6 +334,21 @@ extends <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.ht
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a name="clone()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>clone</h4>
+<pre>public&nbsp;<a href="../../../../org/deidentifier/arx/criteria/PopulationUniqueness.html" title="class in org.deidentifier.arx.criteria">PopulationUniqueness</a>&nbsp;clone()</pre>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#clone()">PrivacyCriterion</a></code></strong></div>
+<div class="block">Clone</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#clone()">clone</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html" title="class in org.deidentifier.arx.criteria">PrivacyCriterion</a></code></dd>
+</dl>
+</li>
+</ul>
 <a name="getPopulationModel()">
 <!--   -->
 </a>
@@ -315,7 +356,26 @@ extends <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.ht
 <li class="blockList">
 <h4>getPopulationModel</h4>
 <pre>public&nbsp;<a href="../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a>&nbsp;getPopulationModel()</pre>
-<dl><dt><span class="strong">Returns:</span></dt><dd>the populationModel</dd></dl>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getPopulationModel()">PrivacyCriterion</a></code></strong></div>
+<div class="block">Returns the associated population model, <code>null</code> if there is none.</div>
+<dl>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getPopulationModel()">getPopulationModel</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html" title="class in org.deidentifier.arx.criteria">PrivacyCriterion</a></code></dd>
+<dt><span class="strong">Returns:</span></dt><dd>the populationModel</dd></dl>
+</li>
+</ul>
+<a name="getRiskThresholdMarketer()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getRiskThresholdMarketer</h4>
+<pre>public&nbsp;double&nbsp;getRiskThresholdMarketer()</pre>
+<div class="block">Return marketer risk threshold, 1 if there is none</div>
+<dl>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#getRiskThresholdMarketer()">getRiskThresholdMarketer</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html" title="class in org.deidentifier.arx.criteria">PrivacyCriterion</a></code></dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
 <a name="getStatisticalModel()">
@@ -326,6 +386,36 @@ extends <a href="../../../../org/deidentifier/arx/criteria/RiskBasedCriterion.ht
 <h4>getStatisticalModel</h4>
 <pre>public&nbsp;<a href="../../../../org/deidentifier/arx/risk/RiskModelPopulationUniqueness.PopulationUniquenessModel.html" title="enum in org.deidentifier.arx.risk">RiskModelPopulationUniqueness.PopulationUniquenessModel</a>&nbsp;getStatisticalModel()</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd>the statisticalModel</dd></dl>
+</li>
+</ul>
+<a name="initialize(org.deidentifier.arx.framework.data.DataManager)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>initialize</h4>
+<pre>public&nbsp;void&nbsp;initialize(<a href="../../../../org/deidentifier/arx/framework/data/DataManager.html" title="class in org.deidentifier.arx.framework.data">DataManager</a>&nbsp;manager)</pre>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#initialize(org.deidentifier.arx.framework.data.DataManager)">PrivacyCriterion</a></code></strong></div>
+<div class="block">Override this to initialize the criterion.</div>
+<dl>
+<dt><strong>Overrides:</strong></dt>
+<dd><code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#initialize(org.deidentifier.arx.framework.data.DataManager)">initialize</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html" title="class in org.deidentifier.arx.criteria">PrivacyCriterion</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="isLocalRecodingSupported()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isLocalRecodingSupported</h4>
+<pre>public&nbsp;boolean&nbsp;isLocalRecodingSupported()</pre>
+<div class="block"><strong>Description copied from class:&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isLocalRecodingSupported()">PrivacyCriterion</a></code></strong></div>
+<div class="block">Returns whether the criterion supports local recoding.</div>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html#isLocalRecodingSupported()">isLocalRecodingSupported</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/deidentifier/arx/criteria/PrivacyCriterion.html" title="class in org.deidentifier.arx.criteria">PrivacyCriterion</a></code></dd>
+<dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
 <a name="toString()">

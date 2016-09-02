@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,10 @@
 package org.deidentifier.arx.gui.view.impl.risk;
 
 
-import java.text.DecimalFormat;
-
 import org.deidentifier.arx.ARXPopulationModel;
 import org.deidentifier.arx.ARXPopulationModel.Region;
 import org.deidentifier.arx.DataHandle;
-import org.deidentifier.arx.criteria.PopulationUniqueness;
+import org.deidentifier.arx.criteria.PrivacyCriterion;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.Model;
 import org.deidentifier.arx.gui.model.ModelEvent;
@@ -67,8 +65,6 @@ public class ViewRisksPopulationModel implements IView {
     /** View */
     private Text             textPopulationSize;
     /** View */
-    private DecimalFormat    format = new DecimalFormat("0.########################################"); //$NON-NLS-1$
-    /** View */
     private Button           buttonUse;
     
     /** Model */
@@ -111,6 +107,7 @@ public class ViewRisksPopulationModel implements IView {
     @Override
     public void reset() {
         table.select(0);
+        table.showSelection();
         textSampleFraction.setText(""); //$NON-NLS-1$
         textPopulationSize.setText(""); //$NON-NLS-1$
         SWTUtil.disable(root);
@@ -206,9 +203,10 @@ public class ViewRisksPopulationModel implements IView {
      */
     private boolean isOutputPopulationModelAvailable() {
         if (model == null || model.getOutputConfig() == null) { return false; }
-        for (PopulationUniqueness t : model.getOutputConfig()
-                                                          .getCriteria(PopulationUniqueness.class)) {
-            if (t.getPopulationModel() != null) { return true; }
+        for (PrivacyCriterion c : model.getOutputConfig().getCriteria()) {
+            if (c.getPopulationModel() != null) {
+                return true;
+            }
         }
         return false;
     }
@@ -257,9 +255,13 @@ public class ViewRisksPopulationModel implements IView {
             }
             table.getParent().setFocus();
             DataHandle handle = model.getInputConfig().getInput().getHandle();
-            textSampleFraction.setText(format.format(popmodel.getSamplingFraction(handle)));
+            long population = (long)popmodel.getPopulationSize();
+            double fraction = (double)handle.getNumRows() / (double)population;
+            textSampleFraction.setText(SWTUtil.getPrettyString(fraction));
+            textSampleFraction.setToolTipText(String.valueOf(fraction));
             textSampleFraction.setEnabled(true);
-            textPopulationSize.setText(format.format(popmodel.getPopulationSize(handle)));
+            textPopulationSize.setText(SWTUtil.getPrettyString(population));
+            textPopulationSize.setToolTipText(String.valueOf(population));
             textPopulationSize.setEnabled(true);
         }
         root.setRedraw(true);

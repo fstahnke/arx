@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,16 @@ import java.util.Set;
 import org.deidentifier.arx.ARXLattice.ARXNode;
 import org.deidentifier.arx.ARXLattice.Anonymity;
 import org.deidentifier.arx.ARXResult;
-import org.deidentifier.arx.aggregates.StatisticsEquivalenceClasses;
 import org.deidentifier.arx.criteria.AverageReidentificationRisk;
+import org.deidentifier.arx.criteria.DDisclosurePrivacy;
 import org.deidentifier.arx.criteria.DPresence;
 import org.deidentifier.arx.criteria.DistinctLDiversity;
+import org.deidentifier.arx.criteria.EDDifferentialPrivacy;
 import org.deidentifier.arx.criteria.EntropyLDiversity;
 import org.deidentifier.arx.criteria.EqualDistanceTCloseness;
 import org.deidentifier.arx.criteria.HierarchicalDistanceTCloseness;
 import org.deidentifier.arx.criteria.KAnonymity;
+import org.deidentifier.arx.criteria.KMap;
 import org.deidentifier.arx.criteria.PopulationUniqueness;
 import org.deidentifier.arx.criteria.PrivacyCriterion;
 import org.deidentifier.arx.criteria.RecursiveCLDiversity;
@@ -39,6 +41,7 @@ import org.deidentifier.arx.criteria.SampleUniqueness;
 import org.deidentifier.arx.gui.Controller;
 import org.deidentifier.arx.gui.model.ModelEvent.ModelPart;
 import org.deidentifier.arx.gui.resources.Resources;
+import org.deidentifier.arx.gui.view.SWTUtil;
 import org.deidentifier.arx.gui.view.impl.common.ClipboardHandlerTree;
 import org.deidentifier.arx.gui.view.impl.common.async.AnalysisData;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -48,6 +51,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -58,7 +62,7 @@ import org.eclipse.swt.widgets.TreeColumn;
  * @author Fabian Prasser
  */
 public class ViewPropertiesOutput extends ViewProperties {
-
+    
     /**
      * A content provider.
      *
@@ -118,14 +122,12 @@ public class ViewPropertiesOutput extends ViewProperties {
         }
 
         @Override
-        public Image
-                getColumnImage(final Object element, final int columnIndex) {
+        public Image getColumnImage(final Object element, final int columnIndex) {
             return null;
         }
 
         @Override
-        public String
-                getColumnText(final Object element, final int columnIndex) {
+        public String getColumnText(final Object element, final int columnIndex) {
             switch (columnIndex) {
             case 0:
                 return ((Property) element).property;
@@ -163,13 +165,23 @@ public class ViewPropertiesOutput extends ViewProperties {
     }
 
     /**
+     * Returns the view type
+     * @return
+     */
+    public LayoutUtility.ViewUtilityType getType() {
+        return LayoutUtility.ViewUtilityType.PROPERTIES;
+    }
+
+    /**
      * Creates the view.
      *
-     * @param group
+     * @param root
      */
-    private void create(final Composite group) {
+    private void create(final Composite root) {
 
-        final Tree tree = new Tree(group, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+        root.setLayout(new FillLayout());
+        
+        final Tree tree = new Tree(root, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
         tree.setHeaderVisible(true);
         
         treeViewer = new TreeViewer(tree);
@@ -216,24 +228,12 @@ public class ViewPropertiesOutput extends ViewProperties {
         // Clear
         roots.clear();
         
-        // Print basic info on outliers
-        StatisticsEquivalenceClasses statistics = context.handle.getStatistics().getEquivalenceClassStatistics();
-        // TODO: This is because of subset views. Provide statistics as well!
-        if (statistics != null) {
-            new Property(Resources.getMessage("PropertiesView.41"), new String[] { String.valueOf(statistics.getNumberOfOutlyingTuples()) }); //$NON-NLS-1$
-            new Property(Resources.getMessage("PropertiesView.42"), new String[] { String.valueOf(statistics.getNumberOfEquivalenceClasses()) }); //$NON-NLS-1$
-            new Property(Resources.getMessage("PropertiesView.43"), new String[] { String.valueOf(statistics.getNumberOfOutlyingEquivalenceClasses()) }); //$NON-NLS-1$
-            new Property(Resources.getMessage("PropertiesView.110"), new String[] { String.valueOf(statistics.getMinimalEquivalenceClassSize()) + " (" + String.valueOf(statistics.getMinimalEquivalenceClassSizeIncludingOutliers()) + ")"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            new Property(Resources.getMessage("PropertiesView.111"), new String[] { String.valueOf(statistics.getMaximalEquivalenceClassSize()) + " (" + String.valueOf(statistics.getMaximalEquivalenceClassSizeIncludingOutliers()) + ")"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            new Property(Resources.getMessage("PropertiesView.112"), new String[] { String.valueOf(statistics.getAverageEquivalenceClassSize()) + " (" + String.valueOf(statistics.getAverageEquivalenceClassSizeIncludingOutliers()) + ")"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        }
-        
         // Print information loss
         if (node.getMaximumInformationLoss().getValue().equals( 
             node.getMinimumInformationLoss().getValue())) {
             
             final String infoloss = node.getMinimumInformationLoss().toString() +
-                                    " [" + format.format(asRelativeValue(node.getMinimumInformationLoss(), result)) + "%]"; //$NON-NLS-1$ //$NON-NLS-2$
+                                    " [" + SWTUtil.getPrettyString(asRelativeValue(node.getMinimumInformationLoss(), result)) + "%]"; //$NON-NLS-1$ //$NON-NLS-2$
             new Property(Resources.getMessage("PropertiesView.46"), new String[] { infoloss }); //$NON-NLS-1$
 
         } 
@@ -252,15 +252,37 @@ public class ViewPropertiesOutput extends ViewProperties {
                 // Only if its not an auto-generated criterion
                 if (!(criterion.getDMin()==0d && criterion.getDMax()==1d)){
                     Property n = new Property(Resources.getMessage("PropertiesView.92"), new String[] { Resources.getMessage("PropertiesView.93") }); //$NON-NLS-1$ //$NON-NLS-2$
-                    new Property(n, Resources.getMessage("PropertiesView.94"), new String[] { String.valueOf(criterion.getDMin())}); //$NON-NLS-1$
-                    new Property(n, Resources.getMessage("PropertiesView.95"), new String[] { String.valueOf(criterion.getDMax())}); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.94"), new String[] { SWTUtil.getPrettyString(criterion.getDMin())}); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.95"), new String[] { SWTUtil.getPrettyString(criterion.getDMax())}); //$NON-NLS-1$
                 }
             }
             // Print info about k-anonymity
             if (context.config.containsCriterion(KAnonymity.class)) {
                 KAnonymity criterion = context.config.getCriterion(KAnonymity.class);
                 Property n = new Property(Resources.getMessage("PropertiesView.51"), new String[] { Resources.getMessage("PropertiesView.52") }); //$NON-NLS-1$ //$NON-NLS-2$
-                new Property(n, Resources.getMessage("PropertiesView.53"), new String[] { String.valueOf(criterion.getK())}); //$NON-NLS-1$
+                new Property(n, Resources.getMessage("PropertiesView.53"), new String[] { SWTUtil.getPrettyString(criterion.getK())}); //$NON-NLS-1$
+            }
+            // Print info about k-map
+            if (context.config.containsCriterion(KMap.class)) {
+                KMap criterion = context.config.getCriterion(KMap.class);
+                Property n = new Property(Resources.getMessage("PropertiesView.51"), new String[] { Resources.getMessage("PropertiesView.132") }); //$NON-NLS-1$ //$NON-NLS-2$
+                new Property(n, Resources.getMessage("PropertiesView.53"), new String[] { SWTUtil.getPrettyString(criterion.getK())}); //$NON-NLS-1$
+                if (!criterion.isAccurate()) {
+                    new Property(n, Resources.getMessage("PropertiesView.146"), new String[] { SWTUtil.getPrettyString(criterion.getDerivedK()) }); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.133"), new String[] { SWTUtil.getPrettyString(((KMap)criterion).getPopulationModel().getPopulationSize())}); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.147"), new String[] { SWTUtil.getPrettyString(criterion.getSignificanceLevel()) }); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.148"), new String[] { SWTUtil.getPrettyString(criterion.getType1Error()) }); //$NON-NLS-1$
+                }
+            }
+            
+            // Print info about (e,d)-dp
+            if (context.config.containsCriterion(EDDifferentialPrivacy.class)) {
+                EDDifferentialPrivacy criterion = context.config.getCriterion(EDDifferentialPrivacy.class);
+                Property n = new Property(Resources.getMessage("PropertiesView.51"), new String[] { Resources.getMessage("PropertiesView.141") }); //$NON-NLS-1$ //$NON-NLS-2$
+                new Property(n, Resources.getMessage("PropertiesView.142"), new String[] { SWTUtil.getPrettyString(criterion.getEpsilon())}); //$NON-NLS-1$
+                new Property(n, Resources.getMessage("PropertiesView.143"), new String[] { SWTUtil.getPrettyString(criterion.getDelta())}); //$NON-NLS-1$
+                new Property(n, Resources.getMessage("PropertiesView.144"), new String[] { SWTUtil.getPrettyString(criterion.getK())}); //$NON-NLS-1$
+                new Property(n, Resources.getMessage("PropertiesView.145"), new String[] { SWTUtil.getPrettyString(criterion.getBeta())}); //$NON-NLS-1$
             }
             
             // Print info about l-diversity or t-closeness
@@ -269,31 +291,36 @@ public class ViewPropertiesOutput extends ViewProperties {
                 if (c instanceof DistinctLDiversity){
                     DistinctLDiversity criterion = (DistinctLDiversity)c;
                     Property n = new Property(Resources.getMessage("PropertiesView.57"), new String[] { Resources.getMessage("PropertiesView.58") }); //$NON-NLS-1$ //$NON-NLS-2$
-                    new Property(n, Resources.getMessage("PropertiesView.59"), new String[] { String.valueOf(criterion.getL()) }); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.59"), new String[] { SWTUtil.getPrettyString(criterion.getL()) }); //$NON-NLS-1$
                     new Property(n, Resources.getMessage("PropertiesView.100"), new String[] { criterion.getAttribute() }); //$NON-NLS-1$
                 } else if (c instanceof EntropyLDiversity){
                     EntropyLDiversity criterion = (EntropyLDiversity)c;
                     Property n = new Property(Resources.getMessage("PropertiesView.63"), new String[] { Resources.getMessage("PropertiesView.64") }); //$NON-NLS-1$ //$NON-NLS-2$
-                    new Property(n, Resources.getMessage("PropertiesView.65"), new String[] { String.valueOf(criterion.getL()) }); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.65"), new String[] { SWTUtil.getPrettyString(criterion.getL()) }); //$NON-NLS-1$
                     new Property(n, Resources.getMessage("PropertiesView.100"), new String[] { criterion.getAttribute() }); //$NON-NLS-1$
                 } else if (c instanceof RecursiveCLDiversity){
                     RecursiveCLDiversity criterion = (RecursiveCLDiversity)c;
                     Property n = new Property(Resources.getMessage("PropertiesView.69"), new String[] { Resources.getMessage("PropertiesView.70") }); //$NON-NLS-1$ //$NON-NLS-2$
-                    new Property(n, Resources.getMessage("PropertiesView.71"), new String[] { String.valueOf(criterion.getC()) }); //$NON-NLS-1$
-                    new Property(n, Resources.getMessage("PropertiesView.72"), new String[] { String.valueOf(criterion.getL()) }); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.71"), new String[] { SWTUtil.getPrettyString(criterion.getC()) }); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.72"), new String[] { SWTUtil.getPrettyString(criterion.getL()) }); //$NON-NLS-1$
                     new Property(n, Resources.getMessage("PropertiesView.100"), new String[] { criterion.getAttribute() }); //$NON-NLS-1$
                 } else if (c instanceof EqualDistanceTCloseness){
                     EqualDistanceTCloseness criterion = (EqualDistanceTCloseness)c;
                     Property n = new Property(Resources.getMessage("PropertiesView.77"), new String[] { Resources.getMessage("PropertiesView.78") }); //$NON-NLS-1$ //$NON-NLS-2$
-                    new Property(n, Resources.getMessage("PropertiesView.79"), new String[] { String.valueOf(criterion.getT()) }); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.79"), new String[] { SWTUtil.getPrettyString(criterion.getT()) }); //$NON-NLS-1$
                     new Property(n, Resources.getMessage("PropertiesView.100"), new String[] { criterion.getAttribute() }); //$NON-NLS-1$
                 } else if (c instanceof HierarchicalDistanceTCloseness){
                     HierarchicalDistanceTCloseness criterion = (HierarchicalDistanceTCloseness)c;
                     Property n = new Property(Resources.getMessage("PropertiesView.83"), new String[] { Resources.getMessage("PropertiesView.84") }); //$NON-NLS-1$ //$NON-NLS-2$
-                    new Property(n, Resources.getMessage("PropertiesView.85"), new String[] { String.valueOf(criterion.getT()) }); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.85"), new String[] { SWTUtil.getPrettyString(criterion.getT()) }); //$NON-NLS-1$
                     new Property(n, Resources.getMessage("PropertiesView.100"), new String[] { criterion.getAttribute() }); //$NON-NLS-1$
                     final int height = context.config.getHierarchy(criterion.getAttribute()).getHierarchy()[0].length;
                     new Property(n, "SE-"+(index++), new String[] { Resources.getMessage("PropertiesView.87") + String.valueOf(height) }); //$NON-NLS-1$ //$NON-NLS-2$
+                } else if (c instanceof DDisclosurePrivacy){
+                    DDisclosurePrivacy criterion = (DDisclosurePrivacy)c;
+                    Property n = new Property(Resources.getMessage("PropertiesView.83"), new String[] { Resources.getMessage("PropertiesView.130") }); //$NON-NLS-1$ //$NON-NLS-2$
+                    new Property(n, Resources.getMessage("PropertiesView.131"), new String[] { SWTUtil.getPrettyString(criterion.getD()) }); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.100"), new String[] { criterion.getAttribute() }); //$NON-NLS-1$
                 }
             }
 
@@ -311,10 +338,10 @@ public class ViewPropertiesOutput extends ViewProperties {
                 }
                         
                 Property n = new Property(Resources.getMessage("PropertiesView.51"), new String[] { type }); //$NON-NLS-1$ //$NON-NLS-2$
-                new Property(n, Resources.getMessage("PropertiesView.120"), new String[] { String.valueOf(criterion.getRiskThreshold())}); //$NON-NLS-1$
+                new Property(n, Resources.getMessage("PropertiesView.120"), new String[] { SWTUtil.getPrettyString(criterion.getRiskThreshold())}); //$NON-NLS-1$
                 
                 if (criterion instanceof PopulationUniqueness) {
-                    new Property(n, Resources.getMessage("PropertiesView.121"), new String[] { String.valueOf(((PopulationUniqueness)criterion).getPopulationModel().getSamplingFraction(context.handle))}); //$NON-NLS-1$
+                    new Property(n, Resources.getMessage("PropertiesView.133"), new String[] { SWTUtil.getPrettyString(((PopulationUniqueness)criterion).getPopulationModel().getPopulationSize())}); //$NON-NLS-1$
                     new Property(n, Resources.getMessage("PropertiesView.122"), new String[] { ((PopulationUniqueness)criterion).getStatisticalModel().toString()}); //$NON-NLS-1$
                 }
             }
@@ -323,8 +350,7 @@ public class ViewPropertiesOutput extends ViewProperties {
         }
 
         // Initialize
-        treeViewer.refresh();
-        treeViewer.expandAll();
+        refresh();
         
         // Redraw
         root.setRedraw(true);

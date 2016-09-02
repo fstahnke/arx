@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,22 @@
 
 package org.deidentifier.arx.gui.view.impl.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.deidentifier.arx.gui.model.ModelCriterion;
 import org.deidentifier.arx.gui.model.ModelKAnonymityCriterion;
 import org.deidentifier.arx.gui.resources.Resources;
 import org.deidentifier.arx.gui.view.SWTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Text;
+
+import de.linearbits.swt.widgets.Knob;
 
 /**
  * A view on a k-anonymity criterion.
@@ -36,11 +41,11 @@ import org.eclipse.swt.widgets.Scale;
  */
 public class EditorCriterionKAnonymity extends EditorCriterion<ModelKAnonymityCriterion>{
 
-    /**  View */
-    private Label labelK;
-    
-    /**  View */
-    private Scale sliderK;
+    /** View */
+    private Text          labelK;
+
+    /** View */
+    private Knob<Integer> knobK;
 
     /**
      * Creates a new instance.
@@ -54,16 +59,6 @@ public class EditorCriterionKAnonymity extends EditorCriterion<ModelKAnonymityCr
     }
 
     /**
-     * Updates the label and tool tip text.
-     *
-     * @param text
-     */
-    private void updateLabel(String text) {
-        labelK.setText(text);
-        labelK.setToolTipText(text);
-    }
-
-    /**
      * Build
      * @param parent
      * @return
@@ -71,33 +66,24 @@ public class EditorCriterionKAnonymity extends EditorCriterion<ModelKAnonymityCr
     protected Composite build(Composite parent) {
 
         // Create input group
-        final Composite group = new Composite(parent, SWT.NONE);
+        Composite group = new Composite(parent, SWT.NONE);
         group.setLayoutData(SWTUtil.createFillHorizontallyGridData());
-        final GridLayout groupInputGridLayout = new GridLayout();
+        GridLayout groupInputGridLayout = new GridLayout();
         groupInputGridLayout.numColumns = 3;
         group.setLayout(groupInputGridLayout);
 
         // Create k slider
-        final Label kLabel = new Label(group, SWT.NONE);
+        Label kLabel = new Label(group, SWT.NONE);
         kLabel.setText(Resources.getMessage("CriterionDefinitionView.22")); //$NON-NLS-1$
 
-        labelK = new Label(group, SWT.BORDER | SWT.CENTER);
-        final GridData d = new GridData();
-        d.minimumWidth = LABEL_WIDTH;
-        d.widthHint = LABEL_WIDTH;
-        labelK.setLayoutData(d);
-        updateLabel("2"); //$NON-NLS-1$
-
-        sliderK = new Scale(group, SWT.HORIZONTAL);
-        sliderK.setLayoutData(SWTUtil.createFillHorizontallyGridData());
-        sliderK.setMaximum(SWTUtil.SLIDER_MAX);
-        sliderK.setMinimum(0);
-        sliderK.setSelection(0);
-        sliderK.addSelectionListener(new SelectionAdapter() {
+        labelK = createLabel(group);
+        knobK = createKnobInteger(group, 2, 1000);
+        updateLabel(labelK, knobK.getValue());
+        knobK.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(final SelectionEvent arg0) {
-                model.setK(SWTUtil.sliderToInt(2, 100, sliderK.getSelection()));
-                updateLabel(String.valueOf(model.getK()));
+                model.setK(knobK.getValue());
+                updateLabel(labelK, model.getK());
             }
         });
 
@@ -107,8 +93,20 @@ public class EditorCriterionKAnonymity extends EditorCriterion<ModelKAnonymityCr
     /**
      * Parse
      */
-    protected void parse(ModelKAnonymityCriterion model) {
-        updateLabel(String.valueOf(model.getK()));
-        sliderK.setSelection(SWTUtil.intToSlider(2, 100, model.getK()));
+    protected void parse(ModelKAnonymityCriterion model, boolean _default) {
+        updateLabel(labelK, model.getK());
+        knobK.setValue(model.getK());
+    }
+
+
+    @Override
+    protected List<ModelCriterion> getTypicalParameters() {
+
+        List<ModelCriterion> result = new ArrayList<ModelCriterion>();
+        result.add(new ModelKAnonymityCriterion(3));
+        result.add(new ModelKAnonymityCriterion(5));
+        result.add(new ModelKAnonymityCriterion(10));
+        result.add(new ModelKAnonymityCriterion(100));
+        return result;
     }
 }

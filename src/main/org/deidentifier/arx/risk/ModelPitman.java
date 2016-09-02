@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@
 package org.deidentifier.arx.risk;
 
 import org.deidentifier.arx.ARXPopulationModel;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedBoolean;
-import org.deidentifier.arx.risk.RiskEstimateBuilder.WrappedInteger;
+import org.deidentifier.arx.common.WrappedBoolean;
+import org.deidentifier.arx.common.WrappedInteger;
 
+import de.linearbits.newtonraphson.Constraint2D;
 import de.linearbits.newtonraphson.Function;
 import de.linearbits.newtonraphson.NewtonRaphson2D;
 import de.linearbits.newtonraphson.NewtonRaphsonConfiguration;
@@ -46,24 +47,22 @@ class ModelPitman extends RiskModelPopulation {
      * 
      * @param model
      * @param histogram
-     * @param sampleSize
      * @param config
      * @param stop
      */
     ModelPitman(final ARXPopulationModel model,
                 final RiskModelHistogram histogram,
-                final int sampleSize,
                 final NewtonRaphsonConfiguration<?> config,
                 final WrappedBoolean stop) {
 
-        super(histogram, model, sampleSize, stop, new WrappedInteger());
+        super(histogram, model, stop, new WrappedInteger());
 
         // Init
         double c1 = getNumClassesOfSize(1);
         double c2 = getNumClassesOfSize(2);
         double u = getNumClasses();
         double p = getPopulationSize();
-        double n = sampleSize;
+        double n = super.getSampleSize();
 
         // Initial guess
         c2 = c2 != 0 ? c2 : 1; // Overestimate
@@ -73,13 +72,15 @@ class ModelPitman extends RiskModelPopulation {
         double a = ((t * (c1 - n)) + ((n - 1) * c1)) / (n * u);
 
         // Solve the Maximum Likelihood Estimates with Polygamma functions
-        NewtonRaphson2D solver = new NewtonRaphson2D(getMasterFunctionClosed(histogram.getHistogram(), u, n)).configure(config);
+        NewtonRaphson2D solver = new NewtonRaphson2D(getMasterFunctionClosed(histogram.getHistogram(), u, n),
+                                                     getConstraint()).configure(config);
         Vector2D result = solver.solve(new Vector2D(t, a));
 
         // If no result found, use iterative implementation
         if (Double.isNaN(result.x) || Double.isNaN(result.y)) {
 
-            solver = new NewtonRaphson2D(getMasterFunctionIterative(histogram.getHistogram(), u, n)).configure(config);
+            solver = new NewtonRaphson2D(getMasterFunctionIterative(histogram.getHistogram(), u, n),
+                                         getConstraint()).configure(config);
             result = solver.solve(new Vector2D(t, a));
 
             // Else check the result against the iterative implementation
@@ -94,9 +95,8 @@ class ModelPitman extends RiskModelPopulation {
                 Math.abs(test.y) > config.getAccuracy()) {
 
                 // Use iterative implementation
-                solver = new NewtonRaphson2D(getMasterFunctionIterative(histogram.getHistogram(),
-                                                                        u,
-                                                                        n)).configure(config);
+                solver = new NewtonRaphson2D(getMasterFunctionIterative(histogram.getHistogram(), u, n),
+                                                                        getConstraint()).configure(config);
                 result = solver.solve(new Vector2D(t, a));
             }
         }
@@ -112,6 +112,19 @@ class ModelPitman extends RiskModelPopulation {
      */
     public double getNumUniques() {
         return this.numUniques;
+    }
+
+    /**
+     * Returns a constraint on theta
+     * @return
+     */
+    private Constraint2D getConstraint() {
+        return new Constraint2D() {
+            @Override
+            public Boolean evaluate(Vector2D arg0) {
+                return arg0.x >= 0;
+            }
+        };
     }
 
     /**
@@ -360,7 +373,7 @@ class ModelPitman extends RiskModelPopulation {
     }
 
     /**
-     * Compiles the result of the Newton-Rhapson-Algorithm
+     * Compiles the result of running the solver
      * 
      * @return
      */

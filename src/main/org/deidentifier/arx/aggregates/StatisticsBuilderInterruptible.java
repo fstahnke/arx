@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 
 package org.deidentifier.arx.aggregates;
 
+import java.text.ParseException;
 import java.util.Map;
 
 import org.deidentifier.arx.AttributeType.Hierarchy;
-import org.deidentifier.arx.DataHandleStatistics;
-import org.deidentifier.arx.aggregates.StatisticsBuilder.ComputationInterruptedException;
+import org.deidentifier.arx.ARXLogisticRegressionConfiguration;
+import org.deidentifier.arx.DataHandleInternal;
+import org.deidentifier.arx.exceptions.ComputationInterruptedException;
 
 
 /**
@@ -41,9 +43,48 @@ public class StatisticsBuilderInterruptible {
      * @param handle
      * @param ecStatistics
      */
-    StatisticsBuilderInterruptible(DataHandleStatistics handle,
-                                   StatisticsEquivalenceClasses ecStatistics) {
-        this.builder = new StatisticsBuilder(handle, ecStatistics);
+    StatisticsBuilderInterruptible(DataHandleInternal handle) {
+        this.builder = new StatisticsBuilder(handle);
+    }
+
+    /**
+     * Creates a new set of statistics for the given classification task
+     * @param clazz - The class attributes
+     * @param config - The configuration
+     * @throws ParseException
+     */
+    public StatisticsClassification getClassificationPerformance(String clazz,
+                                                                 ARXLogisticRegressionConfiguration config) throws InterruptedException {
+        try {
+            return builder.getClassificationPerformance(clazz, config);
+        } catch (Exception e) {
+            if (e instanceof ComputationInterruptedException) {
+                throw new InterruptedException("Interrupted");
+            } else {
+                throw new InterruptedException("Interrupted by exception: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Creates a new set of statistics for the given classification task
+     * @param features - The feature attributes
+     * @param clazz - The class attributes
+     * @param config - The configuration
+     * @throws ParseException
+     */
+    public StatisticsClassification getClassificationPerformance(String[] features,
+                                                                 String clazz,
+                                                                 ARXLogisticRegressionConfiguration config) throws InterruptedException {
+        try {
+            return builder.getClassificationPerformance(features, clazz, config);
+        } catch (Exception e) {
+            if (e instanceof ComputationInterruptedException) {
+                throw new InterruptedException("Interrupted");
+            } else {
+                throw new InterruptedException("Interrupted by exception: " + e.getMessage());
+            }
+        }
     }
 
     /**
@@ -100,9 +141,9 @@ public class StatisticsBuilderInterruptible {
 
         try {
             return builder.getContingencyTable(column1,
-                                               hierarchy1,
+                                               hierarchy1 == null ? null : hierarchy1.getHierarchy(),
                                                column2,
-                                               hierarchy2);
+                                               hierarchy2 == null ? null : hierarchy2.getHierarchy());
         } catch (Exception e) {
             if (e instanceof ComputationInterruptedException) {
                 throw new InterruptedException("Interrupted");
@@ -115,7 +156,7 @@ public class StatisticsBuilderInterruptible {
 
     /**
      * Returns a contingency table for the given columns. This method assumes
-     * that the order of string data items can (and should) be derived from the
+     * that the order of string data items will be derived from the
      * hierarchies provided in the data definition (if any)
      *
      * @param column1 The first column
@@ -197,13 +238,14 @@ public class StatisticsBuilderInterruptible {
                                 int column2,
                                 int size2,
                                 Hierarchy hierarchy2) throws InterruptedException {
+        
         try {
             return builder.getContingencyTable(column1,
                                                size1,
-                                               hierarchy1,
+                                               hierarchy1 == null ? null : hierarchy1.getHierarchy(),
                                                column2,
                                                size2,
-                                               hierarchy2);
+                                               hierarchy2 == null ? null : hierarchy2.getHierarchy());
         } catch (Exception e) {
             if (e instanceof ComputationInterruptedException) {
                 throw new InterruptedException("Interrupted");
@@ -321,8 +363,9 @@ public class StatisticsBuilderInterruptible {
      */
     public String[]
             getDistinctValuesOrdered(int column, Hierarchy hierarchy) throws InterruptedException {
+        
         try {
-            return builder.getDistinctValuesOrdered(column, hierarchy);
+            return builder.getDistinctValuesOrdered(column, hierarchy == null ? null : hierarchy.getHierarchy());
         } catch (Exception e) {
             if (e instanceof ComputationInterruptedException) {
                 throw new InterruptedException("Interrupted");
@@ -409,16 +452,16 @@ public class StatisticsBuilderInterruptible {
      * @return
      * @throws InterruptedException
      */
-    public StatisticsFrequencyDistribution
-            getFrequencyDistribution(int column, Hierarchy hierarchy) throws InterruptedException {
+    public StatisticsFrequencyDistribution getFrequencyDistribution(int column, Hierarchy hierarchy) throws InterruptedException {
+        
         try {
-            return builder.getFrequencyDistribution(column, hierarchy);
+            return builder.getFrequencyDistribution(column, hierarchy == null ? null : hierarchy.getHierarchy());
         } catch (Exception e) {
             if (e instanceof ComputationInterruptedException) {
                 throw new InterruptedException("Interrupted");
             } else {
-                throw new InterruptedException("Interrupted by exception: " +
-                                               e.getMessage());
+                e.printStackTrace();
+                throw new InterruptedException("Interrupted by exception: " + e.getMessage());
             }
         }
     }

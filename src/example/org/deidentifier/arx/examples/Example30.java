@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 package org.deidentifier.arx.examples;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ public class Example30 extends Example {
      *            the arguments
      */
     @SuppressWarnings("unchecked")
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
 
         // Define data
         DefaultData data = Data.create();

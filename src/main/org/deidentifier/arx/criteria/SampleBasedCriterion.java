@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,12 @@ public abstract class SampleBasedCriterion extends PrivacyCriterion {
     /**
      * Instantiates a new criterion.
      *
-     * @param monotonic
+     * @param monotonicWithSuppression
+     * @param monotonicWithGeneralization
      */
-    public SampleBasedCriterion(boolean monotonic){
-        super(monotonic);
+    public SampleBasedCriterion(boolean monotonicWithSuppression,
+                                boolean monotonicWithGeneralization) {
+        super(monotonicWithSuppression, monotonicWithGeneralization);
     }
     
     /**

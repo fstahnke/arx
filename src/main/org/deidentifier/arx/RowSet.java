@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,23 @@ public class RowSet implements Serializable, Cloneable {
     private static final int   BIT_INDEX_MASK        = 63;
     
     /**
-     * 
+     * Creates a new instance
      *
      * @param data
      * @return
      */
     public static RowSet create(Data data){
         return new RowSet(data);
+    }
+
+    /**
+     * Creates a new instance
+     *
+     * @param length
+     * @return
+     */
+    public static RowSet create(int length){
+        return new RowSet(length);
     }
     
     /**  TODO */
@@ -62,7 +72,7 @@ public class RowSet implements Serializable, Cloneable {
     private RowSet(Data data) {
         this.length = data.getHandle().getNumRows();
         int chunks = (int) (Math.ceil((double) this.length / 64d));
-        array = new long[chunks];
+        this.array = new long[chunks];
     }
     
     /**
@@ -73,7 +83,7 @@ public class RowSet implements Serializable, Cloneable {
     private RowSet(int length) {
         this.length = length;
         int chunks = (int) (Math.ceil((double) this.length / 64d));
-        array = new long[chunks];
+        this.array = new long[chunks];
     }
 
     /**
@@ -84,8 +94,8 @@ public class RowSet implements Serializable, Cloneable {
     public void add(int rowIndex) {
         int offset = rowIndex >> ADDRESS_BITS_PER_UNIT;
         long temp = array[offset];
-        array[offset] |= 1L << (rowIndex & BIT_INDEX_MASK);
-        size += array[offset] != temp ? 1 : 0; 
+        this.array[offset] |= 1L << (rowIndex & BIT_INDEX_MASK);
+        this.size += array[offset] != temp ? 1 : 0; 
     }
     
     @Override
@@ -123,8 +133,8 @@ public class RowSet implements Serializable, Cloneable {
     public void remove(int rowIndex){
         int offset = rowIndex >> ADDRESS_BITS_PER_UNIT;
         long temp = array[offset];
-        array[offset] &= ~(1L << (rowIndex & BIT_INDEX_MASK));
-        size -= array[offset] != temp ? 1 : 0; 
+        this.array[offset] &= ~(1L << (rowIndex & BIT_INDEX_MASK));
+        this.size -= array[offset] != temp ? 1 : 0; 
     }
 
     /**

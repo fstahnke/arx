@@ -1,6 +1,6 @@
 /*
  * ARX: Powerful Data Anonymization
- * Copyright 2012 - 2015 Florian Kohlmayer, Fabian Prasser
+ * Copyright 2012 - 2016 Fabian Prasser, Florian Kohlmayer and contributors
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,54 +20,71 @@ package org.deidentifier.arx.algorithm;
 import java.util.Comparator;
 
 import org.deidentifier.arx.framework.data.GeneralizationHierarchy;
-import org.deidentifier.arx.framework.lattice.Lattice;
-import org.deidentifier.arx.framework.lattice.Node;
+import org.deidentifier.arx.framework.lattice.SolutionSpace;
+import org.deidentifier.arx.framework.lattice.Transformation;
 
 /**
- * This class implements the general strategy of the ARX algorithm.
+ * This class implements a total order on all transformations in the search space. It is
+ * used by the Flash algorithm to achieve stable execution times.
  * 
  * @author Fabian Prasser
  * @author Florian Kohlmayer
  */
-public class FLASHStrategy implements Comparator<Node> {
+public class FLASHStrategy implements Comparator<Integer> {
 
     /** The distinct values. */
-    private final int[][]    distinct;
+    private final int[][]       distinct;
 
     /** The maximal level in the lattice. */
-    private final int        maxlevel;
+    private final int           maxlevel;
 
-    /** The maximal level for each qi. */
-    private final int[]      maxLevels;
+    /** The maximal level for each quasi-identifier. */
+    private final int[]         maxLevels;
 
-    /** The criteria for a node with id 'index'. */
-    private final double[][] values;
+    /** The cached values for a node with id 'index'. */
+    private final double[][]    cache;
+
+    /** The solution space */
+    private final SolutionSpace solutionSpace;
 
     /**
      * Creates a new instance.
      * 
-     * @param lattice
-     *            the lattice
-     * @param hier
-     *            the hier
+     * @param solutionSpace the solution space
+     * @param hierarchies the hierarchies
      */
-    public FLASHStrategy(final Lattice lattice,
-                         final GeneralizationHierarchy[] hier) {
+    public FLASHStrategy(final SolutionSpace solutionSpace,
+                         final GeneralizationHierarchy[] hierarchies) {
 
-        maxLevels = lattice.getTop().getTransformation().clone();
-        for (int i=0; i < maxLevels.length; i++) {
-            maxLevels[i] ++;
+        // Check
+        if (solutionSpace.getSize() > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Solution space is too large for executing the FLASH algorithm");
         }
-        distinct = new int[hier.length][];
-        for (int i = 0; i < hier.length; i++) {
-            distinct[i] = hier[i].getDistinctValues();
+        
+        // Store
+        this.solutionSpace = solutionSpace;
+        
+        // Prepare information about levels
+        int level = 0;
+        this.maxLevels = solutionSpace.getTop().getGeneralization().clone();
+        for (int i=0; i < this.maxLevels.length; i++) {
+            level += this.maxLevels[i];
+            this.maxLevels[i] ++;
         }
-        maxlevel = lattice.getLevels().length - 1;
-        values = new double[lattice.getSize()][];
+        this.maxlevel = level;
+        
+        // Prepare information about distinct values
+        this.distinct = new int[hierarchies.length][];
+        for (int i = 0; i < hierarchies.length; i++) {
+            this.distinct[i] = hierarchies[i].getDistinctValues();
+        }
+        
+        // Prepare cache
+        this.cache = new double[(int)solutionSpace.getSize()][];
     }
 
     /**
-     * Compares nodea according to their criteria.
+     * Compares transformations.
      * 
      * @param n1
      *            the n1
@@ -76,17 +93,17 @@ public class FLASHStrategy implements Comparator<Node> {
      * @return the int
      */
     @Override
-    public int compare(final Node n1, final Node n2) {
+    public int compare(final Integer n1, final Integer n2) {
 
         // Obtain vals
-        if (values[n1.id] == null) {
-            values[n1.id] = getValue(n1);
+        if (cache[n1] == null) {
+            cache[n1] = getCriteria(n1);
         }
-        if (values[n2.id] == null) {
-            values[n2.id] = getValue(n2);
+        if (cache[n2] == null) {
+            cache[n2] = getCriteria(n2);
         }
-        final double[] m1 = values[n1.id];
-        final double[] m2 = values[n2.id];
+        final double[] m1 = cache[n1];
+        final double[] m2 = cache[n2];
 
         // Compare vals
         if (m1[0] < m2[0]) {
@@ -107,28 +124,31 @@ public class FLASHStrategy implements Comparator<Node> {
     }
 
     /**
-     * Returns the criteria for the given node.
+     * Returns the criteria that determines a transformations's position.
      * 
-     * @param node
-     *            the node
+     * @param id the id
      * @return the value
      */
-    private final double[] getValue(final Node node) {
+    private final double[] getCriteria(final int id) {
+        
+        // Prepare
         double level = 0;
         double prec = 0;
         double ddistinct = 0;
-
-        level = ((double) node.getLevel() / (double) maxlevel);
-
-        final int[] transformation = node.getTransformation();
-        for (int i = 0; i < transformation.length; i++) {
-            ddistinct += ((double) distinct[i][transformation[i]] / (double) (distinct[i][0]));
-            prec += ((double) transformation[i] / (double) (maxLevels[i] - 1));
+        Transformation transformation = solutionSpace.getTransformation(id);
+        int[] generalization = transformation.getGeneralization();
+        
+        // Compute
+        level = ((double) transformation.getLevel() / (double) maxlevel);
+        for (int i = 0; i < generalization.length; i++) {
+            ddistinct += ((double) distinct[i][generalization[i]] / (double) (distinct[i][0]));
+            prec += ((double) generalization[i] / (double) (maxLevels[i] - 1));
         }
-        ddistinct /= transformation.length;
-        prec /= transformation.length;
+        ddistinct /= generalization.length;
+        prec /= generalization.length;
         ddistinct = 1d - ddistinct;
-
+        
+        // Return
         return new double[] { level, prec, ddistinct };
     }
 }

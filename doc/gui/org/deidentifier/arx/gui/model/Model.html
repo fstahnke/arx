@@ -142,7 +142,7 @@ implements java.io.Serializable</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#Model(java.lang.String, java.lang.String, java.util.Locale)">Model</a></strong>(java.lang.String&nbsp;name,
+<td class="colOne"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#Model(java.lang.String,%20java.lang.String,%20java.util.Locale)">Model</a></strong>(java.lang.String&nbsp;name,
      java.lang.String&nbsp;description,
      java.util.Locale&nbsp;locale)</code>
 <div class="block">Creates a new instance.</div>
@@ -212,15 +212,27 @@ implements java.io.Serializable</pre>
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/gui/model/ModelClassification.html" title="class in org.deidentifier.arx.gui.model">ModelClassification</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getClassificationModel()">getClassificationModel</a></strong>()</code>
+<div class="block">Returns the classification model</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/gui/model/ModelClipboard.html" title="class in org.deidentifier.arx.gui.model">ModelClipboard</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getClipboard()">getClipboard</a></strong>()</code>
 <div class="block">Returns the clipboard.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/io/CSVSyntax.html" title="class in org.deidentifier.arx.io">CSVSyntax</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getCSVSyntax()">getCSVSyntax</a></strong>()</code>
 <div class="block">Gets the csv config model.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Map&lt;java.lang.String,<a href="../../../../../org/deidentifier/arx/gui/model/ModelDDisclosurePrivacyCriterion.html" title="class in org.deidentifier.arx.gui.model">ModelDDisclosurePrivacyCriterion</a>&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getDDisclosurePrivacyModel()">getDDisclosurePrivacyModel</a></strong>()</code>
+<div class="block">Returns the d-disclosure privacy model.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -230,58 +242,70 @@ implements java.io.Serializable</pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/gui/model/ModelDifferentialPrivacyCriterion.html" title="class in org.deidentifier.arx.gui.model">ModelDifferentialPrivacyCriterion</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getDifferentialPrivacyModel()">getDifferentialPrivacyModel</a></strong>()</code>
+<div class="block">Returns the (e,d)-DP model.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/gui/model/ModelDPresenceCriterion.html" title="class in org.deidentifier.arx.gui.model">ModelDPresenceCriterion</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getDPresenceModel()">getDPresenceModel</a></strong>()</code>
 <div class="block">Returns the d-presence model.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>int[]</code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getGroups()">getGroups</a></strong>()</code>
 <div class="block">Returns a list of indices of all equivalence classes.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getHistorySize()">getHistorySize</a></strong>()</code>
 <div class="block">Returns the according parameter.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getInitialNodesInViewer()">getInitialNodesInViewer</a></strong>()</code>
 <div class="block">Returns an upper bound on the number of nodes that will initially
  be displayed in the lattice viewer.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getInputBytes()">getInputBytes</a></strong>()</code>
 <div class="block">Returns the size in bytes of the input file.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/gui/model/ModelConfiguration.html" title="class in org.deidentifier.arx.gui.model">ModelConfiguration</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getInputConfig()">getInputConfig</a></strong>()</code>
 <div class="block">Returns the input configuration.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/DataDefinition.html" title="class in org.deidentifier.arx">DataDefinition</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getInputDefinition()">getInputDefinition</a></strong>()</code>
 <div class="block">Returns the input definition.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/ARXPopulationModel.html" title="class in org.deidentifier.arx">ARXPopulationModel</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getInputPopulationModel()">getInputPopulationModel</a></strong>()</code>
 <div class="block">Returns the input population model</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/gui/model/ModelKAnonymityCriterion.html" title="class in org.deidentifier.arx.gui.model">ModelKAnonymityCriterion</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getKAnonymityModel()">getKAnonymityModel</a></strong>()</code>
 <div class="block">Returns the k-anonymity model.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/gui/model/ModelKMapCriterion.html" title="class in org.deidentifier.arx.gui.model">ModelKMapCriterion</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getKMapModel()">getKMapModel</a></strong>()</code>
+<div class="block">Returns the k-map model.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -297,16 +321,16 @@ implements java.io.Serializable</pre>
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getMaximalSizeForComplexOperations()">getMaximalSizeForComplexOperations</a></strong>()</code>
-<div class="block">When a dataset has more records than this threshold,
- visualization of statistics will be disabled.</div>
+<td class="colFirst"><code><a href="../../../../../org/deidentifier/arx/gui/model/ModelLocalRecoding.html" title="class in org.deidentifier.arx.gui.model">ModelLocalRecoding</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getLocalRecodingModel()">getLocalRecodingModel</a></strong>()</code>
+<div class="block">Returns the model for local recoding</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getMaxNodesInLattice()">getMaxNodesInLattice</a></strong>()</code>
-<div class="block">Returns the maximal size of the lattice.</div>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getMaximalSizeForComplexOperations()">getMaximalSizeForComplexOperations</a></strong>()</code>
+<div class="block">When a dataset has more records than this threshold,
+ visualization of statistics will be disabled.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -418,6 +442,18 @@ implements java.io.Serializable</pre>
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getSelectedAttribute()">getSelectedAttribute</a></strong>()</code>
 <div class="block">Returns the currently selected attribute.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>java.util.Set&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getSelectedClasses()">getSelectedClasses</a></strong>()</code>
+<div class="block">Returns the selected features</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>java.util.Set&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#getSelectedFeatures()">getSelectedFeatures</a></strong>()</code>
+<div class="block">Returns the selected features</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -596,20 +632,8 @@ implements java.io.Serializable</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#setMaxNodesInLattice(int)">setMaxNodesInLattice</a></strong>(int&nbsp;maxNodesInLattice)</code>
-<div class="block">Sets the according parameter.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#setMaxNodesInViewer(int)">setMaxNodesInViewer</a></strong>(int&nbsp;maxNodesInViewer)</code>
 <div class="block">Sets the according parameter.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#setMetricConfiguration(org.deidentifier.arx.metric.MetricConfiguration)">setMetricConfiguration</a></strong>(<a href="../../../../../org/deidentifier/arx/metric/MetricConfiguration.html" title="class in org.deidentifier.arx.metric">MetricConfiguration</a>&nbsp;config)</code>
-<div class="block">Sets the metric configuration.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -638,7 +662,7 @@ implements java.io.Serializable</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#setOutput(org.deidentifier.arx.DataHandle, org.deidentifier.arx.ARXLattice.ARXNode)">setOutput</a></strong>(<a href="../../../../../org/deidentifier/arx/DataHandle.html" title="class in org.deidentifier.arx">DataHandle</a>&nbsp;output,
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#setOutput(org.deidentifier.arx.DataHandle,%20org.deidentifier.arx.ARXLattice.ARXNode)">setOutput</a></strong>(<a href="../../../../../org/deidentifier/arx/DataHandle.html" title="class in org.deidentifier.arx">DataHandle</a>&nbsp;output,
          <a href="../../../../../org/deidentifier/arx/ARXLattice.ARXNode.html" title="class in org.deidentifier.arx">ARXLattice.ARXNode</a>&nbsp;node)</code>
 <div class="block">Sets the current output.</div>
 </td>
@@ -681,6 +705,18 @@ implements java.io.Serializable</pre>
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#setSelectedAttribute(java.lang.String)">setSelectedAttribute</a></strong>(java.lang.String&nbsp;attribute)</code>
 <div class="block">Sets the selected attribute.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#setSelectedClasses(java.util.Set)">setSelectedClasses</a></strong>(java.util.Set&lt;java.lang.String&gt;&nbsp;set)</code>
+<div class="block">Sets a set of selected attributes</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../../org/deidentifier/arx/gui/model/Model.html#setSelectedFeatures(java.util.Set)">setSelectedFeatures</a></strong>(java.util.Set&lt;java.lang.String&gt;&nbsp;set)</code>
+<div class="block">Sets a set of selected attributes</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -882,6 +918,17 @@ implements java.io.Serializable</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
+<a name="getClassificationModel()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getClassificationModel</h4>
+<pre>public&nbsp;<a href="../../../../../org/deidentifier/arx/gui/model/ModelClassification.html" title="class in org.deidentifier.arx.gui.model">ModelClassification</a>&nbsp;getClassificationModel()</pre>
+<div class="block">Returns the classification model</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
 <a name="getClipboard()">
 <!--   -->
 </a>
@@ -904,6 +951,17 @@ implements java.io.Serializable</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
+<a name="getDDisclosurePrivacyModel()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getDDisclosurePrivacyModel</h4>
+<pre>public&nbsp;java.util.Map&lt;java.lang.String,<a href="../../../../../org/deidentifier/arx/gui/model/ModelDDisclosurePrivacyCriterion.html" title="class in org.deidentifier.arx.gui.model">ModelDDisclosurePrivacyCriterion</a>&gt;&nbsp;getDDisclosurePrivacyModel()</pre>
+<div class="block">Returns the d-disclosure privacy model.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
 <a name="getDescription()">
 <!--   -->
 </a>
@@ -915,6 +973,17 @@ implements java.io.Serializable</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
+<a name="getDifferentialPrivacyModel()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getDifferentialPrivacyModel</h4>
+<pre>public&nbsp;<a href="../../../../../org/deidentifier/arx/gui/model/ModelDifferentialPrivacyCriterion.html" title="class in org.deidentifier.arx.gui.model">ModelDifferentialPrivacyCriterion</a>&nbsp;getDifferentialPrivacyModel()</pre>
+<div class="block">Returns the (e,d)-DP model.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
 <a name="getDPresenceModel()">
 <!--   -->
 </a>
@@ -923,6 +992,17 @@ implements java.io.Serializable</pre>
 <h4>getDPresenceModel</h4>
 <pre>public&nbsp;<a href="../../../../../org/deidentifier/arx/gui/model/ModelDPresenceCriterion.html" title="class in org.deidentifier.arx.gui.model">ModelDPresenceCriterion</a>&nbsp;getDPresenceModel()</pre>
 <div class="block">Returns the d-presence model.</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="getKMapModel()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getKMapModel</h4>
+<pre>public&nbsp;<a href="../../../../../org/deidentifier/arx/gui/model/ModelKMapCriterion.html" title="class in org.deidentifier.arx.gui.model">ModelKMapCriterion</a>&nbsp;getKMapModel()</pre>
+<div class="block">Returns the k-map model.</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
@@ -1037,6 +1117,17 @@ implements java.io.Serializable</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
+<a name="getLocalRecodingModel()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getLocalRecodingModel</h4>
+<pre>public&nbsp;<a href="../../../../../org/deidentifier/arx/gui/model/ModelLocalRecoding.html" title="class in org.deidentifier.arx.gui.model">ModelLocalRecoding</a>&nbsp;getLocalRecodingModel()</pre>
+<div class="block">Returns the model for local recoding</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
 <a name="getMaximalSizeForComplexOperations()">
 <!--   -->
 </a>
@@ -1046,17 +1137,6 @@ implements java.io.Serializable</pre>
 <pre>public&nbsp;int&nbsp;getMaximalSizeForComplexOperations()</pre>
 <div class="block">When a dataset has more records than this threshold,
  visualization of statistics will be disabled.</div>
-<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
-</li>
-</ul>
-<a name="getMaxNodesInLattice()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getMaxNodesInLattice</h4>
-<pre>public&nbsp;int&nbsp;getMaxNodesInLattice()</pre>
-<div class="block">Returns the maximal size of the lattice.</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
@@ -1268,6 +1348,28 @@ implements java.io.Serializable</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
+<a name="getSelectedClasses()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSelectedClasses</h4>
+<pre>public&nbsp;java.util.Set&lt;java.lang.String&gt;&nbsp;getSelectedClasses()</pre>
+<div class="block">Returns the selected features</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="getSelectedFeatures()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSelectedFeatures</h4>
+<pre>public&nbsp;java.util.Set&lt;java.lang.String&gt;&nbsp;getSelectedFeatures()</pre>
+<div class="block">Returns the selected features</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
 <a name="getSelectedNode()">
 <!--   -->
 </a>
@@ -1356,17 +1458,6 @@ implements java.io.Serializable</pre>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
-<a name="getUseListwiseDeletion()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getUseListwiseDeletion</h4>
-<pre>public&nbsp;java.lang.Boolean&nbsp;getUseListwiseDeletion()</pre>
-<div class="block">Returns whether list-wise deletion is used for summary statistics</div>
-<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
-</li>
-</ul>
 <a name="getUseFunctionalHierarchies()">
 <!--   -->
 </a>
@@ -1375,6 +1466,17 @@ implements java.io.Serializable</pre>
 <h4>getUseFunctionalHierarchies</h4>
 <pre>public&nbsp;java.lang.Boolean&nbsp;getUseFunctionalHierarchies()</pre>
 <div class="block">Returns whether functional hierarchies should be used</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="getUseListwiseDeletion()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getUseListwiseDeletion</h4>
+<pre>public&nbsp;java.lang.Boolean&nbsp;getUseListwiseDeletion()</pre>
+<div class="block">Returns whether list-wise deletion is used for summary statistics</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
 </li>
 </ul>
@@ -1584,17 +1686,6 @@ implements java.io.Serializable</pre>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>numberOfRows</code> - </dd></dl>
 </li>
 </ul>
-<a name="setMaxNodesInLattice(int)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setMaxNodesInLattice</h4>
-<pre>public&nbsp;void&nbsp;setMaxNodesInLattice(int&nbsp;maxNodesInLattice)</pre>
-<div class="block">Sets the according parameter.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>maxNodesInLattice</code> - </dd></dl>
-</li>
-</ul>
 <a name="setMaxNodesInViewer(int)">
 <!--   -->
 </a>
@@ -1604,17 +1695,6 @@ implements java.io.Serializable</pre>
 <pre>public&nbsp;void&nbsp;setMaxNodesInViewer(int&nbsp;maxNodesInViewer)</pre>
 <div class="block">Sets the according parameter.</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>maxNodesInViewer</code> - </dd></dl>
-</li>
-</ul>
-<a name="setMetricConfiguration(org.deidentifier.arx.metric.MetricConfiguration)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setMetricConfiguration</h4>
-<pre>public&nbsp;void&nbsp;setMetricConfiguration(<a href="../../../../../org/deidentifier/arx/metric/MetricConfiguration.html" title="class in org.deidentifier.arx.metric">MetricConfiguration</a>&nbsp;config)</pre>
-<div class="block">Sets the metric configuration.</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>config</code> - </dd></dl>
 </li>
 </ul>
 <a name="setMetricDescription(org.deidentifier.arx.metric.MetricDescription)">
@@ -1747,6 +1827,28 @@ implements java.io.Serializable</pre>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>attribute</code> - </dd></dl>
 </li>
 </ul>
+<a name="setSelectedClasses(java.util.Set)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSelectedClasses</h4>
+<pre>public&nbsp;void&nbsp;setSelectedClasses(java.util.Set&lt;java.lang.String&gt;&nbsp;set)</pre>
+<div class="block">Sets a set of selected attributes</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>set</code> - </dd></dl>
+</li>
+</ul>
+<a name="setSelectedFeatures(java.util.Set)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSelectedFeatures</h4>
+<pre>public&nbsp;void&nbsp;setSelectedFeatures(java.util.Set&lt;java.lang.String&gt;&nbsp;set)</pre>
+<div class="block">Sets a set of selected attributes</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>set</code> - </dd></dl>
+</li>
+</ul>
 <a name="setSelectedNode(org.deidentifier.arx.ARXLattice.ARXNode)">
 <!--   -->
 </a>
@@ -1832,17 +1934,6 @@ implements java.io.Serializable</pre>
 <div class="block">Marks this model as unmodified.</div>
 </li>
 </ul>
-<a name="setUseListwiseDeletion(boolean)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setUseListwiseDeletion</h4>
-<pre>public&nbsp;void&nbsp;setUseListwiseDeletion(boolean&nbsp;useListwiseDeletion)</pre>
-<div class="block">Sets whether list-wise deletion should be used for summary statistics</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>useListwiseDeletion</code> - </dd></dl>
-</li>
-</ul>
 <a name="setUseFunctionalHierarchies(boolean)">
 <!--   -->
 </a>
@@ -1852,6 +1943,17 @@ implements java.io.Serializable</pre>
 <pre>public&nbsp;void&nbsp;setUseFunctionalHierarchies(boolean&nbsp;useFunctionalHierarchies)</pre>
 <div class="block">Sets whether funtional hierarchies should be used during anonymization to esimtate utility</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>useFunctionalHierarchies</code> - </dd></dl>
+</li>
+</ul>
+<a name="setUseListwiseDeletion(boolean)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setUseListwiseDeletion</h4>
+<pre>public&nbsp;void&nbsp;setUseListwiseDeletion(boolean&nbsp;useListwiseDeletion)</pre>
+<div class="block">Sets whether list-wise deletion should be used for summary statistics</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>useListwiseDeletion</code> - </dd></dl>
 </li>
 </ul>
 <a name="setViewConfig(org.deidentifier.arx.gui.model.ModelViewConfig)">
